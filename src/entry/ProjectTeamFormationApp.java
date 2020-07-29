@@ -2,24 +2,23 @@ package entry;
 
 import cosc1295.src.controllers.FlashController;
 import cosc1295.src.models.Flash;
-import cosc1295.src.views.FlashView;
-import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.FLASH_TYPES;
 import helpers.commons.SharedEnums.APPLICATION_MENU;
 import static helpers.commons.SharedEnums.APPLICATION_MENU.*;
-import helpers.utilities.InputValidator;
+import helpers.utilities.Helpers;
 
 import java.util.Scanner;
 
-public class ProjectTeamFormationApp {
+public final class ProjectTeamFormationApp {
+
+    private final FlashController flashController = FlashController.getInstance();
 
     public void run() {
-        FlashController flashController = new FlashController(new FlashView());
-
         String menuSelection;
+
         while (true) {
             printProgramMenuInternally();
-            flashController.flashing(new Flash(
+            flashController.flash(new Flash(
                     "\nSelect an option: ",
                     FLASH_TYPES.NONE
             ));
@@ -28,8 +27,8 @@ public class ProjectTeamFormationApp {
             menuSelection = inputScanner.next().toUpperCase();
             inputScanner.nextLine();
 
-            if (!InputValidator.validateMenuSelection(menuSelection)) {
-                flashController.flashing(new Flash(
+            if (!Helpers.validateMenuSelection(menuSelection)) {
+                flashController.flash(new Flash(
                         "\nYour selection is out of scope. Press enter to view menu again.",
                         FLASH_TYPES.ATTENTION
                 ));
@@ -42,11 +41,12 @@ public class ProjectTeamFormationApp {
             boolean shouldQuit = runApplicationWithSelection(selectedOption);
 
             if (shouldQuit) {
-                flashController.flashing(new Flash(
+                flashController.flash(new Flash(
                         "\nApplication closed.",
                         FLASH_TYPES.NONE
                 ));
 
+                inputScanner.close();
                 break;
             }
         }
@@ -62,10 +62,11 @@ public class ProjectTeamFormationApp {
 
     private boolean runApplicationWithSelection(APPLICATION_MENU option) {
         boolean taskDone = false;
+        ApplicationFacade appFacade = new ApplicationFacade();
 
         switch (option) {
             case A:
-                System.out.println("Run task: " + A.value);
+                appFacade.runAddCompanyFeature();
                 break;
             case B:
                 System.out.println("Run task: " + B.value);

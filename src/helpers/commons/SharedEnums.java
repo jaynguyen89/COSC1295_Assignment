@@ -1,6 +1,7 @@
 package helpers.commons;
 
 import java.util.Arrays;
+import java.util.List;
 
 public final class SharedEnums {
 
@@ -15,9 +16,17 @@ public final class SharedEnums {
 
         public final String value;
 
-        APPLICATION_MENU(String value) {
-            this.value = value;
-        }
+        APPLICATION_MENU(String value) { this.value = value; }
+    }
+
+    public enum CONFIRMATIONS {
+        Y("YES"),
+        N("NO");
+
+        public final String value;
+        public String getValue() { return value; }
+
+        CONFIRMATIONS(String value) { this.value = value; }
     }
 
     public enum FLASH_TYPES {
@@ -28,14 +37,18 @@ public final class SharedEnums {
 
         public final String value;
 
-        FLASH_TYPES(String value) {
-            this.value = value;
-        }
+        FLASH_TYPES(String value) { this.value = value; }
     }
 
-    public static String[] getAllEnumItemsAsArray(Class<? extends Enum<?>> any) {
-        return Arrays.stream(any.getEnumConstants())
-                .map(Enum::name)
-                .toArray(String[]::new);
+    public enum DATA_TYPES {
+        ADDRESS, COMPANY
+    }
+
+    public static List<String> getAllEnumItemsAsList(Class<? extends Enum<?>> any) {
+        String[] items = Arrays.stream(any.getEnumConstants())
+                               .map(Enum::name)
+                               .toArray(String[]::new);
+
+        return Arrays.asList(items);
     }
 }
