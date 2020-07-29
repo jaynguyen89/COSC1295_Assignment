@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class CompanyView {
 
     private final FlashController flashController = FlashController.getInstance();
-    private Scanner inputScanner;
+    private final Scanner inputScanner;
 
     public CompanyView() {
         inputScanner = new Scanner(System.in);

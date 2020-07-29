@@ -94,12 +94,12 @@ public class Address {
 
     public String stringify() {
         return id + SharedConstants.TEXT_DELIMITER +
-               building + SharedConstants.TEXT_DELIMITER +
+               ((building.isEmpty() ? SharedConstants.NA : building) + SharedConstants.TEXT_DELIMITER) +
                street + SharedConstants.TEXT_DELIMITER +
                suburb + SharedConstants.TEXT_DELIMITER +
                state + SharedConstants.TEXT_DELIMITER +
                postCode + SharedConstants.TEXT_DELIMITER +
-               country + "\n";
+               country;
     }
 
     public String prettify() {

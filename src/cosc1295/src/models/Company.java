@@ -72,6 +72,6 @@ public class Company {
                 companyName + SharedConstants.TEXT_DELIMITER +
                 abnNumber + SharedConstants.TEXT_DELIMITER +
                 websiteUrl + SharedConstants.TEXT_DELIMITER +
-                address.getId() + "\n";
+                address.getId();
     }
 }

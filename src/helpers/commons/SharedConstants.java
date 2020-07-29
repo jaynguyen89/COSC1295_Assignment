@@ -10,6 +10,8 @@ public final class SharedConstants {
 
     public static final String TEXT_DELIMITER = ",,";
 
+    public static final String NA = "N/A";
+
     public static final String ADDRESS_FILE_NAME = "addresses.txt";
 
     public static final String COMPANY_FILE_NAME = "companies.txt";

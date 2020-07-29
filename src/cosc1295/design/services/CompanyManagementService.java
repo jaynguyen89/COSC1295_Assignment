@@ -7,7 +7,7 @@ import helpers.commons.SharedEnums.DATA_TYPES;
 public class CompanyManagementService extends ServiceBase implements ICompanyManagementService {
 
     @Override
-    public boolean writeNewCompanyToFile(Company company) {
+    public boolean saveNewCompany(Company company) {
         int newInstanceId = getNextInstanceIdForNewEntry(DATA_TYPES.COMPANY);
         if (newInstanceId == -1) return false;
 

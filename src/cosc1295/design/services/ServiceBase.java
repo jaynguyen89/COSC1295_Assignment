@@ -32,9 +32,11 @@ class ServiceBase {
             }
 
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(fileToWrite));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileToWrite, true));
+            PrintWriter printer = new PrintWriter(writer);
 
-            writer.write(any);
+            printer.println(any);
+            printer.close();
             writer.close();
         } catch (FileNotFoundException ex) {
             return false;

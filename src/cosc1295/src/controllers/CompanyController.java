@@ -10,7 +10,7 @@ public class CompanyController {
 
     private final CompanyView companyView;
     AddressController addressController;
-    private ICompanyManagementService companyService;
+    private final ICompanyManagementService companyService;
 
     public CompanyController() {
         companyView = new CompanyView();
@@ -30,7 +30,7 @@ public class CompanyController {
         Address savedAddress = addressController.saveNewAddress(company.getAddress());
         if (savedAddress != null) {
             company.setAddress(savedAddress);
-            return companyService.writeNewCompanyToFile(company);
+            return companyService.saveNewCompany(company);
         }
 
         return false;

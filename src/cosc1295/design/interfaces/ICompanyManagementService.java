@@ -4,5 +4,5 @@ import cosc1295.src.models.Company;
 
 public interface ICompanyManagementService {
 
-    boolean writeNewCompanyToFile(Company company);
+    boolean saveNewCompany(Company company);
 }
