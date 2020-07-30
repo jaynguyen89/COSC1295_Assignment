@@ -1,8 +1,14 @@
 package cosc1295.providers.services;
 
 import cosc1295.providers.interfaces.IProjectOwnerService;
+import cosc1295.src.models.Company;
 import cosc1295.src.models.ProjectOwner;
+import cosc1295.src.models.Role;
+import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProjectOwnerService extends FileServiceBase implements IProjectOwnerService {
 
@@ -15,5 +21,41 @@ public class ProjectOwnerService extends FileServiceBase implements IProjectOwne
         String normalizedProjectOwner = projectOwner.stringify();
 
         return writeToFile(normalizedProjectOwner, SharedEnums.DATA_TYPES.PROJECT_OWNER);
+    }
+
+    @Override
+    public List<ProjectOwner> readAllProjectOwnersFromFile() {
+        List<String> rawProjectOwnerData = readEntireRawDataFromFile(SharedEnums.DATA_TYPES.PROJECT_OWNER);
+
+        if (rawProjectOwnerData == null) return null;
+        if (rawProjectOwnerData.isEmpty()) return new ArrayList<>();
+
+        List<ProjectOwner> projectOwners = new ArrayList<>();
+        try {
+            for (String rawProjectOwner : rawProjectOwnerData) {
+                String[] projectOwnerTokens = rawProjectOwner.split(SharedConstants.TEXT_DELIMITER);
+                ProjectOwner projectOwner = new ProjectOwner();
+
+                projectOwner.setId(Integer.parseInt(projectOwnerTokens[0]));
+                projectOwner.setFirstName(projectOwnerTokens[1]);
+                projectOwner.setLastName(projectOwnerTokens[2]);
+                projectOwner.setEmailAddress(projectOwnerTokens[3]);
+                projectOwner.setUniqueId(projectOwnerTokens[5]);
+
+                Role role = new Role();
+                role.setId(Integer.parseInt(projectOwnerTokens[4]));
+                projectOwner.setRole(role);
+
+                Company company = new Company();
+                company.setId(Integer.parseInt(projectOwnerTokens[6]));
+                projectOwner.setCompany(company);
+
+                projectOwners.add(projectOwner);
+            }
+        } catch (IndexOutOfBoundsException | NumberFormatException ex) {
+            return null;
+        }
+
+        return projectOwners;
     }
 }

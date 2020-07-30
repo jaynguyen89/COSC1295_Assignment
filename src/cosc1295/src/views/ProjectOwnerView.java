@@ -28,6 +28,7 @@ public class ProjectOwnerView {
                 FLASH_TYPES.ATTENTION
             ));
 
+            inputScanner.nextLine();
             return null;
         }
 
@@ -151,12 +152,11 @@ public class ProjectOwnerView {
                 default:
                     flasher.flash(new Flash("Company: ", FLASH_TYPES.NONE));
 
-                    for (Company company : companies) {
+                    for (Company company : companies)
                         flasher.flash(new Flash(
                             "\t" + company.getId() + ". " + company.getCompanyName(),
                             FLASH_TYPES.NONE
                         ));
-                    }
 
                     String selectedCompanyId;
                     boolean setCompanyDone = false;

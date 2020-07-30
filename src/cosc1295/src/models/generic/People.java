@@ -1,6 +1,7 @@
 package cosc1295.src.models.generic;
 
 import cosc1295.src.models.Role;
+import helpers.commons.SharedConstants;
 import helpers.utilities.Helpers;
 
 import java.util.regex.Matcher;
@@ -34,11 +35,17 @@ public class People {
         this.lastName = lastName;
     }
 
+    public String getFullName() {
+        return firstName + SharedConstants.SPACE + lastName;
+    }
+
     public  void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
     }
 
     public Role getRole() { return role; }
+
+    public void setRole(Role role) { this.role = role; }
 
     public boolean setRole(String role, boolean isId) {
         this.role = new Role();

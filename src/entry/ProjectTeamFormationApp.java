@@ -73,7 +73,7 @@ public final class ProjectTeamFormationApp {
                 appFacade.runAddProjectOwnerFeature();
                 break;
             case C:
-                System.out.println("Run task: " + C.value);
+                appFacade.runAddProjectFeature();
                 break;
             case D:
                 System.out.println("Run task: " + D.value);

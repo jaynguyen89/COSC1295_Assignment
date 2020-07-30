@@ -1,0 +1,17 @@
+String addressId = companyTokens[companyTokens.length - 1];
+                String rawAddress = lookupRawDataFromFileById(addressId.trim(), DATA_TYPES.ADDRESS);
+
+                if (!rawAddress.isEmpty() && !rawAddress.equals(SharedConstants.NA)) {
+                    String[] addressTokens = rawAddress.split(SharedConstants.TEXT_DELIMITER);
+                    company.setAddress(new Address(
+                        Integer.parseInt(addressTokens[0].trim()),
+                        addressTokens[1].equals(SharedConstants.NA) ?
+                            SharedConstants.EMPTY_STRING :
+                            addressTokens[1],
+                        addressTokens[2],
+                        addressTokens[3],
+                        addressTokens[4],
+                        addressTokens[5],
+                        addressTokens[6]
+                    ));
+                }

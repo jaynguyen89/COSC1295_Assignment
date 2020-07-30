@@ -33,31 +33,16 @@ public class CompanyService extends FileServiceBase implements ICompanyService {
         try {
             for (String rawCompany : rawCompanyData) {
                 Company company = new Company();
-
                 String[] companyTokens = rawCompany.split(SharedConstants.TEXT_DELIMITER);
-
-                String addressId = companyTokens[companyTokens.length - 1];
-                String rawAddress = lookupRawDataFromFileById(addressId.trim(), DATA_TYPES.ADDRESS);
-
-                if (!rawAddress.isEmpty() && !rawAddress.equals(SharedConstants.NA)) {
-                    String[] addressTokens = rawAddress.split(SharedConstants.TEXT_DELIMITER);
-                    company.setAddress(new Address(
-                        Integer.parseInt(addressTokens[0].trim()),
-                        addressTokens[1].equals(SharedConstants.NA) ?
-                            SharedConstants.EMPTY_STRING :
-                            addressTokens[1],
-                        addressTokens[2],
-                        addressTokens[3],
-                        addressTokens[4],
-                        addressTokens[5],
-                        addressTokens[6]
-                    ));
-                }
 
                 company.setId(Integer.parseInt(companyTokens[0].trim()));
                 company.setCompanyName(companyTokens[1]);
                 company.setAbnNumber(companyTokens[2]);
                 company.setWebsiteUrl(companyTokens[3]);
+
+                Address address = new Address();
+                address.setId(Integer.parseInt(companyTokens[4]));
+                company.setAddress(address);
 
                 companies.add(company);
             }
