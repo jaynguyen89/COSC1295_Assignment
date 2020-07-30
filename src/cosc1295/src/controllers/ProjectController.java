@@ -26,7 +26,7 @@ public class ProjectController {
     }
 
 
-    public boolean executeAddProjectTask() {
+    public Boolean executeAddProjectTask() {
         List<ProjectOwner> allProjectOwners = projectOwnerService.readAllProjectOwnersFromFile();
         if (allProjectOwners == null) {
             flasher.flash(new Flash(
@@ -38,6 +38,8 @@ public class ProjectController {
         }
 
         Project newProject = projectView.getProjectDetails(allProjectOwners);
+        if (newProject == null) return null;
+
         return projectService.saveNewProject(newProject);
     }
 

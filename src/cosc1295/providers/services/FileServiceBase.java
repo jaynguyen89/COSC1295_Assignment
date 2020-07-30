@@ -168,7 +168,8 @@ class FileServiceBase {
             type == DATA_TYPES.ADDRESS ? SharedConstants.ADDRESS_FILE_NAME
                     : (type == DATA_TYPES.COMPANY ? SharedConstants.COMPANY_FILE_NAME
                     : (type == DATA_TYPES.ROLE ? SharedConstants.ROLE_FILE_NAME
-                    : SharedConstants.PROJECT_OWNER_FILE_NAME))
+                    : (type == DATA_TYPES.PROJECT ? SharedConstants.PROJECT_FILE_NAME
+                    : SharedConstants.PROJECT_OWNER_FILE_NAME)))
         );
     }
 }
