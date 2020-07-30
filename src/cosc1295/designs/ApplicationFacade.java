@@ -50,7 +50,9 @@ public class ApplicationFacade {
     }
 
     public void runAddProjectFeature() {
-        boolean taskResult = projectController.executeAddProjectTask();
-        projectController.displayAddProjectResult(taskResult);
+        Boolean taskResult = projectController.executeAddProjectTask();
+
+        if (taskResult != null)
+            projectController.displayAddProjectResult(taskResult);
     }
 }

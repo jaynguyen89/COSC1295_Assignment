@@ -58,7 +58,7 @@ public final class ProjectTeamFormationApp {
         System.out.println("\t\t\t----------\n");
 
         for (APPLICATION_MENU menuItem : values())
-            System.out.println(String.format("\t\t%s. %s", menuItem, menuItem.value));
+            System.out.printf("\t\t%s. %s%n", menuItem, menuItem.value);
     }
 
     private boolean runApplicationWithSelection(APPLICATION_MENU option) {

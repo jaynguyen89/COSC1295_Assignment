@@ -9,6 +9,7 @@ import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -85,5 +86,21 @@ public class Project {
 
         briefDescription = Helpers.prettifyStringLiterals(briefDescription, false);
         return true;
+    }
+
+    public String stringify() {
+        StringBuilder projectString = new StringBuilder(
+            uniqueId + SharedConstants.TEXT_DELIMITER +
+            projectTitle + SharedConstants.TEXT_DELIMITER +
+            briefDescription + SharedConstants.TEXT_DELIMITER +
+            projectOwner.getId() + SharedConstants.TEXT_DELIMITER
+        );
+
+        for (Map.Entry<SKILLS, RANKINGS> entry : skillRanking.entrySet())
+            projectString.append(entry.getKey().name())
+                         .append(entry.getValue().getValue() + 1)
+                         .append(SharedConstants.TEXT_DELIMITER);
+
+        return projectString.toString();
     }
 }

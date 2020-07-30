@@ -45,7 +45,12 @@ public final class SharedEnums {
     }
 
     public enum RANKINGS {
-        LOW, AVERAGE, HIGH, HIGHEST
+        LOW(0), AVERAGE(1), HIGH(2), HIGHEST(3);
+
+        public final int value;
+        public int getValue() { return value; }
+
+        RANKINGS(int value) { this.value = value; }
     }
 
     public enum SKILLS {

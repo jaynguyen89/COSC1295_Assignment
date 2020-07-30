@@ -129,9 +129,9 @@ public class ProjectView {
                     projectFieldTracker++;
                     break;
                 default:
-                    flasher.flash(new Flash("Skill Ranking: ", FLASH_TYPES.NONE));
-                    getSkillRankings();
-                    //TODO
+                    flasher.flash(new Flash("Skill Ranking:\n1: Low\t2: Average\t3: High\t4: Highest", FLASH_TYPES.NONE));
+                    project.setSkillRanking(getSkillRankings());
+
                     projectFieldTracker++;
                     break;
             }
@@ -145,10 +145,82 @@ public class ProjectView {
             result ? new Flash("The new project has been added successfully.\n", FLASH_TYPES.SUCCESS)
                    : new Flash("Unable to add new project due to an error.\n", FLASH_TYPES.NONE)
         );
+
+        flasher.flash(new Flash("Press enter to continue.", FLASH_TYPES.NONE));
+        inputScanner.nextLine();
     }
 
     private HashMap<SKILLS, RANKINGS> getSkillRankings() {
-        //TODO
-        return null;
+        HashMap<SKILLS, RANKINGS> skillRankings = new HashMap<>();
+        int skillInputTracker = 0;
+
+        RANKINGS ranking;
+        while (skillInputTracker < 4) {
+            switch (skillInputTracker) {
+                case 0:
+                    ranking = getRankingInput(skillInputTracker);
+                    skillRankings.put(SKILLS.A, ranking);
+
+                    skillInputTracker++;
+                    break;
+                case 1:
+                    ranking = getRankingInput(skillInputTracker);
+                    skillRankings.put(SKILLS.N, ranking);
+
+                    skillInputTracker++;
+                    break;
+                case 2:
+                    ranking = getRankingInput(skillInputTracker);
+                    skillRankings.put(SKILLS.P, ranking);
+
+                    skillInputTracker++;
+                    break;
+                default:
+                    ranking = getRankingInput(skillInputTracker);
+                    skillRankings.put(SKILLS.W, ranking);
+
+                    skillInputTracker++;
+                    break;
+            }
+        }
+
+
+        return skillRankings;
+    }
+
+    private RANKINGS getRankingInput(int skill) {
+        boolean validRanking = false;
+        RANKINGS eRanking = null;
+
+        while (!validRanking) {
+            flasher.flash(new Flash(
+                    "\tRanking for " + (skill == 0 ? SKILLS.A.value
+                            : (skill == 1 ? SKILLS.N.value
+                            : (skill == 2 ? SKILLS.P.value : SKILLS.W.value))) + ": ",
+                    FLASH_TYPES.NONE
+            ));
+
+            String rankingString = inputScanner.next();
+            inputScanner.nextLine();
+
+            if (Helpers.isIntegerNumber(rankingString)) {
+                int ranking = Integer.parseInt(rankingString);
+
+                if (ranking < 1 || ranking > 4) {
+                    flasher.flash(new Flash("Invalid ranking! Press enter to retry.", FLASH_TYPES.ERROR));
+                    inputScanner.nextLine();
+                    continue;
+                }
+
+                eRanking = RANKINGS.values()[ranking - 1];
+                validRanking = true;
+            }
+            else {
+                flasher.flash(new Flash("Unrecognized input format! Press enter to retry.", FLASH_TYPES.ERROR));
+                inputScanner.nextLine();
+            }
+        }
+
+        return eRanking;
     }
 }
