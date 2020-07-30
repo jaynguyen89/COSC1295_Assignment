@@ -41,7 +41,23 @@ public final class SharedEnums {
     }
 
     public enum DATA_TYPES {
-        ADDRESS, COMPANY, ROLE, PROJECT_OWNER
+        ADDRESS, COMPANY, ROLE, PROJECT_OWNER, PROJECT
+    }
+
+    public enum RANKINGS {
+        LOW, AVERAGE, HIGH, HIGHEST
+    }
+
+    public enum SKILLS {
+        A("Analytics & Big Data"),
+        N("Networking & Security"),
+        P("Programming & Software Engineering"),
+        W("Web & Mobile Applications");
+
+        public final String value;
+        public String getValue() { return value; }
+
+        SKILLS(String value) { this.value = value; }
     }
 
     public static List<String> getAllEnumItemsAsList(Class<? extends Enum<?>> any) {

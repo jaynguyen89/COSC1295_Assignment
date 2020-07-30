@@ -39,7 +39,7 @@ public class ProjectOwnerController {
 
         if (allRoles == null || allCompanies == null) {
             flasher.flash(new Flash(
-                    "An error occurred while retrieving data from file. Please try again.",
+                    "An error occurred while retrieving Roles and Companies data from file. Please try again.",
                     SharedEnums.FLASH_TYPES.ERROR
             ));
 
@@ -61,7 +61,7 @@ public class ProjectOwnerController {
         return false;
     }
 
-    public void displayTaskResult(Boolean taskResult) {
+    public void displayProjectOwnerResult(Boolean taskResult) {
         projectOwnerView.printTaskResult(taskResult);
     }
 }
