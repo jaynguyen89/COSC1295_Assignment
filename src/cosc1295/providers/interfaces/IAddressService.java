@@ -1,4 +1,4 @@
-package cosc1295.design.interfaces;
+package cosc1295.providers.interfaces;
 
 import cosc1295.src.models.Address;
 

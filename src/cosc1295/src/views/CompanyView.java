@@ -1,6 +1,6 @@
 package cosc1295.src.views;
 
-import cosc1295.src.controllers.FlashController;
+import cosc1295.designs.Flasher;
 import cosc1295.src.models.Company;
 import cosc1295.src.models.Flash;
 import helpers.commons.SharedEnums;
@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class CompanyView {
 
-    private final FlashController flashController = FlashController.getInstance();
+    private final Flasher flasher = Flasher.getInstance();
     private final Scanner inputScanner;
 
     public CompanyView() {
@@ -21,7 +21,7 @@ public class CompanyView {
     public Company getCompanyBasicDetails() {
         Company newCompany = new Company();
 
-        flashController.flash(new Flash(
+        flasher.flash(new Flash(
                 "\t\tTASK: ADD COMPANY\n\t\tPlease enter the details of New Company\n",
                 FLASH_TYPES.NONE
         ));
@@ -30,36 +30,39 @@ public class CompanyView {
         while (companyFieldTracker < 3)
             switch (companyFieldTracker) {
                 case 0:
-                    flashController.flash(new Flash("Company Name: ", FLASH_TYPES.NONE));
+                    flasher.flash(new Flash("Company Name: (allowed: ().-')", FLASH_TYPES.NONE));
 
                     newCompany.setCompanyName(inputScanner.nextLine());
-                    if (!newCompany.validateAndPrettifyCompanyName()) {
-                        flashController.flash(new Flash("Company Name cannot be empty!\n", FLASH_TYPES.ERROR));
-                        continue;
-                    }
+                    Boolean nameValidation = newCompany.validateAndPrettifyCompanyName();
 
+                    if (nameValidation == null) flasher.flash(new Flash("Company Name cannot be empty!\n", FLASH_TYPES.ERROR));
+                    else if (!nameValidation) flasher.flash(new Flash("Company Name contains disallowed special character!\n", FLASH_TYPES.ERROR));
+
+                    if (nameValidation == null || !nameValidation) continue;
                     companyFieldTracker++;
                     break;
                 case 1:
-                    flashController.flash(new Flash("ABN Number: ", FLASH_TYPES.NONE));
+                    flasher.flash(new Flash("ABN Number: ", FLASH_TYPES.NONE));
 
                     newCompany.setAbnNumber(inputScanner.nextLine());
-                    if (!newCompany.validateAndPrettifyAbnNumber()) {
-                        flashController.flash(new Flash("ABN Number cannot be empty!\n", FLASH_TYPES.ERROR));
-                        continue;
-                    }
+                    Boolean abnValidation = newCompany.validateAndPrettifyAbnNumber();
 
+                    if (abnValidation == null) flasher.flash(new Flash("ABN Number cannot be empty!\n", FLASH_TYPES.ERROR));
+                    else if (!abnValidation) flasher.flash(new Flash("ABN Number can only have digits and alphabetical letters!\n", FLASH_TYPES.ERROR));
+
+                    if (abnValidation == null || !abnValidation) continue;
                     companyFieldTracker++;
                     break;
                 default:
-                    flashController.flash(new Flash("Website URL: ", FLASH_TYPES.NONE));
+                    flasher.flash(new Flash("Website URL: ", FLASH_TYPES.NONE));
 
                     newCompany.setWebsiteUrl(inputScanner.nextLine());
-                    if (!newCompany.validateWebsiteURL()) {
-                        flashController.flash(new Flash("Website URL cannot be empty!\n", FLASH_TYPES.ERROR));
-                        continue;
-                    }
+                    Boolean urlValidation = newCompany.validateWebsiteURL();
 
+                    if (urlValidation == null) flasher.flash(new Flash("Website URL cannot be empty!\n", FLASH_TYPES.ERROR));
+                    else if (!urlValidation) flasher.flash(new Flash("Website URL seems to be invalid!\n", FLASH_TYPES.ERROR));
+
+                    if (urlValidation == null || !urlValidation) continue;
                     companyFieldTracker++;
                     break;
             }
@@ -68,38 +71,16 @@ public class CompanyView {
     }
 
     public boolean promptToRerunAddCompanyTaskAfterFailure() {
-        String response;
-
-        while (true) {
-            flashController.flash(new Flash(
-                    "\t\tTASK: ADD COMPANY\n\t\t" +
-                            "An error occurred while adding the company.\n\t\t" +
-                            "Do you wish to retry? (Y/N) ",
-                    FLASH_TYPES.NONE
-            ));
-
-            response = inputScanner.next().toUpperCase();
-            inputScanner.nextLine();
-
-            if (!Helpers.validateConfirmation(response)) {
-                flashController.flash(new Flash(
-                        "Response not recognized. Press enter to continue.",
-                        FLASH_TYPES.ATTENTION
-                ));
-
-                inputScanner.nextLine();
-                continue;
-            }
-
-            break;
-        }
-
-        return response.equals(SharedEnums.CONFIRMATIONS.Y.value) ||
-               response.equals(SharedEnums.CONFIRMATIONS.Y.name());
+        return flasher.promptForConfirmation(new Flash(
+            "\t\tTASK: ADD COMPANY\n\t\t" +
+                    "An error occurred while adding the company.\n\t\t" +
+                    "Do you wish to retry? (Y/N) ",
+            FLASH_TYPES.NONE
+        ));
     }
 
     public void printAddCompanyResult(boolean result) {
-        flashController.flash(
+        flasher.flash(
             result ? new Flash("The new company has been added successfully.\n", FLASH_TYPES.SUCCESS) :
                      new Flash("Unable to add new company due to an error.\n", FLASH_TYPES.NONE)
         );

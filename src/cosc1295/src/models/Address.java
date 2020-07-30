@@ -16,6 +16,23 @@ public class Address {
     private String postCode;
     private String country;
 
+    public Address() { }
+
+    public Address(
+        int id, String building,
+        String street, String suburb,
+        String state, String postCode,
+        String country
+    ) {
+        this.id = id;
+        this.building = building;
+        this.street = street;
+        this.suburb = suburb;
+        this.state = state;
+        this.postCode = postCode;
+        this.country = country;
+    }
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -69,6 +86,7 @@ public class Address {
             return false;
 
         state = Helpers.prettifyStringLiterals(state, false);
+        state = state.toUpperCase();
         return true;
     }
 
@@ -78,7 +96,7 @@ public class Address {
 
         postCode = Helpers.prettifyStringLiterals(postCode, false);
 
-        Pattern postCodeRegex = Pattern.compile("^[\\d\\w\\s]+$");
+        Pattern postCodeRegex = Pattern.compile("^[\\w\\s]+$");
         Matcher matcher = postCodeRegex.matcher(postCode);
 
         return matcher.matches();

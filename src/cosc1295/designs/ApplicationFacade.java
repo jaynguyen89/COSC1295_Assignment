@@ -1,4 +1,4 @@
-package entry;
+package cosc1295.designs;
 
 import cosc1295.src.controllers.CompanyController;
 import cosc1295.src.controllers.ProjectOwnerController;
@@ -35,16 +35,14 @@ public class ApplicationFacade {
         boolean featureDone = false;
 
         while (!featureDone) {
-            if (!projectOwnerController.executeAddProjectOwnerTask()) {
-                //TODO
+            Boolean taskResult = projectOwnerController.executeAddProjectOwnerTask();
+            if (taskResult == null) {
+                featureDone = true;
+                continue;
             }
 
-            //TODO
+            projectOwnerController.displayTaskResult(taskResult);
             featureDone = true;
         }
-    }
-
-    public void runAddProjectFeature() {
-
     }
 }

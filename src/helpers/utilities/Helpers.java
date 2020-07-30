@@ -4,6 +4,8 @@ import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,5 +53,24 @@ public final class Helpers {
         }
 
         return any;
+    }
+
+    public static Boolean validateLiteralName(String name, boolean isHuman) {
+        if (isNullOrBlankOrEmpty(name)) return null;
+
+        Pattern nameRegex = Pattern.compile(isHuman ? "^[a-zA-Z.\\-' ]+$" : "^[\\w.\\-'() ]+$");
+        Matcher matcher = nameRegex.matcher(name);
+
+        return matcher.matches();
+    }
+
+    public static boolean isIntegerNumber(String any) {
+        try {
+            Integer.parseInt(any);
+        } catch (NumberFormatException | NullPointerException ex) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -4,9 +4,9 @@ import helpers.commons.SharedEnums.FLASH_TYPES;
 
 public class Flash {
 
-    private String message;
+    private final String message;
 
-    private FLASH_TYPES type;
+    private final FLASH_TYPES type;
 
     public Flash(String message, FLASH_TYPES type) {
         this.message = message;

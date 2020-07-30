@@ -1,7 +1,7 @@
 package cosc1295.src.controllers;
 
-import cosc1295.design.interfaces.IAddressService;
-import cosc1295.design.services.AddressService;
+import cosc1295.providers.interfaces.IAddressService;
+import cosc1295.providers.services.AddressService;
 import cosc1295.src.models.Address;
 import cosc1295.src.views.AddressView;
 

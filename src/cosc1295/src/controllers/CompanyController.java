@@ -1,7 +1,7 @@
 package cosc1295.src.controllers;
 
-import cosc1295.design.interfaces.ICompanyManagementService;
-import cosc1295.design.services.CompanyManagementService;
+import cosc1295.providers.interfaces.ICompanyService;
+import cosc1295.providers.services.CompanyService;
 import cosc1295.src.models.Address;
 import cosc1295.src.models.Company;
 import cosc1295.src.views.CompanyView;
@@ -10,12 +10,12 @@ public class CompanyController {
 
     private final CompanyView companyView;
     AddressController addressController;
-    private final ICompanyManagementService companyService;
+    private final ICompanyService companyService;
 
     public CompanyController() {
         companyView = new CompanyView();
         addressController = new AddressController();
-        companyService = new CompanyManagementService();
+        companyService = new CompanyService();
     }
 
     public boolean executeAddCompanyTask() {

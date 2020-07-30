@@ -1,6 +1,7 @@
 package entry;
 
-import cosc1295.src.controllers.FlashController;
+import cosc1295.designs.ApplicationFacade;
+import cosc1295.designs.Flasher;
 import cosc1295.src.models.Flash;
 import helpers.commons.SharedEnums.FLASH_TYPES;
 import helpers.commons.SharedEnums.APPLICATION_MENU;
@@ -11,14 +12,14 @@ import java.util.Scanner;
 
 public final class ProjectTeamFormationApp {
 
-    private final FlashController flashController = FlashController.getInstance();
+    private final Flasher flasher = Flasher.getInstance();
 
     public void run() {
         String menuSelection;
 
         while (true) {
             printProgramMenuInternally();
-            flashController.flash(new Flash(
+            flasher.flash(new Flash(
                     "\nSelect an option: ",
                     FLASH_TYPES.NONE
             ));
@@ -28,7 +29,7 @@ public final class ProjectTeamFormationApp {
             inputScanner.nextLine();
 
             if (!Helpers.validateMenuSelection(menuSelection)) {
-                flashController.flash(new Flash(
+                flasher.flash(new Flash(
                         "\nYour selection is out of scope. Press enter to view menu again.",
                         FLASH_TYPES.ATTENTION
                 ));
@@ -41,7 +42,7 @@ public final class ProjectTeamFormationApp {
             boolean shouldQuit = runApplicationWithSelection(selectedOption);
 
             if (shouldQuit) {
-                flashController.flash(new Flash(
+                flasher.flash(new Flash(
                         "\nApplication closed.",
                         FLASH_TYPES.NONE
                 ));

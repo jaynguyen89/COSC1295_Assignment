@@ -15,4 +15,8 @@ public final class SharedConstants {
     public static final String ADDRESS_FILE_NAME = "addresses.txt";
 
     public static final String COMPANY_FILE_NAME = "companies.txt";
+
+    public static final String ROLE_FILE_NAME = "roles.txt";
+
+    public static final String PROJECT_OWNER_FILE_NAME = "project_owners.txt";
 }

@@ -41,7 +41,7 @@ public final class SharedEnums {
     }
 
     public enum DATA_TYPES {
-        ADDRESS, COMPANY
+        ADDRESS, COMPANY, ROLE, PROJECT_OWNER
     }
 
     public static List<String> getAllEnumItemsAsList(Class<? extends Enum<?>> any) {
