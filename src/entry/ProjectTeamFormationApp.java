@@ -82,7 +82,7 @@ public final class ProjectTeamFormationApp {
                 appFacade.runStudentPreferenceCapturingFeature();
                 break;
             case F:
-                System.out.println("Run task: " + F.getValue());
+                appFacade.runProjectShortlistingFeature();
                 break;
             default:
                 taskDone = true;

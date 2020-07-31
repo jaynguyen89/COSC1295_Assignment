@@ -72,4 +72,8 @@ public class ApplicationFacade {
         if (taskResult != null)
             studentController.displayStudentTaskResult(taskResult);
     }
+
+    public void runProjectShortlistingFeature() {
+        projectController.shortlistProjectsBasedOnPreferences();
+    }
 }

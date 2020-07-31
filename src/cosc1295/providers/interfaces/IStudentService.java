@@ -12,4 +12,6 @@ public interface IStudentService {
     Boolean updateStudentPersonality(Student student);
 
     Boolean saveStudentPreferences(Preference preference);
+
+    List<Preference> readAllStudentPreferencesFromFile();
 }

@@ -167,7 +167,7 @@ public class ProjectView {
         return project;
     }
 
-    public void printTaskResult(boolean result) {
+    public void printAddProjectTaskResult(boolean result) {
         flasher.flash(
             result ? new Flash("The new project has been added successfully.\n", FLASH_TYPES.SUCCESS)
                    : new Flash("Unable to add new project due to an error.\n", FLASH_TYPES.NONE)

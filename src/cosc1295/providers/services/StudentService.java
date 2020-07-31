@@ -74,4 +74,36 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
         String normalizedPreference = preference.stringify();
         return writeToFile(normalizedPreference, DATA_TYPES.PREFERENCE);
     }
+
+    @Override
+    public List<Preference> readAllStudentPreferencesFromFile() {
+        List<String> rawPreferences = readEntireRawDataFromFile(DATA_TYPES.PREFERENCE);
+
+        if (rawPreferences == null) return null;
+        if (rawPreferences.isEmpty()) return new ArrayList<>();
+
+        List<Preference> preferences = new ArrayList<>();
+        try {
+            for (String rawPreference : rawPreferences) {
+                String[] preferenceTokens = rawPreference.split(SharedConstants.TEXT_DELIMITER);
+                Preference preference = new Preference();
+
+                preference.setStudentUniqueId(preferenceTokens[0]);
+
+                HashMap<String, Integer> projectPreferences = new HashMap<>();
+                projectPreferences.put(preferenceTokens[1], Integer.parseInt(preferenceTokens[2]));
+                projectPreferences.put(preferenceTokens[3], Integer.parseInt(preferenceTokens[4]));
+                projectPreferences.put(preferenceTokens[5], Integer.parseInt(preferenceTokens[6]));
+                projectPreferences.put(preferenceTokens[7], Integer.parseInt(preferenceTokens[8]));
+
+                preference.setPreference(projectPreferences);
+
+                preferences.add(preference);
+            }
+        } catch (IndexOutOfBoundsException | NumberFormatException ex) {
+            return null;
+        }
+
+        return preferences;
+    }
 }
