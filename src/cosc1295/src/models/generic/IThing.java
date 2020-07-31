@@ -6,15 +6,17 @@ public interface IThing {
 
     int id = 0;
 
-    public void setId(int id);
+    void setId(int id);
 
-    public int getId();
+    int getId();
 
     String uniqueId = SharedConstants.EMPTY_STRING;
 
-    public void setUniqueId(String uniqueId);
+    void setUniqueId(String uniqueId);
 
-    public String getUniqueId();
+    String getUniqueId();
 
-    public Boolean isUniqueIdAvailable();
+    Boolean isUniqueIdAvailable();
+
+    String stringify();
 }

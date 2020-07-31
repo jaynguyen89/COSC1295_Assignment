@@ -35,8 +35,8 @@ public class ProjectOwnerView {
         ProjectOwner projectOwner = new ProjectOwner();
 
         flasher.flash(new Flash(
-                "\t\tTASK: ADD PROJECT OWNER\n\t\tPlease enter the details of New Project Owner\n",
-                FLASH_TYPES.NONE
+            "\t\tTASK: ADD PROJECT OWNER\n\t\tPlease enter the details of New Project Owner\n",
+            FLASH_TYPES.NONE
         ));
 
         int projectOwnerFieldTracker = 0;

@@ -43,7 +43,7 @@ public final class SharedEnums {
     }
 
     public enum DATA_TYPES {
-        ADDRESS, COMPANY, ROLE, PROJECT_OWNER, PROJECT
+        ADDRESS, COMPANY, ROLE, PROJECT_OWNER, PROJECT, STUDENT
     }
 
     public enum RANKINGS {
@@ -75,6 +75,22 @@ public final class SharedEnums {
 
         private final String value;
         public String getValue() { return value; }
+
+        public static String display() {
+            return "\t" + A.name() + ". " + A.value + "\n" +
+                "\t" + B.name() + ". " + B.value + "\n" +
+                "\t" + C.name() + ". " + C.value + "\n" +
+                "\t" + D.name() + ". " + D.value + "\n";
+        }
+
+        public static PERSONALITIES getPersonality(String input) {
+            if (input.equals(A.name())) return A;
+            if (input.equals(B.name())) return B;
+            if (input.equals(C.name())) return C;
+            if (input.equals(D.name())) return D;
+
+            return null;
+        }
 
         PERSONALITIES(String value) { this.value = value; }
     }

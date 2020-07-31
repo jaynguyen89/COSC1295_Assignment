@@ -129,6 +129,43 @@ public class TextFileServiceBase {
         return true;
     }
 
+    public boolean updateEntryToFileById(String thingToUpdate, int id, DATA_TYPES type) {
+        String filePath = generateFilePathByDataType(type);
+        File fileToUpdate = new File(filePath);
+
+        if (!fileToUpdate.exists() || !fileToUpdate.canRead()) {
+            flasher.flash(new Flash("File not found or Insufficient WRITE permission.\n", SharedEnums.FLASH_TYPES.ERROR));
+            return false;
+        }
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileToUpdate));
+            StringBuffer lineBuffer = new StringBuffer();
+            String lineToUpdate;
+
+            while ((lineToUpdate = reader.readLine()) != null) {
+                String[] tokens = lineToUpdate.split(SharedConstants.TEXT_DELIMITER);
+                if (tokens[0].equals(String.valueOf(id)))
+                    lineToUpdate = thingToUpdate;
+
+                lineBuffer.append(lineToUpdate);
+                lineBuffer.append("\n");
+            }
+
+            reader.close();
+
+            FileOutputStream outputStream = new FileOutputStream(filePath);
+            outputStream.write(lineBuffer.toString().getBytes());
+
+            outputStream.close();
+        } catch (IOException e) {
+            flasher.flash(new Flash("An error occurred while updating new data to file.\n", SharedEnums.FLASH_TYPES.ERROR));
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean isRedundantUniqueId(String uniqueId, DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToCheck = new File(filePath);
@@ -196,7 +233,8 @@ public class TextFileServiceBase {
                     : (type == DATA_TYPES.COMPANY ? SharedConstants.COMPANY_FILE_NAME
                     : (type == DATA_TYPES.ROLE ? SharedConstants.ROLE_FILE_NAME
                     : (type == DATA_TYPES.PROJECT ? SharedConstants.PROJECT_FILE_NAME
-                    : SharedConstants.PROJECT_OWNER_FILE_NAME)))
+                    : (type == DATA_TYPES.STUDENT ? SharedConstants.STUDENT_FILE_NAME
+                    : SharedConstants.PROJECT_OWNER_FILE_NAME))))
         );
     }
 }

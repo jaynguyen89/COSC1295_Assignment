@@ -76,7 +76,7 @@ public final class ProjectTeamFormationApp {
                 appFacade.runAddProjectFeature();
                 break;
             case D:
-                System.out.println("Run task: " + D.getValue());
+                appFacade.runStudentPersonalityCapturingFeature();;
                 break;
             case E:
                 System.out.println("Run task: " + E.getValue());
