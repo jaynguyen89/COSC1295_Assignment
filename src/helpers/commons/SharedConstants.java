@@ -16,6 +16,8 @@ public final class SharedConstants {
 
     public static final int MAX_CONFLICTERS = 2;
 
+    public static final int MAX_PREFERENCE = 4;
+
     public static final String ADDRESS_FILE_NAME = "addresses.txt";
 
     public static final String COMPANY_FILE_NAME = "companies.txt";
@@ -27,4 +29,6 @@ public final class SharedConstants {
     public static final String PROJECT_FILE_NAME = "projects.txt";
 
     public static final String STUDENT_FILE_NAME = "student_info.txt";
+
+    public static final String PREFERENCE_FILE_NAME = "preferences.txt";
 }

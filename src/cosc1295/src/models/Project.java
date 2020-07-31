@@ -108,4 +108,8 @@ public class Project implements IThing, Serializable {
 
         return projectString.toString();
     }
+
+    public String display() {
+        return id + ". " + uniqueId + "\t\t" + projectTitle;
+    }
 }

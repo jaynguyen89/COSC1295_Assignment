@@ -43,7 +43,7 @@ public final class SharedEnums {
     }
 
     public enum DATA_TYPES {
-        ADDRESS, COMPANY, ROLE, PROJECT_OWNER, PROJECT, STUDENT
+        ADDRESS, COMPANY, ROLE, PROJECT_OWNER, PROJECT, STUDENT, PREFERENCE
     }
 
     public enum RANKINGS {

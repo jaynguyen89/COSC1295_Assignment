@@ -2,6 +2,7 @@ package cosc1295.providers.services;
 
 import cosc1295.providers.bases.TextFileServiceBase;
 import cosc1295.providers.interfaces.IStudentService;
+import cosc1295.src.models.Preference;
 import cosc1295.src.models.Student;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.SKILLS;
@@ -9,6 +10,8 @@ import helpers.commons.SharedEnums.RANKINGS;
 import helpers.commons.SharedEnums.DATA_TYPES;
 import helpers.commons.SharedEnums.PERSONALITIES;
 
+import helpers.utilities.Helpers;
+import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,19 +36,8 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
 
                 HashMap<SKILLS, RANKINGS> skillRanking = new HashMap<>();
                 for (int i = 2; i <= 5; i++) {
-                    String skill = studentTokens[i].substring(0, 1);
-                    int ranking = Integer.parseInt(
-                        studentTokens[i].substring(studentTokens[i].length() - 1)
-                    ) - 1;
-                    String name = SKILLS.P.name();
-                    SKILLS eSkill = skill.equals(SKILLS.A.name()) ? SKILLS.A :
-                        (skill.equals(SKILLS.N.name()) ? SKILLS.N :
-                            (skill.equals(SKILLS.P.name()) ? SKILLS.P : SKILLS.W)
-                        );
-
-                    RANKINGS eRanking = RANKINGS.values()[ranking];
-
-                    skillRanking.put(eSkill, eRanking);
+                    Pair<SKILLS, RANKINGS> skPair = Helpers.parseSkillRankingToken(studentTokens[i]);
+                    skillRanking.put(skPair.getKey(), skPair.getValue());
                 }
 
                 student.setSkillRanking(skillRanking);
@@ -75,5 +67,11 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
     public Boolean updateStudentPersonality(Student student) {
         String normalizedStudent = student.stringify();
         return updateEntryToFileById(normalizedStudent, student.getId(), DATA_TYPES.STUDENT);
+    }
+
+    @Override
+    public Boolean saveStudentPreferences(Preference preference) {
+        String normalizedPreference = preference.stringify();
+        return writeToFile(normalizedPreference, DATA_TYPES.PREFERENCE);
     }
 }

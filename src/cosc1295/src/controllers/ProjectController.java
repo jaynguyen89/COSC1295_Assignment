@@ -22,7 +22,6 @@ public class ProjectController extends ControllerBase {
         projectOwnerService = new ProjectOwnerService();
     }
 
-
     public Boolean executeAddProjectTask() {
         List<ProjectOwner> allProjectOwners = projectOwnerService.readAllProjectOwnersFromFile();
         if (allProjectOwners == null) {
@@ -42,5 +41,9 @@ public class ProjectController extends ControllerBase {
 
     public void displayAddProjectResult(boolean taskResult) {
         projectView.printTaskResult(taskResult);
+    }
+
+    public Project getAProjectFromList(List<Project> projects) {
+        return projectView.getProjectFromList(projects);
     }
 }

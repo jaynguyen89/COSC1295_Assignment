@@ -127,4 +127,25 @@ public final class Helpers {
 
         return null;
     }
+
+    public static
+        Pair<SharedEnums.SKILLS,
+             SharedEnums.RANKINGS>
+    parseSkillRankingToken(String token) {
+        String skill = token.substring(0, 1);
+        int ranking = Integer.parseInt(
+                token.substring(token.length() - 1)
+        ) - 1;
+
+        SharedEnums.SKILLS eSkill =
+                skill.equals(SharedEnums.SKILLS.A.name()) ? SharedEnums.SKILLS.A :
+                (skill.equals(SharedEnums.SKILLS.N.name()) ? SharedEnums.SKILLS.N :
+                        (skill.equals(SharedEnums.SKILLS.P.name()) ? SharedEnums.SKILLS.P
+                                : SharedEnums.SKILLS.W)
+                );
+
+        SharedEnums.RANKINGS eRanking = SharedEnums.RANKINGS.values()[ranking];
+
+        return new Pair<>(eSkill, eRanking);
+    }
 }

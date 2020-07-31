@@ -63,6 +63,13 @@ public class ApplicationFacade {
         Boolean taskResult = studentController.executeStudentPersonalityCapturingTask();
 
         if (taskResult != null)
-            studentController.displayPersonalityCapturingTaskResult(taskResult);
+            studentController.displayStudentTaskResult(taskResult);
+    }
+
+    public void runStudentPreferenceCapturingFeature() {
+        Boolean taskResult = studentController.executeStudentPreferenceCapturingTask();
+
+        if (taskResult != null)
+            studentController.displayStudentTaskResult(taskResult);
     }
 }

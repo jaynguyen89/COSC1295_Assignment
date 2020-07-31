@@ -4,11 +4,13 @@ import cosc1295.designs.Flasher;
 import cosc1295.src.models.Flash;
 import cosc1295.src.models.Project;
 import cosc1295.src.models.ProjectOwner;
+import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.SKILLS;
 import helpers.commons.SharedEnums.RANKINGS;
 import helpers.commons.SharedEnums.FLASH_TYPES;
 import helpers.utilities.Helpers;
 
+import javafx.util.Pair;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
@@ -247,5 +249,90 @@ public class ProjectView {
         }
 
         return eRanking;
+    }
+
+    public Project getProjectFromList(List<Project> projects) {
+        if (projects.isEmpty()) {
+            flasher.flash(new Flash(
+                "No Project record has been saved: file `projects.txt` not found or empty.\n" +
+                        "Please add at least 4 Projects before attempting this task.\n" +
+                        "Press enter to continue.",
+                FLASH_TYPES.ATTENTION
+            ));
+
+            inputScanner.nextLine();
+            return null;
+        }
+
+        flasher.flash(new Flash("\nPlease select a project from the list.\n", FLASH_TYPES.NONE));
+        Project selectedProject = null;
+
+        for (Project project : projects)
+            flasher.flash(new Flash("\t" + project.display(), FLASH_TYPES.NONE));
+
+        String selectedProjectId = SharedConstants.EMPTY_STRING;
+        while (selectedProjectId.isEmpty()) {
+            flasher.flash(new Flash("\nSelected Project: ", FLASH_TYPES.NONE));
+
+            selectedProjectId = inputScanner.next();
+            inputScanner.nextLine();
+
+            Pair<Project, Boolean> searchResult = searchProjectFromListByInput(selectedProjectId, projects);
+            if (searchResult == null) return null;
+            else if (searchResult.getValue()) {
+                selectedProjectId = SharedConstants.EMPTY_STRING;
+                continue;
+            }
+
+            selectedProject = searchResult.getKey();
+        }
+
+        return selectedProject;
+    }
+
+    private Pair<Project, Boolean> searchProjectFromListByInput(
+        String selectedProjectId,
+        List<Project> projects
+    ) {
+        boolean found = false;
+        Project selectedProject = null;
+
+        if (Helpers.isIntegerNumber(selectedProjectId)) {
+            int projectId = Integer.parseInt(selectedProjectId);
+
+            if (projectId <= 0) {
+                flasher.flash(new Flash("Invalid ID. Press enter to select again.", FLASH_TYPES.ATTENTION));
+                inputScanner.nextLine();
+
+                return new Pair<>(null, true);
+            }
+
+            for (Project project : projects)
+                if (project.getId() == projectId) {
+                    selectedProject = project;
+                    found = true;
+                    break;
+                }
+        }
+        else for (Project project : projects)
+            if (project.getUniqueId().trim().equalsIgnoreCase(selectedProjectId.trim())) {
+                selectedProject = project;
+                found = true;
+                break;
+            }
+
+        if (!found) {
+            boolean response = flasher.promptForConfirmation(new Flash(
+                "Project not found.\n" +
+                        "Do you wish to select again or go back to main menu?\n" +
+                        "Y: Select again\tN: Back to main menu",
+                FLASH_TYPES.ATTENTION
+            ));
+
+            if (!response) return null;
+            else return new Pair<>(null, true);
+        }
+
+        return new Pair<>(selectedProject, false);
     }
 }

@@ -2,13 +2,15 @@ package cosc1295.src.views;
 
 import cosc1295.designs.Flasher;
 import cosc1295.src.models.Flash;
+import cosc1295.src.models.Preference;
+import cosc1295.src.models.Project;
 import cosc1295.src.models.Student;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.FLASH_TYPES;
 import helpers.commons.SharedEnums.PERSONALITIES;
 import helpers.utilities.Helpers;
-import javafx.util.Pair;
 
+import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,8 +48,8 @@ public class StudentView {
 
     public void printTaskResult(boolean result) {
         flasher.flash(new Flash(
-                result ? "Personality data have been saved successfully for Students.\nPress enter to continue."
-                       : "An error occurred while saving the new Personality data.\nPress enter to continue.",
+                result ? "Student data have been saved successfully for Students.\nPress enter to continue."
+                       : "An error occurred while saving the new Student data.\nPress enter to continue.",
                 result ? FLASH_TYPES.SUCCESS : FLASH_TYPES.ERROR
         ));
 
@@ -272,10 +274,10 @@ public class StudentView {
 
         if (!found) {
             boolean response = flasher.promptForConfirmation(new Flash(
-                    "Student not found.\n" +
-                            "Do you wish to select again or go back to main menu?\n" +
-                            "Y: Select again\tN: Back to main menu",
-                    FLASH_TYPES.ATTENTION
+                "Student not found.\n" +
+                        "Do you wish to select again or go back to main menu?\n" +
+                        "Y: Select again\tN: Back to main menu",
+                FLASH_TYPES.ATTENTION
             ));
 
             if (!response) return null;
@@ -283,5 +285,37 @@ public class StudentView {
         }
 
         return new Pair<>(selectedStudent, false);
+    }
+
+    public Preference captureStudentPreferences(Student student, Project project, Preference preference) {
+        flasher.flash(new Flash(
+            "\nPlease set a preference for " + project.getUniqueId() +
+                    " by Student " + student.getUniqueId(),
+            FLASH_TYPES.NONE
+        ));
+        flasher.flash(new Flash(
+            "1. Disliked\t2. Neutral\t3. Preferred\t4. Most Preferred\n",
+            FLASH_TYPES.NONE
+        ));
+
+        while (true) {
+            flasher.flash(new Flash("Your selection: ", FLASH_TYPES.NONE));
+            String selection = inputScanner.next();
+            inputScanner.nextLine();
+
+            if (Helpers.isIntegerNumber(selection)) {
+                int pref = Integer.parseInt(selection);
+
+                if (pref > 0 && pref < 5) {
+                    preference.addPreference(new Pair<>(project.getUniqueId(), pref));
+                    break;
+                }
+            }
+
+            flasher.flash(new Flash("Invalid input for preference. Press enter to continue.", FLASH_TYPES.ATTENTION));
+            inputScanner.nextLine();
+        }
+
+        return preference;
     }
 }
