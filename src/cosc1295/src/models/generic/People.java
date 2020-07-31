@@ -4,10 +4,11 @@ import cosc1295.src.models.Role;
 import helpers.commons.SharedConstants;
 import helpers.utilities.Helpers;
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class People {
+public class People implements Serializable {
 
     protected int id;
 

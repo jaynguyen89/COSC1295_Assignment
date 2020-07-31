@@ -27,9 +27,45 @@ public class CompanyView {
         ));
 
         int companyFieldTracker = 0;
-        while (companyFieldTracker < 3)
+        while (companyFieldTracker < 4)
             switch (companyFieldTracker) {
                 case 0:
+                    flasher.flash(new Flash("Company ID: ", FLASH_TYPES.NONE));
+
+                    newCompany.setUniqueId(inputScanner.nextLine());
+                    Boolean idValidation = newCompany.validateAndPrettifyUniqueId();
+                    if (idValidation == null) flasher.flash(new Flash("Company ID cannot be empty!", FLASH_TYPES.ATTENTION));
+                    else if (!idValidation) flasher.flash(new Flash("Company ID should not have special characters.", FLASH_TYPES.ATTENTION));
+
+                    if (idValidation == null || !idValidation) continue;
+
+                    Boolean idAvailable = newCompany.isUniqueIdAvailable();
+                    if (idAvailable == null) {
+                        flasher.flash(new Flash("An error occurred while checking saved data.", FLASH_TYPES.ERROR));
+                        boolean response = flasher.promptForConfirmation(new Flash(
+                                "Do you wish to try again or go back to main menu?\n" +
+                                        "Y: Try again\tN: Back to main menu",
+                                FLASH_TYPES.ATTENTION
+                        ));
+
+                        if (!response) return null;
+                        continue;
+                    }
+
+                    if (!idAvailable) {
+                        flasher.flash(new Flash(
+                                "Company ID " + newCompany.getUniqueId() + " is duplicated. Please set another ID.\n" +
+                                        "Press enter to continue.",
+                                FLASH_TYPES.ERROR
+                        ));
+
+                        inputScanner.nextLine();
+                        continue;
+                    }
+
+                    companyFieldTracker++;
+                    break;
+                case 1:
                     flasher.flash(new Flash("Company Name: (allowed: ().-')", FLASH_TYPES.NONE));
 
                     newCompany.setCompanyName(inputScanner.nextLine());
@@ -41,7 +77,7 @@ public class CompanyView {
                     if (nameValidation == null || !nameValidation) continue;
                     companyFieldTracker++;
                     break;
-                case 1:
+                case 2:
                     flasher.flash(new Flash("ABN Number: ", FLASH_TYPES.NONE));
 
                     newCompany.setAbnNumber(inputScanner.nextLine());

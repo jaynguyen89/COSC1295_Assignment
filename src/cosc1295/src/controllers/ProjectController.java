@@ -1,6 +1,5 @@
 package cosc1295.src.controllers;
 
-import cosc1295.designs.Flasher;
 import cosc1295.providers.services.ProjectOwnerService;
 import cosc1295.providers.services.ProjectService;
 import cosc1295.src.models.Flash;
@@ -11,9 +10,7 @@ import helpers.commons.SharedEnums;
 
 import java.util.List;
 
-public class ProjectController {
-
-    private final Flasher flasher = Flasher.getInstance();
+public class ProjectController extends ControllerBase {
 
     private final ProjectView projectView;
     private final ProjectService projectService;

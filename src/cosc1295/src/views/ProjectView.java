@@ -24,7 +24,7 @@ public class ProjectView {
         if (projectOwners.isEmpty()) {
             flasher.flash(new Flash(
                 "Projects are required to have a Project Owner ID.\n" +
-                        "However, no Project Owner has been added. Please add at least 1 first.\n" +
+                        "However, no Project Owner has been added. Please add at least 1 Project Owner first.\n" +
                         "Press enter to continue.",
                 FLASH_TYPES.ATTENTION
             ));
@@ -46,8 +46,33 @@ public class ProjectView {
                     flasher.flash(new Flash("Project ID: ", FLASH_TYPES.NONE));
 
                     project.setUniqueId(inputScanner.nextLine());
-                    if (!project.validateAndPrettifyId()) {
-                        flasher.flash(new Flash("Invalid ID. Please re-enter Project ID.", FLASH_TYPES.ERROR));
+                    Boolean idValidation = project.validateAndPrettifyId();
+                    if (idValidation == null) flasher.flash(new Flash("Project ID cannot be empty!", FLASH_TYPES.ATTENTION));
+                    else if (!idValidation) flasher.flash(new Flash("Project ID should not have special characters.", FLASH_TYPES.ATTENTION));
+
+                    if (idValidation == null || !idValidation) continue;
+
+                    Boolean idAvailable = project.isUniqueIdAvailable();
+                    if (idAvailable == null) {
+                        flasher.flash(new Flash("An error occurred while checking saved data.", FLASH_TYPES.ERROR));
+                        boolean response = flasher.promptForConfirmation(new Flash(
+                                        "Do you wish to try again or go back to main menu?\n" +
+                                        "Y: Try again\tN: Back to main menu",
+                                FLASH_TYPES.ATTENTION
+                        ));
+
+                        if (!response) return null;
+                        continue;
+                    }
+
+                    if (!idAvailable) {
+                        flasher.flash(new Flash(
+                            "Project ID " + project.getUniqueId() + " is duplicated. Please set another ID.\n" +
+                                    "Press enter to continue.",
+                            FLASH_TYPES.ERROR
+                        ));
+
+                        inputScanner.nextLine();
                         continue;
                     }
 

@@ -1,6 +1,5 @@
 package cosc1295.src.controllers;
 
-import cosc1295.designs.Flasher;
 import cosc1295.providers.interfaces.ICompanyService;
 import cosc1295.providers.interfaces.IProjectOwnerService;
 import cosc1295.providers.interfaces.IRoleService;
@@ -17,9 +16,7 @@ import helpers.commons.SharedEnums;
 import javafx.util.Pair;
 import java.util.List;
 
-public class ProjectOwnerController {
-
-    private final Flasher flasher = Flasher.getInstance();
+public class ProjectOwnerController extends ControllerBase {
 
     private final ProjectOwnerView projectOwnerView;
     private final IProjectOwnerService projectOwnerService;

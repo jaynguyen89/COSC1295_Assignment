@@ -1,10 +1,11 @@
 package cosc1295.providers.services;
 
+import cosc1295.providers.bases.TextFileServiceBase;
 import cosc1295.providers.interfaces.IAddressService;
 import cosc1295.src.models.Address;
 import helpers.commons.SharedEnums.DATA_TYPES;
 
-public class AddressService extends FileServiceBase implements IAddressService {
+public class AddressService extends TextFileServiceBase implements IAddressService {
 
     @Override
     public Address writeAddressToFile(Address address) {

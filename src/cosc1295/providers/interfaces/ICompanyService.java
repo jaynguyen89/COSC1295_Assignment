@@ -9,4 +9,6 @@ public interface ICompanyService {
     boolean saveNewCompany(Company company);
 
     List<Company> readAllCompaniesFromFile();
+
+    boolean isUniqueIdDuplicated(String uniqueId);
 }

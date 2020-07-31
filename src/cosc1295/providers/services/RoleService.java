@@ -1,7 +1,7 @@
 package cosc1295.providers.services;
 
+import cosc1295.providers.bases.TextFileServiceBase;
 import cosc1295.providers.interfaces.IRoleService;
-import cosc1295.designs.Flasher;
 import cosc1295.src.models.Role;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
@@ -9,7 +9,7 @@ import helpers.commons.SharedEnums;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RoleService extends FileServiceBase implements IRoleService {
+public class RoleService extends TextFileServiceBase implements IRoleService {
 
     @Override
     public List<Role> readAllRolesFromFile() {

@@ -9,4 +9,6 @@ public interface IProjectOwnerService {
     boolean saveNewProjectOwner(ProjectOwner projectOwner);
 
     List<ProjectOwner> readAllProjectOwnersFromFile();
+
+    boolean isUniqueIdDuplicated(String uniqueId);
 }

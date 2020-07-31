@@ -5,10 +5,10 @@ import cosc1295.providers.services.AddressService;
 import cosc1295.src.models.Address;
 import cosc1295.src.views.AddressView;
 
-public class AddressController {
+public class AddressController extends ControllerBase {
 
-    private AddressView addressView;
-    private IAddressService addressService;
+    private final AddressView addressView;
+    private final IAddressService addressService;
 
     public AddressController() {
         addressView = new AddressView();

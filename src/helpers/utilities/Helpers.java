@@ -1,8 +1,16 @@
 package helpers.utilities;
 
+import cosc1295.providers.bases.ServiceLocator;
+import cosc1295.providers.services.CompanyService;
+import cosc1295.providers.services.ProjectOwnerService;
+import cosc1295.providers.services.ProjectService;
+import cosc1295.src.models.Company;
+import cosc1295.src.models.Project;
+import cosc1295.src.models.ProjectOwner;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 
+import javafx.util.Pair;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -72,5 +80,51 @@ public final class Helpers {
         }
 
         return true;
+    }
+
+    public static Pair<String, Boolean> validateAndPrettifyUniqueId(String uniqueId) {
+        if (Helpers.isNullOrBlankOrEmpty(uniqueId))
+            return null;
+
+        uniqueId = uniqueId.trim()
+                .replaceAll(
+                        SharedConstants.MULTIPLE_SPACE,
+                        SharedConstants.EMPTY_STRING
+                )
+                .toUpperCase();
+
+        Pattern idRegex = Pattern.compile("^[\\w]+$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = idRegex.matcher(uniqueId);
+
+        return new Pair<>(uniqueId, matcher.matches());
+    }
+
+    public static <T> Boolean checkUniqueIdAvailableFor(Class<T> type, String uniqId) {
+        ServiceLocator locator = ServiceLocator.getInstance();
+
+        CompanyService companyService;
+        ProjectOwnerService projectOwnerService;
+        ProjectService projectService;
+
+        try {
+            if (Company.class.equals(type)) {
+                companyService = locator.getService(CompanyService.class);
+                return !companyService.isUniqueIdDuplicated(uniqId);
+            } else if (ProjectOwner.class.equals(type)) {
+                projectOwnerService = locator.getService(ProjectOwnerService.class);
+                return !projectOwnerService.isUniqueIdDuplicated(uniqId);
+            } else if (Project.class.equals(type)) {
+                projectService = locator.getService(ProjectService.class);
+                return !projectService.isUniqueIdDuplicated(uniqId);
+            }
+        } catch (
+            IllegalAccessException |
+            InstantiationException |
+            NullPointerException ex
+        ) {
+            return null;
+        }
+
+        return null;
     }
 }

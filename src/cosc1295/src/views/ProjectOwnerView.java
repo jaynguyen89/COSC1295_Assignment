@@ -142,8 +142,33 @@ public class ProjectOwnerView {
                     flasher.flash(new Flash("Unique ID: (no special characters)", FLASH_TYPES.NONE));
 
                     projectOwner.setUniqueId(inputScanner.nextLine());
-                    if (!projectOwner.validateAndPrettifyUniqueId()) {
-                        flasher.flash(new Flash("Invalid ID. Please re-enter Unique ID.", FLASH_TYPES.ERROR));
+                    Boolean idValidation = projectOwner.validateAndPrettifyUniqueId();
+                    if (idValidation == null) flasher.flash(new Flash("Unique ID cannot be empty!", FLASH_TYPES.ATTENTION));
+                    else if (!idValidation) flasher.flash(new Flash("Unique ID should not have special characters.", FLASH_TYPES.ATTENTION));
+
+                    if (idValidation == null || !idValidation) continue;
+
+                    Boolean idAvailable = projectOwner.isUniqueIdAvailable();
+                    if (idAvailable == null) {
+                        flasher.flash(new Flash("An error occurred while checking saved data.", FLASH_TYPES.ERROR));
+                        boolean response = flasher.promptForConfirmation(new Flash(
+                                "Do you wish to try again or go back to main menu?\n" +
+                                        "Y: Try again\tN: Back to main menu",
+                                FLASH_TYPES.ATTENTION
+                        ));
+
+                        if (!response) return null;
+                        continue;
+                    }
+
+                    if (!idAvailable) {
+                        flasher.flash(new Flash(
+                                "Project Owner ID " + projectOwner.getUniqueId() + " is duplicated. Please set another ID.\n" +
+                                        "Press enter to continue.",
+                                FLASH_TYPES.ERROR
+                        ));
+
+                        inputScanner.nextLine();
                         continue;
                     }
 

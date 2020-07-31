@@ -6,7 +6,7 @@ import cosc1295.src.models.Address;
 import cosc1295.src.models.Company;
 import cosc1295.src.views.CompanyView;
 
-public class CompanyController {
+public class CompanyController extends ControllerBase {
 
     private final CompanyView companyView;
     AddressController addressController;

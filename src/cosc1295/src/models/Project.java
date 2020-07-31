@@ -1,19 +1,19 @@
 package cosc1295.src.models;
 
+import cosc1295.src.models.generic.IThing;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.SKILLS;
 import helpers.commons.SharedEnums.RANKINGS;
-
 import helpers.utilities.Helpers;
 import javafx.util.Pair;
 
+import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public class Project {
+public class Project implements IThing, Serializable {
+
+    private int id;
 
     private String uniqueId;
 
@@ -25,11 +25,24 @@ public class Project {
 
     private HashMap<SKILLS, RANKINGS> skillRanking;
 
+    @Override
+    public void setId(int id) { this.id = id; }
+
+    @Override
+    public int getId() { return id; }
+
+    @Override
     public void setUniqueId(String uniqueId) {
         this.uniqueId = uniqueId;
     }
 
+    @Override
     public String getUniqueId() { return uniqueId; }
+
+    @Override
+    public Boolean isUniqueIdAvailable() {
+        return Helpers.checkUniqueIdAvailableFor(this.getClass(), uniqueId);
+    }
 
     public void setProjectTitle(String title) {
         projectTitle = title;
@@ -55,21 +68,12 @@ public class Project {
         skillRanking = rankings;
     }
 
-    public boolean validateAndPrettifyId() {
-        if (Helpers.isNullOrBlankOrEmpty(uniqueId))
-            return false;
+    public Boolean validateAndPrettifyId() {
+        Pair<String, Boolean> validation = Helpers.validateAndPrettifyUniqueId(uniqueId);
+        if (validation == null) return null;
 
-        uniqueId = uniqueId.trim()
-                .replaceAll(
-                        SharedConstants.MULTIPLE_SPACE,
-                        SharedConstants.EMPTY_STRING
-                )
-                .toUpperCase();
-
-        Pattern idRegex = Pattern.compile("^[\\w]+$", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = idRegex.matcher(uniqueId);
-
-        return matcher.matches();
+        uniqueId = validation.getKey();
+        return validation.getValue();
     }
 
     public boolean validateAndPrettifyProjectTitle() {
@@ -90,6 +94,7 @@ public class Project {
 
     public String stringify() {
         StringBuilder projectString = new StringBuilder(
+            id + SharedConstants.TEXT_DELIMITER +
             uniqueId + SharedConstants.TEXT_DELIMITER +
             projectTitle + SharedConstants.TEXT_DELIMITER +
             briefDescription + SharedConstants.TEXT_DELIMITER +

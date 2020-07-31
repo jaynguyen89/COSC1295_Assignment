@@ -1,5 +1,6 @@
 package cosc1295.providers.services;
 
+import cosc1295.providers.bases.TextFileServiceBase;
 import cosc1295.providers.interfaces.ICompanyService;
 import cosc1295.src.models.Address;
 import cosc1295.src.models.Company;
@@ -9,7 +10,7 @@ import helpers.commons.SharedEnums.DATA_TYPES;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompanyService extends FileServiceBase implements ICompanyService {
+public class CompanyService extends TextFileServiceBase implements ICompanyService {
 
     @Override
     public boolean saveNewCompany(Company company) {
@@ -36,12 +37,13 @@ public class CompanyService extends FileServiceBase implements ICompanyService {
                 String[] companyTokens = rawCompany.split(SharedConstants.TEXT_DELIMITER);
 
                 company.setId(Integer.parseInt(companyTokens[0].trim()));
-                company.setCompanyName(companyTokens[1]);
-                company.setAbnNumber(companyTokens[2]);
-                company.setWebsiteUrl(companyTokens[3]);
+                company.setUniqueId(companyTokens[1]);
+                company.setCompanyName(companyTokens[2]);
+                company.setAbnNumber(companyTokens[3]);
+                company.setWebsiteUrl(companyTokens[4]);
 
                 Address address = new Address();
-                address.setId(Integer.parseInt(companyTokens[4]));
+                address.setId(Integer.parseInt(companyTokens[5]));
                 company.setAddress(address);
 
                 companies.add(company);
@@ -51,5 +53,10 @@ public class CompanyService extends FileServiceBase implements ICompanyService {
         }
 
         return companies;
+    }
+
+    @Override
+    public boolean isUniqueIdDuplicated(String uniqueId) {
+        return isRedundantUniqueId(uniqueId, DATA_TYPES.COMPANY);
     }
 }

@@ -2,7 +2,9 @@ package cosc1295.src.models;
 
 import helpers.commons.SharedConstants;
 
-public class Role {
+import java.io.Serializable;
+
+public class Role implements Serializable {
 
     private int id;
 

@@ -6,7 +6,7 @@ import cosc1295.src.models.Role;
 
 import java.util.List;
 
-public class RoleController {
+public class RoleController extends ControllerBase {
 
     private final IRoleService roleService;
 

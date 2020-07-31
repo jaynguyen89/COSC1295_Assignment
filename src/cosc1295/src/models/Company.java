@@ -1,14 +1,18 @@
 package cosc1295.src.models;
 
+import cosc1295.src.models.generic.IThing;
 import helpers.commons.SharedConstants;
 import helpers.utilities.Helpers;
+import javafx.util.Pair;
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Company {
+public class Company implements IThing, Serializable {
 
     private int id;
+    private String uniqueId;
     private String companyName;
     private String abnNumber;
     private String websiteUrl;
@@ -17,6 +21,17 @@ public class Company {
     public int getId() { return id; }
 
     public void setId(int id) { this.id = id; }
+
+    @Override
+    public String getUniqueId() { return uniqueId; }
+
+    @Override
+    public Boolean isUniqueIdAvailable() {
+        return Helpers.checkUniqueIdAvailableFor(this.getClass(), uniqueId);
+    }
+
+    @Override
+    public void setUniqueId(String uniqueId) { this.uniqueId = uniqueId; }
 
     public String getCompanyName() { return companyName; }
 
@@ -42,6 +57,14 @@ public class Company {
 
     public Address getAddress() {
         return address;
+    }
+
+    public Boolean validateAndPrettifyUniqueId() {
+        Pair<String, Boolean> validation = Helpers.validateAndPrettifyUniqueId(uniqueId);
+        if (validation == null) return null;
+
+        uniqueId = validation.getKey();
+        return validation.getValue();
     }
 
     public Boolean validateAndPrettifyCompanyName() {
@@ -72,9 +95,10 @@ public class Company {
 
     public String stringify() {
         return id + SharedConstants.TEXT_DELIMITER +
-                companyName + SharedConstants.TEXT_DELIMITER +
-                abnNumber + SharedConstants.TEXT_DELIMITER +
-                websiteUrl + SharedConstants.TEXT_DELIMITER +
-                address.getId();
+            uniqueId + SharedConstants.TEXT_DELIMITER +
+            companyName + SharedConstants.TEXT_DELIMITER +
+            abnNumber + SharedConstants.TEXT_DELIMITER +
+            websiteUrl + SharedConstants.TEXT_DELIMITER +
+            address.getId();
     }
 }

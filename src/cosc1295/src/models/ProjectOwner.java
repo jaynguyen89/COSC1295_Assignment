@@ -1,13 +1,14 @@
 package cosc1295.src.models;
 
+import cosc1295.src.models.generic.IThing;
 import cosc1295.src.models.generic.People;
 import helpers.commons.SharedConstants;
 import helpers.utilities.Helpers;
+import javafx.util.Pair;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.Serializable;
 
-public class ProjectOwner extends People {
+public class ProjectOwner extends People implements IThing, Serializable {
 
     private String uniqueId;
 
@@ -17,34 +18,33 @@ public class ProjectOwner extends People {
         this.uniqueId = uniqueId;
     }
 
+    @Override
+    public String getUniqueId() { return uniqueId; }
+
+    @Override
+    public Boolean isUniqueIdAvailable() {
+        return Helpers.checkUniqueIdAvailableFor(this.getClass(), uniqueId);
+    }
+
     public void setCompany(Company company) {
         this.company = company;
     }
 
-    public boolean validateAndPrettifyUniqueId() {
-        if (Helpers.isNullOrBlankOrEmpty(uniqueId))
-            return false;
+    public Boolean validateAndPrettifyUniqueId() {
+        Pair<String, Boolean> validation = Helpers.validateAndPrettifyUniqueId(uniqueId);
+        if (validation == null) return null;
 
-        uniqueId = uniqueId.trim()
-                .replaceAll(
-                    SharedConstants.MULTIPLE_SPACE,
-                    SharedConstants.EMPTY_STRING
-                )
-                .toUpperCase();
-
-        Pattern idRegex = Pattern.compile("^[\\w]+$", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = idRegex.matcher(uniqueId);
-
-        return matcher.matches();
+        uniqueId = validation.getKey();
+        return validation.getValue();
     }
 
     public String stringify() {
-        return id + SharedConstants.TEXT_DELIMITER +
+        return getId() + SharedConstants.TEXT_DELIMITER +
+            uniqueId + SharedConstants.TEXT_DELIMITER +
             firstName + SharedConstants.TEXT_DELIMITER +
             lastName + SharedConstants.TEXT_DELIMITER +
             emailAddress + SharedConstants.TEXT_DELIMITER +
             role.getId() + SharedConstants.TEXT_DELIMITER +
-            uniqueId + SharedConstants.TEXT_DELIMITER +
             company.getId();
 
     }

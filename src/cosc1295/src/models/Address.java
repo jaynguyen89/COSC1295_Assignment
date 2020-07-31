@@ -3,10 +3,11 @@ package cosc1295.src.models;
 import helpers.commons.SharedConstants;
 import helpers.utilities.Helpers;
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Address {
+public class Address implements Serializable {
 
     private int id;
     private String building;

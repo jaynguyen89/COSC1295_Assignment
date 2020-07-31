@@ -1,4 +1,4 @@
-package cosc1295.providers.services;
+package cosc1295.providers.bases;
 
 import cosc1295.designs.Flasher;
 import cosc1295.src.models.Flash;
@@ -10,13 +10,13 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class FileServiceBase {
+public class TextFileServiceBase {
 
     private final Flasher flasher = Flasher.getInstance();
 
-    protected final String ASSET_PATH = System.getProperty("user.dir") + "\\src\\assets\\";
+    private final String ASSET_PATH = System.getProperty("user.dir") + "\\src\\assets\\texts\\";
 
-    protected List<String> readEntireRawDataFromFile(DATA_TYPES type) {
+    public List<String> readEntireRawDataFromFile(DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToRead = new File(filePath);
 
@@ -46,7 +46,7 @@ class FileServiceBase {
         return rawData;
     }
 
-    protected String lookupRawDataFromFileById(String id, DATA_TYPES type) {
+    public String lookupRawDataFromFileById(String id, DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToRead = new File(filePath);
 
@@ -92,7 +92,7 @@ class FileServiceBase {
         return entryInNeed;
     }
 
-    protected boolean writeToFile(String any, DATA_TYPES type) {
+    public boolean writeToFile(String any, DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToWrite = new File(filePath);
 
@@ -129,7 +129,34 @@ class FileServiceBase {
         return true;
     }
 
-    protected int getNextInstanceIdForNewEntry(DATA_TYPES type) {
+    public boolean isRedundantUniqueId(String uniqueId, DATA_TYPES type) {
+        String filePath = generateFilePathByDataType(type);
+        File fileToCheck = new File(filePath);
+
+        if (!fileToCheck.exists()) return false;
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileToCheck));
+
+            String currentEntry;
+            while ((currentEntry = reader.readLine()) != null) {
+                String[] tokens = currentEntry.split(SharedConstants.TEXT_DELIMITER);
+                if (tokens[1].equalsIgnoreCase(uniqueId))
+                    return true;
+            }
+
+            reader.close();
+        } catch (IOException | IndexOutOfBoundsException ex) {
+            flasher.flash(new Flash(
+                "Error occurred while reading file: " + ex.getMessage(),
+                SharedEnums.FLASH_TYPES.ERROR
+            ));
+        }
+
+        return false;
+    }
+
+    public int getNextInstanceIdForNewEntry(DATA_TYPES type) {
         final int UNDETERMINED_ID = -1;
         String filePath = generateFilePathByDataType(type);
         File fileToRead = new File(filePath);
