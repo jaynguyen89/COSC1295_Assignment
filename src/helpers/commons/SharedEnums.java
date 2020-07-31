@@ -14,7 +14,8 @@ public final class SharedEnums {
         F("Shortlist Projects"),
         X("Quit");
 
-        public final String value;
+        private final String value;
+        public String getValue() { return value; }
 
         APPLICATION_MENU(String value) { this.value = value; }
     }
@@ -23,7 +24,7 @@ public final class SharedEnums {
         Y("YES"),
         N("NO");
 
-        public final String value;
+        private final String value;
         public String getValue() { return value; }
 
         CONFIRMATIONS(String value) { this.value = value; }
@@ -35,7 +36,8 @@ public final class SharedEnums {
         ATTENTION("Attention! "),
         ERROR("Error! ");
 
-        public final String value;
+        private final String value;
+        public String getValue() { return value; }
 
         FLASH_TYPES(String value) { this.value = value; }
     }
@@ -47,7 +49,7 @@ public final class SharedEnums {
     public enum RANKINGS {
         LOW(0), AVERAGE(1), HIGH(2), HIGHEST(3);
 
-        public final int value;
+        private final int value;
         public int getValue() { return value; }
 
         RANKINGS(int value) { this.value = value; }
@@ -59,10 +61,22 @@ public final class SharedEnums {
         P("Programming & Software Engineering"),
         W("Web & Mobile Applications");
 
-        public final String value;
+        private final String value;
         public String getValue() { return value; }
 
         SKILLS(String value) { this.value = value; }
+    }
+
+    public enum PERSONALITIES {
+        A("Director"),
+        B("Socializer"),
+        C("Thinker"),
+        D("Supporter");
+
+        private final String value;
+        public String getValue() { return value; }
+
+        PERSONALITIES(String value) { this.value = value; }
     }
 
     public static List<String> getAllEnumItemsAsList(Class<? extends Enum<?>> any) {

@@ -58,7 +58,7 @@ public final class ProjectTeamFormationApp {
         System.out.println("\t\t\t----------\n");
 
         for (APPLICATION_MENU menuItem : values())
-            System.out.printf("\t\t%s. %s%n", menuItem, menuItem.value);
+            System.out.printf("\t\t%s. %s%n", menuItem, menuItem.getValue());
     }
 
     private boolean runApplicationWithSelection(APPLICATION_MENU option) {
@@ -76,13 +76,13 @@ public final class ProjectTeamFormationApp {
                 appFacade.runAddProjectFeature();
                 break;
             case D:
-                System.out.println("Run task: " + D.value);
+                System.out.println("Run task: " + D.getValue());
                 break;
             case E:
-                System.out.println("Run task: " + E.value);
+                System.out.println("Run task: " + E.getValue());
                 break;
             case F:
-                System.out.println("Run task: " + F.value);
+                System.out.println("Run task: " + F.getValue());
                 break;
             default:
                 taskDone = true;

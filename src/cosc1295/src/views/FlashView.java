@@ -37,7 +37,7 @@ public class FlashView {
             break;
         }
 
-        return response.equals(SharedEnums.CONFIRMATIONS.Y.value) ||
+        return response.equals(SharedEnums.CONFIRMATIONS.Y.getValue()) ||
                 response.equals(SharedEnums.CONFIRMATIONS.Y.name());
     }
 }

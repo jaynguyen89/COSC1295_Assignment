@@ -219,9 +219,9 @@ public class ProjectView {
 
         while (!validRanking) {
             flasher.flash(new Flash(
-                    "\tRanking for " + (skill == 0 ? SKILLS.A.value
-                            : (skill == 1 ? SKILLS.N.value
-                            : (skill == 2 ? SKILLS.P.value : SKILLS.W.value))) + ": ",
+                    "\tRanking for " + (skill == 0 ? SKILLS.A.getValue()
+                            : (skill == 1 ? SKILLS.N.getValue()
+                            : (skill == 2 ? SKILLS.P.getValue() : SKILLS.W.getValue()))) + ": ",
                     FLASH_TYPES.NONE
             ));
 

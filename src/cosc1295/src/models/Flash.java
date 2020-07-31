@@ -18,6 +18,6 @@ public class Flash {
     }
 
     public String getType() {
-        return type.value;
+        return type.getValue();
     }
 }
