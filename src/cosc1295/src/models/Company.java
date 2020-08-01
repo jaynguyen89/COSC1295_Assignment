@@ -93,10 +93,18 @@ public class Company implements IThing, Serializable {
         return matcher.matches();
     }
 
+    /**
+     * Creates a string information of Company to print out on console
+     * @return String
+     */
     public String toString() {
         return id + "." + uniqueId + "\t" + companyName;
     }
 
+    /**
+     * Creates string formatted with delimiter to save into file
+     * @return String
+     */
     public String stringify() {
         return id + SharedConstants.TEXT_DELIMITER +
             uniqueId + SharedConstants.TEXT_DELIMITER +

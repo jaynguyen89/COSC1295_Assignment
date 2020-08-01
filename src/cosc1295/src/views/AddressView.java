@@ -16,21 +16,25 @@ public class AddressView {
         inputScanner = new Scanner(System.in);
     }
 
+    /**
+     * Gets user inputs to create a new Address.
+     * @return Address
+     */
     public Address getAddressDetails() {
         Address newAddress = new Address();
 
         int addressFieldTracker = 0;
         while (addressFieldTracker < 6)
             switch (addressFieldTracker) {
-                case 0:
+                case 0: //Getting building name/number
                     flasher.flash(new Flash("Address - Building Address: (press enter to skip)", SharedEnums.FLASH_TYPES.NONE));
 
                     newAddress.setBuilding(inputScanner.nextLine());
-                    newAddress.prettifyBuilding();
+                    newAddress.prettifyBuilding(); //No need to validate this input
 
                     addressFieldTracker++;
                     break;
-                case 1:
+                case 1: //Getting streetAddress
                     flasher.flash(new Flash("Address - Street Address: ", SharedEnums.FLASH_TYPES.NONE));
 
                     newAddress.setStreet(inputScanner.nextLine());
@@ -41,7 +45,7 @@ public class AddressView {
 
                     addressFieldTracker++;
                     break;
-                case 2:
+                case 2: //Getting suburb
                     flasher.flash(new Flash("Address - Suburb: ", SharedEnums.FLASH_TYPES.NONE));
 
                     newAddress.setSuburb(inputScanner.nextLine());
@@ -52,7 +56,7 @@ public class AddressView {
 
                     addressFieldTracker++;
                     break;
-                case 3:
+                case 3: //Getting state
                     flasher.flash(new Flash("Address - State: ", SharedEnums.FLASH_TYPES.NONE));
 
                     newAddress.setState(inputScanner.nextLine());
@@ -63,7 +67,7 @@ public class AddressView {
 
                     addressFieldTracker++;
                     break;
-                case 4:
+                case 4: //Getting postCode
                     flasher.flash(new Flash("Address - Postcode: ", SharedEnums.FLASH_TYPES.NONE));
 
                     newAddress.setPostCode(inputScanner.nextLine());
@@ -74,7 +78,7 @@ public class AddressView {
 
                     addressFieldTracker++;
                     break;
-                default:
+                default: //Getting country
                     flasher.flash(new Flash("Address - Country: ", SharedEnums.FLASH_TYPES.NONE));
 
                     newAddress.setCountry(inputScanner.nextLine());

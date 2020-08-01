@@ -1,5 +1,8 @@
 package cosc1295.providers.bases;
 
+/**
+ * Singleton class that provides other classes the access to services.
+ */
 public final class ServiceLocator {
 
     private static ServiceLocator locator;
@@ -18,6 +21,14 @@ public final class ServiceLocator {
         return locator;
     }
 
+    /**
+     * Gets an instance of a service according to the class type.
+     * @param type <T>
+     * @param <T> Type
+     * @return <T>
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
     public <T> T getService(Class<T> type)
         throws
             IllegalAccessException,

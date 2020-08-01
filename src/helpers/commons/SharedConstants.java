@@ -1,5 +1,8 @@
 package helpers.commons;
 
+/**
+ * All the constants values that will be used in the whole project.
+ */
 public final class SharedConstants {
 
     public static final String EMPTY_STRING = "";

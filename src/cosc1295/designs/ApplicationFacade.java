@@ -5,6 +5,9 @@ import cosc1295.src.controllers.ProjectController;
 import cosc1295.src.controllers.ProjectOwnerController;
 import cosc1295.src.controllers.StudentController;
 
+/**
+ * Facade Design Pattern
+ */
 public class ApplicationFacade {
 
     private final CompanyController companyController;

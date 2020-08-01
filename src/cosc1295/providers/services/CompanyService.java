@@ -10,6 +10,9 @@ import helpers.commons.SharedEnums.DATA_TYPES;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * For Dependency Injection
+ */
 public class CompanyService extends TextFileServiceBase implements ICompanyService {
 
     @Override

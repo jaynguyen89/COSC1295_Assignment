@@ -48,6 +48,15 @@ public class People implements Serializable {
 
     public void setRole(Role role) { this.role = role; }
 
+    /**
+     * The string `role` can be `id` or `uniqueId` attribute in the Role class.
+     * The boolean `isId` tells which attribute it is intended to use.
+     * If it is `id`, make a number then set to Role `id`, otherwise,
+     * reprocess it then set to role name. Return error if the string `role` conflicts with boolean `isId`.
+     * @param role String
+     * @param isId boolean
+     * @return boolean
+     */
     public boolean setRole(String role, boolean isId) {
         this.role = new Role();
         boolean error = false;
@@ -59,7 +68,7 @@ public class People implements Serializable {
                 if (id > 0) this.role.setId(id);
                 else error = true;
             }
-            else error = true;
+            else error = true; //Not a number
         }
         else {
             error = Helpers.isNullOrBlankOrEmpty(role);

@@ -96,6 +96,10 @@ public class Address implements Serializable {
         return true;
     }
 
+    /**
+     * Creates string formatted with delimiter to save into file
+     * @return String
+     */
     public String stringify() {
         return id + SharedConstants.TEXT_DELIMITER +
                ((building.isEmpty() ? SharedConstants.NA : building) + SharedConstants.TEXT_DELIMITER) +
@@ -106,6 +110,10 @@ public class Address implements Serializable {
                country;
     }
 
+    /**
+     * Creates a string information of Address to print out on console
+     * @return String
+     */
     public String prettify() {
         String sBuilding = building.isEmpty() ? SharedConstants.EMPTY_STRING : building.concat(", ");
 

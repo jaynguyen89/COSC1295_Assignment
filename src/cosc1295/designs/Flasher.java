@@ -3,6 +3,9 @@ package cosc1295.designs;
 import cosc1295.src.models.Flash;
 import cosc1295.src.views.FlashView;
 
+/**
+ * Singleton Design Pattern
+ */
 public final class Flasher {
 
     private static Flasher flasher;

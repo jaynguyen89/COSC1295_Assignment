@@ -3,6 +3,9 @@ package helpers.commons;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * All the Enum classes that will be used in the whole project.
+ */
 public final class SharedEnums {
 
     public enum APPLICATION_MENU {

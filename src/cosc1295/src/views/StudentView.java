@@ -1,5 +1,6 @@
 package cosc1295.src.views;
 
+import com.sun.istack.internal.NotNull;
 import cosc1295.designs.Flasher;
 import cosc1295.src.models.Flash;
 import cosc1295.src.models.Preference;
@@ -25,7 +26,12 @@ public class StudentView {
         inputScanner = new Scanner(System.in);
     }
 
-    public Student getStudentFromListToUpdate(List<Student> students) {
+    /**
+     * Prompts user to select a Student from Student List before any task can be done on a student.
+     * @param students List<Student>
+     * @return Student
+     */
+    public Student getStudentFromListToUpdate(@NotNull List<Student> students) {
         if (students.isEmpty()) {
             flasher.flash(new Flash(
                 "No Student record has been saved: file `students.txt` or `student_info.txt` not found or empty.\n" +
@@ -57,7 +63,13 @@ public class StudentView {
         inputScanner.nextLine();
     }
 
-    private Student selectStudentToCapturePersonality(List<Student> students) {
+    /**
+     * Lets user select a Student from the Student List.
+     * User can enter either `id` or uniqueId to select a Student.
+     * @param students List<Student>
+     * @return Student
+     */
+    private Student selectStudentToCapturePersonality(@NotNull List<Student> students) {
         Student selectedStudent = null;
 
         for (Student student : students)
@@ -71,8 +83,8 @@ public class StudentView {
             inputScanner.nextLine();
 
             Pair<Student, Boolean> searchResult = searchStudentFromListByInput(selectedStudentId, students);
-            if (searchResult == null) return null;
-            else if (searchResult.getValue()) {
+            if (searchResult == null) return null; //Signal app to return to Main Menu
+            else if (searchResult.getValue()) { //Rerun this while statement
                 selectedStudentId = SharedConstants.EMPTY_STRING;
                 continue;
             }
@@ -83,7 +95,16 @@ public class StudentView {
         return selectedStudent;
     }
 
+    /**
+     * Prompts user to set a PERSONALITIES for the selected Student. Each PERSONALITIES can only be added up to
+     * n times, with n = total(students)/4 assuming the number of students is always enough to make groups of 4 students.
+     * Returns NULL to signal the app returning to Main Menu, otherwise, the updated Student having a PERSONALITIES.
+     * @param student Student
+     * @param students List<Student>
+     * @return Student
+     */
     public Student captureStudentPersonality(Student student, List<Student> students) {
+        //Count the times a PERSONALITIES has been assigned
         HashMap<PERSONALITIES, Integer> personalityDistribution = countPersonalityDistributions(students);
 
         flasher.flash(new Flash("Personality of Student " + student.getUniqueId() + ":\n", FLASH_TYPES.NONE));
@@ -116,6 +137,7 @@ public class StudentView {
             }
 
             try {
+                //Limit each PERSONALITIES to not letting it exceed the computed distribution
                 if (personalityDistribution.get(personality) + 1 > students.size() / SharedConstants.GROUP_LIMIT) {
                     flasher.flash(new Flash(
                         "The number of this personality " + personality.name() + " exceeds the group distribution.\n" +
@@ -135,8 +157,8 @@ public class StudentView {
                         FLASH_TYPES.ATTENTION
                 ));
 
-                if (!response) return null;
-                else personalityInput = SharedConstants.EMPTY_STRING;
+                if (!response) return null; //Signal app to return to Main Menu
+                else personalityInput = SharedConstants.EMPTY_STRING; //Rerun this while statement
             }
 
             student.setPersonality(personality);
@@ -156,6 +178,13 @@ public class StudentView {
         ));
     }
 
+    /**
+     * Set the uniqueId as the Conflicter for a selected student. Allows for adding up to 2 Conflicters.
+     * Returns NULL to signal the app returning to Main Menu, otherwise, the updated Student having Conflicter.
+     * @param student Student
+     * @param students List<Student>
+     * @return Student
+     */
     public Student captureStudentConflicters(Student student, List<Student> students) {
         int conflicterCount = student.getConflicters().size();
         flasher.flash(new Flash("Capture the conflicters of Student " + student.getUniqueId() + ".\n", FLASH_TYPES.NONE));
@@ -174,8 +203,8 @@ public class StudentView {
             inputScanner.nextLine();
 
             Pair<Student, Boolean> searchResult = searchStudentFromListByInput(selectedConflicterId, possibleConflicters);
-            if (searchResult == null) return null;
-            else if (searchResult.getValue()) continue;
+            if (searchResult == null) return null; //Signal app to return to Main Menu
+            else if (searchResult.getValue()) continue; //Rerun this while statement
 
             Student conflicter = searchResult.getKey();
             student.addConflicter(conflicter.getUniqueId());
@@ -187,19 +216,21 @@ public class StudentView {
                 FLASH_TYPES.SUCCESS
             ));
 
+            //User can add only 1 Conflicter, so prompt if they want to add the second one.
             if (conflicterCount < SharedConstants.MAX_CONFLICTERS) {
                 boolean response = flasher.promptForConfirmation(new Flash(
                     "Do you want to add another? Y: Yes\tN: No",
                     FLASH_TYPES.NONE
                 ));
 
-                if (!response) return student;
+                if (!response) return student; //User don't want
             }
         }
 
         return student;
     }
 
+    //This method is quite simple to understand right?
     private HashMap<PERSONALITIES, Integer> countPersonalityDistributions(List<Student> students) {
         HashMap<PERSONALITIES, Integer> personalityCounts = new HashMap<PERSONALITIES, Integer>() {{
             put(PERSONALITIES.A, 0);
@@ -248,6 +279,14 @@ public class StudentView {
         return possibilities;
     }
 
+    /**
+     * Searches for a Student from Student List given selectedStudentId, which can be either
+     * the uniqueId or the numeric id as seen in Student class.
+     * Return a Pair with the Value to control the app flow, and the Key being the Student.
+     * @param selectedStudentId String
+     * @param students List<Student>
+     * @return Pair<Student, Boolean>
+     */
     private Pair<Student, Boolean> searchStudentFromListByInput(
             String selectedStudentId,
             List<Student> students
@@ -255,14 +294,14 @@ public class StudentView {
         boolean found = false;
         Student selectedStudent = null;
 
-        if (Helpers.isIntegerNumber(selectedStudentId)) {
+        if (Helpers.isIntegerNumber(selectedStudentId)) { //selectedStudentId is numeric id
             int studentId = Integer.parseInt(selectedStudentId);
 
             if (studentId <= 0) {
                 flasher.flash(new Flash("Invalid ID. Press enter to select again.", FLASH_TYPES.ATTENTION));
                 inputScanner.nextLine();
 
-                return new Pair<>(null, true);
+                return new Pair<>(null, true); //Rerun while statement
             }
 
             for (Student student : students)
@@ -272,7 +311,8 @@ public class StudentView {
                     break;
                 }
         }
-        else for (Student student : students)
+        else //selectedStudentId is the uniqueId
+            for (Student student : students)
             if (student.getUniqueId().trim().equalsIgnoreCase(selectedStudentId.trim())) {
                 selectedStudent = student;
                 found = true;
@@ -287,13 +327,20 @@ public class StudentView {
                 FLASH_TYPES.ATTENTION
             ));
 
-            if (!response) return null;
-            else return new Pair<>(null, true);
+            if (!response) return null; //Return to Main Menu
+            else return new Pair<>(null, true); //Rerun while statement
         }
 
         return new Pair<>(selectedStudent, false);
     }
 
+    /**
+     * Sets a PREFERENCES to a selected Project for a Student.
+     * @param student Student
+     * @param project Project
+     * @param preference Preference
+     * @return Preference
+     */
     public Preference captureStudentPreferences(Student student, Project project, Preference preference) {
         flasher.flash(new Flash(
             "\nPlease set a preference for " + project.getUniqueId() +
@@ -334,17 +381,24 @@ public class StudentView {
         ));
     }
 
+    /**
+     * Starts the updating Conflicters task: user can select to replace a current Conflicter or add more.
+     * Returns the Student having updated the Conflicter.
+     * @param student Student
+     * @param students List<Student>
+     * @return Student
+     */
     public Student updateStudentConflicters(Student student, List<Student> students) {
         flasher.flash(new Flash("\nUpdate the conflicters for Student " + student.getUniqueId() + ".\n", FLASH_TYPES.NONE));
 
         boolean shouldReplaceConflicter = true;
-        if (student.getConflicters().size() == 2)
+        if (student.getConflicters().size() == 2) //Student has 2 Conflicter, can only replace
             flasher.flash(new Flash(
                 "Student " + student.getUniqueId() + " has had 2 conflicters.\n" +
                         "You can now select a conflicter to replace:\n",
                 FLASH_TYPES.NONE
             ));
-        else
+        else //Student has 1 Conflicter, can select to replace or add more
             shouldReplaceConflicter = flasher.promptForConfirmation(new Flash(
                     "Student " + student.getUniqueId() + " has had 1 conflicter.\n" +
                             "Do you want to replace the current one or add 1 more?" +
@@ -358,6 +412,13 @@ public class StudentView {
         return student;
     }
 
+    /**
+     * Allows for replacing the Conflicter(s). User can keep replacing until whenever they are done.
+     * Returns the Student having newly updated Conflicter(s).
+     * @param student Student
+     * @param students List<Student>
+     * @return Student
+     */
     private Student replaceConflictersFor(Student student, List<Student> students) {
         boolean replaceDone = false;
 
@@ -368,6 +429,7 @@ public class StudentView {
             String selectedToReplace = inputScanner.next();
             inputScanner.nextLine();
 
+            //Select a Conflicter to be replaced
             selectedToReplace = selectedToReplace.trim().toUpperCase();
             if (!student.getConflicters().contains(selectedToReplace)) {
                 flasher.flash(new Flash("Invalid selection. Press enter to continue.", FLASH_TYPES.ATTENTION));
@@ -376,6 +438,7 @@ public class StudentView {
                 continue;
             }
 
+            //Select a new Conflicter to replace
             flasher.flash(new Flash("\nSelect a new conflicter:\n", FLASH_TYPES.NONE));
             List<Student> possibleConflicters = printConflictersTableFor(student, students);
             flasher.flash(new Flash("\nYour selection:", FLASH_TYPES.NONE));
@@ -383,10 +446,14 @@ public class StudentView {
             String replaceById = inputScanner.next();
             inputScanner.nextLine();
 
+            //Check if the new Conflicter is a valid selection
             Pair<Student, Boolean> searchResult = searchStudentFromListByInput(replaceById, possibleConflicters);
-            if (searchResult == null) return null;
-            else if (searchResult.getValue()) continue;
 
+            //Invalid selection, then...
+            if (searchResult == null) return null; //Return to Main Menu
+            else if (searchResult.getValue()) continue; //Rerun this while statement
+
+            //Valid selection, then...
             student.getConflicters().remove(selectedToReplace);
             student.getConflicters().add(searchResult.getKey().getUniqueId());
 

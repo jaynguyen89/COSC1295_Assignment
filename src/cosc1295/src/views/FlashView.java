@@ -14,6 +14,12 @@ public class FlashView {
         );
     }
 
+    /**
+     * Prints to console the Confirmation Dialog with Yes/No selection.
+     * Gets user selection then returns true for Yes, false for No.
+     * @param flash Flash
+     * @return boolean
+     */
     public boolean promptForConfirmation(Flash flash) {
         String response;
         Scanner inputScanner = new Scanner(System.in);

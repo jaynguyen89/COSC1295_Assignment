@@ -1,7 +1,8 @@
 package entry;
 
-//The entry point of the program
-
+/**
+ * Entry point
+ */
 public final class Program {
 
 	public static void main(String[] args) {

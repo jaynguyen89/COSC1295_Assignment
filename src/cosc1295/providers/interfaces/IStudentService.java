@@ -5,6 +5,9 @@ import cosc1295.src.models.Student;
 
 import java.util.List;
 
+/**
+ * Dependency Injection Design Pattern
+ */
 public interface IStudentService {
     
     List<Student> readAllStudentsFromFile();

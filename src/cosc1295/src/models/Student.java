@@ -70,6 +70,10 @@ public class Student implements IThing, Serializable {
         conflicters.add(uniqueId);
     }
 
+    /**
+     * Creates a string information of Student to print out on console
+     * @return String
+     */
     public String toString() {
         StringBuilder displayString = new StringBuilder(id + ". " + uniqueId + "\t\t");
 
@@ -98,6 +102,10 @@ public class Student implements IThing, Serializable {
         return conflicters;
     }
 
+    /**
+     * Creates string formatted with delimiter to save into file
+     * @return String
+     */
     public String stringify() {
         StringBuilder stringStudent = new StringBuilder(
             id + SharedConstants.TEXT_DELIMITER +

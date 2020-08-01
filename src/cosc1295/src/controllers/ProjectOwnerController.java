@@ -34,7 +34,7 @@ public class ProjectOwnerController extends ControllerBase {
         List<Role> allRoles = roleService.readAllRolesFromFile();
         List<Company> allCompanies = companyService.readAllCompaniesFromFile();
 
-        if (allRoles == null || allCompanies == null) {
+        if (allRoles == null || allCompanies == null) {  //Exception in the services
             flasher.flash(new Flash(
                     "An error occurred while retrieving Roles and Companies data from file. Please try again.",
                     SharedEnums.FLASH_TYPES.ERROR

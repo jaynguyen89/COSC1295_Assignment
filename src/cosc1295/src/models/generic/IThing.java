@@ -18,5 +18,9 @@ public interface IThing {
 
     Boolean isUniqueIdAvailable();
 
+    /**
+     * Creates string formatted with delimiter to save into file
+     * @return String
+     */
     String stringify();
 }

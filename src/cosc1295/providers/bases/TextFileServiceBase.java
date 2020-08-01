@@ -16,6 +16,11 @@ public class TextFileServiceBase {
 
     private final String ASSET_PATH = System.getProperty("user.dir") + "\\src\\assets\\texts\\";
 
+    /**
+     * Reads all lines in a file into a list of strings then returns.
+     * @param type DATA_TYPES
+     * @return List<String>
+     */
     public List<String> readEntireRawDataFromFile(DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToRead = new File(filePath);
@@ -46,6 +51,13 @@ public class TextFileServiceBase {
         return rawData;
     }
 
+    /**
+     * Search for a line in file with the `id` according to DATA_TYPES.
+     * Return that line to the Service accordingly.
+     * @param id String
+     * @param type DATA_TYPES
+     * @return String
+     */
     public String lookupRawDataFromFileById(String id, DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToRead = new File(filePath);
@@ -92,6 +104,13 @@ public class TextFileServiceBase {
         return entryInNeed;
     }
 
+    /**
+     * Writes any strings that is given to this method into a file according to DATA_TYPES.
+     * Returns false on exception or error, otherwise, returns true on success.
+     * @param any String
+     * @param type DATA_TYPES
+     * @return boolean
+     */
     public boolean writeToFile(String any, DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToWrite = new File(filePath);
@@ -129,6 +148,14 @@ public class TextFileServiceBase {
         return true;
     }
 
+    /**
+     * Edits (replaces) a line in a file according to DATA_TYPES. Searches for the line by `id`,
+     * replaces it when found. Returns false on exception or error, true on success.
+     * @param thingToUpdate String
+     * @param id int
+     * @param type DATA_TYPES
+     * @return boolean
+     */
     public boolean updateEntryToFileById(String thingToUpdate, int id, DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToUpdate = new File(filePath);
@@ -166,6 +193,13 @@ public class TextFileServiceBase {
         return true;
     }
 
+    /**
+     * Taking the uniqueId, check a file according to DATA_TYPES for a line that contains the uniqueId.
+     * If found, returns true to indicate a redundancy, otherwise false.
+     * @param uniqueId String
+     * @param type DATA_TYPES
+     * @return boolean
+     */
     public boolean isRedundantUniqueId(String uniqueId, DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToCheck = new File(filePath);
@@ -193,6 +227,12 @@ public class TextFileServiceBase {
         return false;
     }
 
+    /**
+     * Reads a file according to DATA_TYPES, looks for the max `id` of all entries,
+     * then returns the `id` for the next entry.
+     * @param type DATA_TYPES
+     * @return int
+     */
     public int getNextInstanceIdForNewEntry(DATA_TYPES type) {
         final int UNDETERMINED_ID = -1;
         String filePath = generateFilePathByDataType(type);
@@ -227,6 +267,11 @@ public class TextFileServiceBase {
         return ++currentEntryId;
     }
 
+    /**
+     * Creates the file path for reading a file according to DATA_TYPES.
+     * @param type DATA_TYPES
+     * @return String
+     */
     private String generateFilePathByDataType(DATA_TYPES type) {
         return ASSET_PATH + (
             type == DATA_TYPES.ADDRESS ? SharedConstants.ADDRESS_FILE_NAME

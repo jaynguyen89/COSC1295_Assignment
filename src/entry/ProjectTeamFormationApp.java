@@ -1,5 +1,6 @@
 package entry;
 
+import com.sun.istack.internal.NotNull;
 import cosc1295.designs.ApplicationFacade;
 import cosc1295.designs.Flasher;
 import cosc1295.src.models.Flash;
@@ -10,6 +11,9 @@ import helpers.utilities.Helpers;
 
 import java.util.Scanner;
 
+/**
+ * Main Menu navigation when the app starts.
+ */
 public final class ProjectTeamFormationApp {
 
     private final Flasher flasher = Flasher.getInstance();
@@ -26,7 +30,7 @@ public final class ProjectTeamFormationApp {
 
             Scanner inputScanner = new Scanner(System.in);
             menuSelection = inputScanner.next().toUpperCase();
-            inputScanner.nextLine();
+            inputScanner.nextLine(); //remove left-over from buffer, place cursor on new line for next input reading
 
             if (!Helpers.validateMenuSelection(menuSelection)) {
                 flasher.flash(new Flash(
@@ -61,7 +65,13 @@ public final class ProjectTeamFormationApp {
             System.out.printf("\t\t%s. %s%n", menuItem, menuItem.getValue());
     }
 
-    private boolean runApplicationWithSelection(APPLICATION_MENU option) {
+    /**
+     * Runs a feature selected by user input.
+     * Returns true when user selects option to quit the app.
+     * @param option APPLICATION_MENU
+     * @return boolean
+     */
+    private boolean runApplicationWithSelection(@NotNull APPLICATION_MENU option) {
         boolean taskDone = false;
         ApplicationFacade appFacade = new ApplicationFacade();
 

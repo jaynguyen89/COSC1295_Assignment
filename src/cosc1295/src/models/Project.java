@@ -92,6 +92,10 @@ public class Project implements IThing, Serializable {
         return true;
     }
 
+    /**
+     * Creates string formatted with delimiter to save into file
+     * @return String
+     */
     public String stringify() {
         StringBuilder projectString = new StringBuilder(
             id + SharedConstants.TEXT_DELIMITER +

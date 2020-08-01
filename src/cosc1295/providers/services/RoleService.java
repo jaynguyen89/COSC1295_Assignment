@@ -9,6 +9,9 @@ import helpers.commons.SharedEnums;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * For Dependency Injection
+ */
 public class RoleService extends TextFileServiceBase implements IRoleService {
 
     @Override

@@ -16,6 +16,10 @@ public class CompanyView {
         inputScanner = new Scanner(System.in);
     }
 
+    /**
+     * Gets user inputs to create a new Company.
+     * @return Company
+     */
     public Company getCompanyBasicDetails() {
         Company newCompany = new Company();
 
@@ -27,18 +31,19 @@ public class CompanyView {
         int companyFieldTracker = 0;
         while (companyFieldTracker < 4)
             switch (companyFieldTracker) {
-                case 0:
+                case 0: //Getting uniqueId
                     flasher.flash(new Flash("Company ID: ", FLASH_TYPES.NONE));
 
                     newCompany.setUniqueId(inputScanner.nextLine());
-                    Boolean idValidation = newCompany.validateAndPrettifyUniqueId();
+                    Boolean idValidation = newCompany.validateAndPrettifyUniqueId(); //Validation
                     if (idValidation == null) flasher.flash(new Flash("Company ID cannot be empty!", FLASH_TYPES.ATTENTION));
                     else if (!idValidation) flasher.flash(new Flash("Company ID should not have special characters.", FLASH_TYPES.ATTENTION));
 
-                    if (idValidation == null || !idValidation) continue;
+                    if (idValidation == null || !idValidation) continue; //Rerun while statement, continue case 0
 
+                    //Check if uniqueId is safe to create a new Company
                     Boolean idAvailable = newCompany.isUniqueIdAvailable();
-                    if (idAvailable == null) {
+                    if (idAvailable == null) { //An exception is thrown while checking saved data
                         flasher.flash(new Flash("An error occurred while checking saved data.", FLASH_TYPES.ERROR));
                         boolean response = flasher.promptForConfirmation(new Flash(
                                 "Do you wish to try again or go back to main menu?\n" +
@@ -46,11 +51,11 @@ public class CompanyView {
                                 FLASH_TYPES.ATTENTION
                         ));
 
-                        if (!response) return null;
-                        continue;
+                        if (!response) return null; //Return to Main Menu
+                        continue; //Rerun while statement, continue case 0
                     }
 
-                    if (!idAvailable) {
+                    if (!idAvailable) { //uniqueId is unsafe
                         flasher.flash(new Flash(
                                 "Company ID " + newCompany.getUniqueId() + " is duplicated. Please set another ID.\n" +
                                         "Press enter to continue.",
@@ -58,45 +63,46 @@ public class CompanyView {
                         ));
 
                         inputScanner.nextLine();
-                        continue;
+                        continue; //Rerun while statement, continue case 0
                     }
 
+                    //Up to here, uniqueId is safe and set successfully
                     companyFieldTracker++;
                     break;
-                case 1:
+                case 1: //Getting companyName
                     flasher.flash(new Flash("Company Name: (allowed: ().-')", FLASH_TYPES.NONE));
 
                     newCompany.setCompanyName(inputScanner.nextLine());
-                    Boolean nameValidation = newCompany.validateAndPrettifyCompanyName();
+                    Boolean nameValidation = newCompany.validateAndPrettifyCompanyName(); //Validation
 
                     if (nameValidation == null) flasher.flash(new Flash("Company Name cannot be empty!\n", FLASH_TYPES.ERROR));
                     else if (!nameValidation) flasher.flash(new Flash("Company Name contains disallowed special character!\n", FLASH_TYPES.ERROR));
 
-                    if (nameValidation == null || !nameValidation) continue;
+                    if (nameValidation == null || !nameValidation) continue; //Rerun while statement, continue case 1
                     companyFieldTracker++;
                     break;
-                case 2:
+                case 2: //Getting abnNumber
                     flasher.flash(new Flash("ABN Number: ", FLASH_TYPES.NONE));
 
                     newCompany.setAbnNumber(inputScanner.nextLine());
-                    Boolean abnValidation = newCompany.validateAndPrettifyAbnNumber();
+                    Boolean abnValidation = newCompany.validateAndPrettifyAbnNumber(); //Validation
 
                     if (abnValidation == null) flasher.flash(new Flash("ABN Number cannot be empty!\n", FLASH_TYPES.ERROR));
                     else if (!abnValidation) flasher.flash(new Flash("ABN Number can only have digits and alphabetical letters!\n", FLASH_TYPES.ERROR));
 
-                    if (abnValidation == null || !abnValidation) continue;
+                    if (abnValidation == null || !abnValidation) continue; //Rerun while statement, continue case 2
                     companyFieldTracker++;
                     break;
-                default:
+                default: //Getting websiteUrl
                     flasher.flash(new Flash("Website URL: ", FLASH_TYPES.NONE));
 
                     newCompany.setWebsiteUrl(inputScanner.nextLine());
-                    Boolean urlValidation = newCompany.validateWebsiteURL();
+                    Boolean urlValidation = newCompany.validateWebsiteURL(); //Validation
 
                     if (urlValidation == null) flasher.flash(new Flash("Website URL cannot be empty!\n", FLASH_TYPES.ERROR));
                     else if (!urlValidation) flasher.flash(new Flash("Website URL seems to be invalid!\n", FLASH_TYPES.ERROR));
 
-                    if (urlValidation == null || !urlValidation) continue;
+                    if (urlValidation == null || !urlValidation) continue; //Rerun while statement, continue this case
                     companyFieldTracker++;
                     break;
             }

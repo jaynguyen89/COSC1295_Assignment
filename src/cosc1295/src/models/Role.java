@@ -29,6 +29,10 @@ public class Role implements Serializable {
 
     public String getRole() { return role; }
 
+    /**
+     * Creates string formatted with delimiter to save into file
+     * @return String
+     */
     public String stringify() {
         return id + SharedConstants.TEXT_DELIMITER + role;
     }

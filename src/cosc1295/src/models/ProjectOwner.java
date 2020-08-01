@@ -38,6 +38,10 @@ public class ProjectOwner extends People implements IThing, Serializable {
         return validation.getValue();
     }
 
+    /**
+     * Creates string formatted with delimiter to save into file
+     * @return String
+     */
     public String stringify() {
         return getId() + SharedConstants.TEXT_DELIMITER +
             uniqueId + SharedConstants.TEXT_DELIMITER +

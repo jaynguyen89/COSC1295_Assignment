@@ -37,6 +37,10 @@ public class Preference implements Serializable {
         preference.put(prefPair.getKey(), prefPair.getValue());
     }
 
+    /**
+     * Creates string formatted with delimiter to save into file
+     * @return String
+     */
     public String stringify() {
         StringBuilder stringPref = new StringBuilder(studentUniqueId + SharedConstants.TEXT_DELIMITER);
 

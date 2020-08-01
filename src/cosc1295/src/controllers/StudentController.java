@@ -28,13 +28,13 @@ public class StudentController extends ControllerBase {
 
     public Boolean executeStudentPersonalityCapturingTask() {
         List<Student> allStudents = getAllStudents();
-        if (allStudents == null) return false;
+        if (allStudents == null) return false; //Exception in StudentService or ServiceBase
 
         Student student = studentView.getStudentFromListToUpdate(allStudents);
         if (student == null) return null;
 
         boolean shouldCapturePersonality = true;
-        if (student.getPersonality() != null)
+        if (student.getPersonality() != null) //Ask if user wants to change Student's PERSONALITIES
             shouldCapturePersonality = studentView.promptToCapturePersonality(student);
 
         if (shouldCapturePersonality) {
@@ -72,10 +72,10 @@ public class StudentController extends ControllerBase {
 
     public Boolean executeStudentPreferenceCapturingTask() {
         List<Student> allStudents = getAllStudents();
-        if (allStudents == null) return false;
+        if (allStudents == null) return false; //Exception in StudentService or ServiceBase
 
         List<Project> allProjects = getAllProjects();
-        if (allProjects == null) return false;
+        if (allProjects == null) return false; //Exception in ProjectService or ServiceBase
 
         Student student = studentView.getStudentFromListToUpdate(allStudents);
         if (student == null) return null;
