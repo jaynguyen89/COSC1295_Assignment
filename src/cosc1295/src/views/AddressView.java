@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class AddressView {
 
     private final Flasher flasher = Flasher.getInstance();
-    private Scanner inputScanner;
+    private final Scanner inputScanner;
 
     public AddressView() {
         inputScanner = new Scanner(System.in);

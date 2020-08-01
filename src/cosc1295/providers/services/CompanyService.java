@@ -33,6 +33,8 @@ public class CompanyService extends TextFileServiceBase implements ICompanyServi
         List<Company> companies = new ArrayList<>();
         try {
             for (String rawCompany : rawCompanyData) {
+                if (rawCompany.isEmpty()) continue;
+
                 Company company = new Company();
                 String[] companyTokens = rawCompany.split(SharedConstants.TEXT_DELIMITER);
 

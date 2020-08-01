@@ -3,8 +3,8 @@ package cosc1295.src.models;
 import cosc1295.src.models.generic.IThing;
 import helpers.commons.SharedConstants;
 import helpers.utilities.Helpers;
-import javafx.util.Pair;
 
+import javafx.util.Pair;
 import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,6 +91,10 @@ public class Company implements IThing, Serializable {
         Matcher matcher = urlRegex.matcher(websiteUrl);
 
         return matcher.matches();
+    }
+
+    public String toString() {
+        return id + "." + uniqueId + "\t" + companyName;
     }
 
     public String stringify() {

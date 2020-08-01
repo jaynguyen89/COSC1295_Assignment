@@ -13,7 +13,6 @@ import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 
 import javafx.util.Pair;
-
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -152,14 +151,17 @@ public final class Helpers {
         return new Pair<>(eSkill, eRanking);
     }
     
-    public static HashMap<String, Integer> sortDescending(HashMap<String, Integer> any) {
+    public static List<Map.Entry<String, Integer>> sortDescending(HashMap<String, Integer> any) {
         List<Map.Entry<String, Integer>> listToSort = new ArrayList<>(any.entrySet());
-        listToSort.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+        for (int i = 0; i < listToSort.size(); i++)
+            for (int j = 1; j < listToSort.size() - i; j++)
+                if (listToSort.get(j - 1).getValue() < listToSort.get(j).getValue()) {
+                    Map.Entry<String, Integer> temp = listToSort.get(j - 1);
+                    listToSort.set(j - 1, listToSort.get(j));
+                    listToSort.set(j, temp);
+                }
         
-        HashMap<String, Integer> sortedMap = new HashMap<>();
-        for (Map.Entry<String, Integer> entry : listToSort)
-            sortedMap.put(entry.getKey(), entry.getValue());
-        
-        return sortedMap;
+        return listToSort;
     }
 }

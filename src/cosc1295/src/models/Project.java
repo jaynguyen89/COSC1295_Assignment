@@ -5,8 +5,8 @@ import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.SKILLS;
 import helpers.commons.SharedEnums.RANKINGS;
 import helpers.utilities.Helpers;
-import javafx.util.Pair;
 
+import javafx.util.Pair;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

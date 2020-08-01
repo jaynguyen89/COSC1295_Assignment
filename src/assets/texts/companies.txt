@@ -1,2 +1,4 @@
 1,,COM1,,Hidrogen Pty Ltd ,,3476532745632,,www.hidrogen.com.au,,1
 2,,COM2,,Jaycom Pty Ltd ,,32905734834,,https://www.jaycom.vnn.vn,,2
+3,,COM3,,Third Company ,,9238457348,,www.thirdcompany.com,,3
+4,,COM4,,Fourth Company ,,02934783573843,,http://fourthcompany.com,,4

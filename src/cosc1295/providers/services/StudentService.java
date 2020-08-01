@@ -42,7 +42,7 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
 
                 student.setSkillRanking(skillRanking);
 
-                if (studentTokens.length == 7)
+                if (studentTokens.length > 6)
                     student.setPersonality(
                         studentTokens[6].equals(PERSONALITIES.A.name()) ? PERSONALITIES.A
                             : (studentTokens[6].equals(PERSONALITIES.B.name()) ? PERSONALITIES.B
@@ -50,8 +50,8 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
                     );
 
                 List<String> conflicters = new ArrayList<>();
-                if (studentTokens.length == 8) conflicters.add(studentTokens[7].trim());
-                if (studentTokens.length == 9) conflicters.add(studentTokens[8].trim());
+                if (studentTokens.length > 7) conflicters.add(studentTokens[7].trim());
+                if (studentTokens.length > 8) conflicters.add(studentTokens[8].trim());
 
                 student.setConflicters(conflicters);
                 students.add(student);
@@ -85,6 +85,8 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
         List<Preference> preferences = new ArrayList<>();
         try {
             for (String rawPreference : rawPreferences) {
+                if (rawPreference.isEmpty()) continue;
+
                 String[] preferenceTokens = rawPreference.split(SharedConstants.TEXT_DELIMITER);
                 Preference preference = new Preference();
 

@@ -118,7 +118,7 @@ public class ProjectOwnerView {
                                         break;
                                     }
 
-                                setRoleSuccess = found;
+                                if (found) continue;
                                 flasher.flash(new Flash("Role ID not found. Press enter to continue.", FLASH_TYPES.ATTENTION));
                                 inputScanner.nextLine();
 
@@ -178,10 +178,7 @@ public class ProjectOwnerView {
                     flasher.flash(new Flash("Company: ", FLASH_TYPES.NONE));
 
                     for (Company company : companies)
-                        flasher.flash(new Flash(
-                            "\t" + company.getId() + ". " + company.getCompanyName(),
-                            FLASH_TYPES.NONE
-                        ));
+                        flasher.flash(new Flash("\t" + company.toString(), FLASH_TYPES.NONE));
 
                     String selectedCompanyId;
                     boolean setCompanyDone = false;

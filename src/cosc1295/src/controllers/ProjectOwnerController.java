@@ -55,7 +55,7 @@ public class ProjectOwnerController extends ControllerBase {
         )
             return projectOwnerService.saveNewProjectOwner(projectOwner);
 
-        return false;
+        return projectOwnerService.saveNewProjectOwner(projectOwner);
     }
 
     public void displayProjectOwnerResult(Boolean taskResult) {

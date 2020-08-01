@@ -33,17 +33,37 @@ public class StudentController extends ControllerBase {
         Student student = studentView.getStudentFromListToUpdate(allStudents);
         if (student == null) return null;
 
-        student = studentView.captureStudentPersonality(student, allStudents);
-        if (student == null) return null;
+        boolean shouldCapturePersonality = true;
+        if (student.getPersonality() != null)
+            shouldCapturePersonality = studentView.promptToCapturePersonality(student);
 
-        if (student.getConflicters().size() == SharedConstants.MAX_CONFLICTERS)
-            studentView.displayConflicterSkippingInformationFor(student.getUniqueId());
-        else {
-            student = studentView.captureStudentConflicters(student, allStudents);
+        if (shouldCapturePersonality) {
+            student = studentView.captureStudentPersonality(student, allStudents);
             if (student == null) return null;
         }
 
-        return studentService.updateStudentPersonality(student);
+        boolean shouldCaptureConflicters = studentView.promptToCaptureConflicters(student);
+        if (!shouldCaptureConflicters && shouldCapturePersonality)
+            return studentService.updateStudentPersonality(student);
+
+        if (shouldCaptureConflicters &&
+            student.getConflicters().size() == 0) {
+            student = studentView.captureStudentConflicters(student, allStudents);
+            if (student == null) return null;
+
+            return studentService.updateStudentPersonality(student);
+        }
+
+        if (shouldCaptureConflicters &&
+                student.getConflicters().size() != 0) {
+            student = studentView.updateStudentConflicters(student, allStudents);
+            if (student == null) return null;
+        }
+
+        if (shouldCapturePersonality || shouldCaptureConflicters)
+            return studentService.updateStudentPersonality(student);
+
+        return null;
     }
 
     public void displayStudentTaskResult(boolean result) {

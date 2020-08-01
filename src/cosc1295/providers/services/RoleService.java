@@ -21,6 +21,8 @@ public class RoleService extends TextFileServiceBase implements IRoleService {
         List<Role> roles = new ArrayList<>();
         try {
             for (String rawRoleString : rawRoleData) {
+                if (rawRoleString.isEmpty()) continue;
+
                 String[] tokens = rawRoleString.split(SharedConstants.TEXT_DELIMITER);
 
                 int roleId = Integer.parseInt(tokens[0]);

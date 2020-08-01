@@ -9,8 +9,8 @@ import helpers.commons.SharedEnums.SKILLS;
 import helpers.commons.SharedEnums.RANKINGS;
 import helpers.commons.SharedEnums.DATA_TYPES;
 import helpers.utilities.Helpers;
-import javafx.util.Pair;
 
+import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +43,8 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
         List<Project> projects = new ArrayList<>();
         try {
             for (String rawProject : rawProjectData) {
+                if (rawProject.isEmpty()) continue;
+
                 Project project = new Project();
                 String[] projectTokens = rawProject.split(SharedConstants.TEXT_DELIMITER);
 

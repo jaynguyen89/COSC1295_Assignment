@@ -3,9 +3,7 @@ package cosc1295.src.views;
 import cosc1295.designs.Flasher;
 import cosc1295.src.models.Company;
 import cosc1295.src.models.Flash;
-import helpers.commons.SharedEnums;
 import helpers.commons.SharedEnums.FLASH_TYPES;
-import helpers.utilities.Helpers;
 
 import java.util.Scanner;
 

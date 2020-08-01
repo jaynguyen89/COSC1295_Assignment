@@ -8,6 +8,7 @@ public final class Program {
 
 		ProjectTeamFormationApp application = new ProjectTeamFormationApp();
 		application.run();
+		System.exit(0);
 
 	}
 }

@@ -11,10 +11,7 @@ import helpers.commons.SharedEnums.FLASH_TYPES;
 import helpers.utilities.Helpers;
 
 import javafx.util.Pair;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class ProjectView {
 
@@ -183,46 +180,49 @@ public class ProjectView {
         int skillInputTracker = 0;
 
         RANKINGS ranking;
+        List<RANKINGS> selectedRankings = new ArrayList<>();
         while (skillInputTracker < 4) {
             switch (skillInputTracker) {
                 case 0:
-                    ranking = getRankingInput(skillInputTracker);
+                    ranking = getRankingInput(skillInputTracker, selectedRankings);
                     skillRankings.put(SKILLS.A, ranking);
 
                     skillInputTracker++;
                     break;
                 case 1:
-                    ranking = getRankingInput(skillInputTracker);
+                    ranking = getRankingInput(skillInputTracker, selectedRankings);
                     skillRankings.put(SKILLS.N, ranking);
 
                     skillInputTracker++;
                     break;
                 case 2:
-                    ranking = getRankingInput(skillInputTracker);
+                    ranking = getRankingInput(skillInputTracker, selectedRankings);
                     skillRankings.put(SKILLS.P, ranking);
 
                     skillInputTracker++;
                     break;
                 default:
-                    ranking = getRankingInput(skillInputTracker);
+                    ranking = getRankingInput(skillInputTracker, selectedRankings);
                     skillRankings.put(SKILLS.W, ranking);
 
                     skillInputTracker++;
                     break;
             }
+
+            selectedRankings.add(ranking);
         }
 
 
         return skillRankings;
     }
 
-    private RANKINGS getRankingInput(int skill) {
+    private RANKINGS getRankingInput(int skill, List<RANKINGS> selectedRankings) {
         boolean validRanking = false;
         RANKINGS eRanking = null;
 
         while (!validRanking) {
             flasher.flash(new Flash(
-                    "\tRanking for " + (skill == 0 ? SKILLS.A.getValue()
+                    "\nRanking for " + (skill == 0 ? SKILLS.A.getValue()
                             : (skill == 1 ? SKILLS.N.getValue()
                             : (skill == 2 ? SKILLS.P.getValue() : SKILLS.W.getValue()))) + ": ",
                     FLASH_TYPES.NONE
@@ -241,6 +241,17 @@ public class ProjectView {
                 }
 
                 eRanking = RANKINGS.values()[ranking - 1];
+                if (selectedRankings.contains(eRanking)) {
+                    flasher.flash(new Flash(
+                        "Ranking " + eRanking.getValue() + " has been set previously for another skill.",
+                        FLASH_TYPES.ATTENTION
+                    ));
+                    flasher.flash(new Flash("Please select another one. Press enter to continue.", FLASH_TYPES.NONE));
+
+                    inputScanner.nextLine();
+                    continue;
+                }
+
                 validRanking = true;
             }
             else {
@@ -337,10 +348,20 @@ public class ProjectView {
         return new Pair<>(selectedProject, false);
     }
 
-    public void printShortlistedProjects(HashMap<String, Integer> shortlist) {
-        flasher.flash(new Flash("\nPlease view below the shortlisted Projects:", FLASH_TYPES.NONE));
+    public void printShortlistedProjects(List<Map.Entry<String, Integer>> shortlist) {
+        flasher.flash(new Flash("\nPlease view below the shortlisted Projects:\n", FLASH_TYPES.NONE));
+        flasher.flash(new Flash("\t-------------\n", FLASH_TYPES.NONE));
 
-        for (Map.Entry<String, Integer> entry : shortlist.entrySet())
+        for (Map.Entry<String, Integer> entry : shortlist) {
             flasher.flash(new Flash("\t" + entry.getKey() + "\t" + entry.getValue(), FLASH_TYPES.NONE));
+
+            if (shortlist.indexOf(entry) == shortlist.size() - 1 - SharedConstants.SHORTLISTED_NUM)
+                flasher.flash(new Flash("\n\tProjects with lowest preference:", FLASH_TYPES.NONE));
+        }
+
+        flasher.flash(new Flash("\n\t-------------\n", FLASH_TYPES.NONE));
+        flasher.flash(new Flash("Press enter to continue.", FLASH_TYPES.NONE));
+
+        inputScanner.nextLine();
     }
 }

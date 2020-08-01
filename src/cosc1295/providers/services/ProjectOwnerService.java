@@ -34,6 +34,8 @@ public class ProjectOwnerService extends TextFileServiceBase implements IProject
         List<ProjectOwner> projectOwners = new ArrayList<>();
         try {
             for (String rawProjectOwner : rawProjectOwnerData) {
+                if (rawProjectOwner.isEmpty()) continue;
+
                 String[] projectOwnerTokens = rawProjectOwner.split(SharedConstants.TEXT_DELIMITER);
                 ProjectOwner projectOwner = new ProjectOwner();
 

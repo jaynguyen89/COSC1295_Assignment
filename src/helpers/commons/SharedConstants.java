@@ -18,6 +18,8 @@ public final class SharedConstants {
 
     public static final int MAX_PREFERENCE = 4;
 
+    public static final int SHORTLISTED_NUM = 5;
+
     public static final String ADDRESS_FILE_NAME = "addresses.txt";
 
     public static final String COMPANY_FILE_NAME = "companies.txt";

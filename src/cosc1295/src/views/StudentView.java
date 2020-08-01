@@ -39,7 +39,8 @@ public class StudentView {
         }
 
         flasher.flash(new Flash(
-            "\t\tTASK: CAPTURE STUDENT PERSONALITY\n\t\tPlease select a student first from the list\n",
+            "\t\tTASK: CAPTURE STUDENT PERSONALITY & PREFERENCES\n\t\t" +
+                    "Please select a student first from the list\n",
             FLASH_TYPES.NONE
         ));
 
@@ -83,14 +84,14 @@ public class StudentView {
     }
 
     public Student captureStudentPersonality(Student student, List<Student> students) {
-        HashMap<PERSONALITIES, Integer> personalityCounts = countPersonalityDistributions(students);
+        HashMap<PERSONALITIES, Integer> personalityDistribution = countPersonalityDistributions(students);
 
         flasher.flash(new Flash("Personality of Student " + student.getUniqueId() + ":\n", FLASH_TYPES.NONE));
         flasher.flash(new Flash(PERSONALITIES.display(), FLASH_TYPES.NONE));
 
         String personalityInput = SharedConstants.EMPTY_STRING;
         while (personalityInput.isEmpty()) {
-            flasher.flash(new Flash("Your selection: " + student.getUniqueId() + ":\n", FLASH_TYPES.NONE));
+            flasher.flash(new Flash("Your selection for Student " + student.getUniqueId() + ":\n", FLASH_TYPES.NONE));
 
             personalityInput = inputScanner.next();
             inputScanner.nextLine();
@@ -104,10 +105,20 @@ public class StudentView {
                 continue;
             }
 
+            if (personality == student.getPersonality()) {
+                flasher.flash(new Flash(
+                    "\nPersonality is same as current. No changes is made.\nPress enter to continue.",
+                    FLASH_TYPES.NONE
+                ));
+
+                inputScanner.nextLine();
+                return student;
+            }
+
             try {
-                if (personalityCounts.get(personality) + 1 > students.size() / SharedConstants.GROUP_LIMIT) {
+                if (personalityDistribution.get(personality) + 1 > students.size() / SharedConstants.GROUP_LIMIT) {
                     flasher.flash(new Flash(
-                        "The number of this personality " + personality.name() + " exceeds the group distribution." +
+                        "The number of this personality " + personality.name() + " exceeds the group distribution.\n" +
                                 "Please select again. Press enter to continue.",
                         FLASH_TYPES.ATTENTION
                     ));
@@ -136,13 +147,20 @@ public class StudentView {
         return student;
     }
 
+    public boolean promptToCaptureConflicters(Student student) {
+        return flasher.promptForConfirmation(new Flash(
+                "Student " + student.getUniqueId() + " has had " + student.getConflicters().size() + " conflicters.\n" +
+                "Do you wish to continue with capturing/updating Student's conflicters?\n" +
+                "Y: Yes\tN: no",
+                FLASH_TYPES.NONE
+        ));
+    }
+
     public Student captureStudentConflicters(Student student, List<Student> students) {
         int conflicterCount = student.getConflicters().size();
-        Student selectedConflict = null;
-
         flasher.flash(new Flash("Capture the conflicters of Student " + student.getUniqueId() + ".\n", FLASH_TYPES.NONE));
 
-        String selectedConflicterId = SharedConstants.EMPTY_STRING;
+        String selectedConflicterId;
         while (conflicterCount < SharedConstants.MAX_CONFLICTERS) {
             flasher.flash(new Flash(
                 "You can now add up to " + (SharedConstants.MAX_CONFLICTERS - conflicterCount) + " more conflicter(s).\n",
@@ -213,17 +231,6 @@ public class StudentView {
         }
 
         return personalityCounts;
-    }
-
-    public void displayConflicterSkippingInformationFor(String uniqueId) {
-        flasher.flash(new Flash(
-                "Capturing conflicters will be skipped because Student " +
-                        uniqueId + " has added 2 conflicters.",
-                FLASH_TYPES.NONE
-        ));
-
-        flasher.flash(new Flash("Now proceed to saving this student. Press enter to continue.", FLASH_TYPES.NONE));
-        inputScanner.nextLine();
     }
 
     private List<Student> printConflictersTableFor(Student student, List<Student> students) {
@@ -317,5 +324,80 @@ public class StudentView {
         }
 
         return preference;
+    }
+
+    public boolean promptToCapturePersonality(Student student) {
+        return flasher.promptForConfirmation(new Flash(
+                "Student " + student.getUniqueId() + " has had Personality " + student.getPersonality().getValue() + ".\n" +
+                        "Do you wish to update? Y: Yes N: no",
+                FLASH_TYPES.NONE
+        ));
+    }
+
+    public Student updateStudentConflicters(Student student, List<Student> students) {
+        flasher.flash(new Flash("\nUpdate the conflicters for Student " + student.getUniqueId() + ".\n", FLASH_TYPES.NONE));
+
+        boolean shouldReplaceConflicter = true;
+        if (student.getConflicters().size() == 2)
+            flasher.flash(new Flash(
+                "Student " + student.getUniqueId() + " has had 2 conflicters.\n" +
+                        "You can now select a conflicter to replace:\n",
+                FLASH_TYPES.NONE
+            ));
+        else
+            shouldReplaceConflicter = flasher.promptForConfirmation(new Flash(
+                    "Student " + student.getUniqueId() + " has had 1 conflicter.\n" +
+                            "Do you want to replace the current one or add 1 more?" +
+                            "Y: Replace\tN: Add",
+                FLASH_TYPES.ATTENTION
+            ));
+
+        if (shouldReplaceConflicter) student = replaceConflictersFor(student, students);
+        else student = captureStudentConflicters(student, students);
+
+        return student;
+    }
+
+    private Student replaceConflictersFor(Student student, List<Student> students) {
+        boolean replaceDone = false;
+
+        while (!replaceDone) {
+            flasher.flash(new Flash("\t" + student.getConflicters().toString(), FLASH_TYPES.NONE));
+            flasher.flash(new Flash("\nYour selection: ", FLASH_TYPES.NONE));
+
+            String selectedToReplace = inputScanner.next();
+            inputScanner.nextLine();
+
+            selectedToReplace = selectedToReplace.trim().toUpperCase();
+            if (!student.getConflicters().contains(selectedToReplace)) {
+                flasher.flash(new Flash("Invalid selection. Press enter to continue.", FLASH_TYPES.ATTENTION));
+
+                inputScanner.nextLine();
+                continue;
+            }
+
+            flasher.flash(new Flash("\nSelect a new conflicter:\n", FLASH_TYPES.NONE));
+            List<Student> possibleConflicters = printConflictersTableFor(student, students);
+            flasher.flash(new Flash("\nYour selection:", FLASH_TYPES.NONE));
+
+            String replaceById = inputScanner.next();
+            inputScanner.nextLine();
+
+            Pair<Student, Boolean> searchResult = searchStudentFromListByInput(replaceById, possibleConflicters);
+            if (searchResult == null) return null;
+            else if (searchResult.getValue()) continue;
+
+            student.getConflicters().remove(selectedToReplace);
+            student.getConflicters().add(searchResult.getKey().getUniqueId());
+
+            replaceDone = !flasher.promptForConfirmation(new Flash(
+                "Conflicter " + selectedToReplace + " has been replaced by new Conflicter " +
+                        searchResult.getKey().getUniqueId() + " for Student " + student.getUniqueId() + "\n" +
+                        "Do you wish to replace more? Y: Yes\tN: No",
+                FLASH_TYPES.SUCCESS
+            ));
+        }
+
+        return student;
     }
 }

@@ -1,2 +1,4 @@
 1,,Block 1 Paradise Tower,,12 Oceania Blv ,,Atlantica ,,HEAVEN,,3456,,Vietnam 
 2,,N/A,,1/15 Haven Cl ,,Sunshine West ,,VIC,,3020,,Australia 
+3,,N/A,,1/2 Any Street ,,Somewhere ,,WHERE,,3030,,Elsewhere 
+4,,N/A,,2 Round St ,,Square ,,TRIANGLE,,1111,,Space 

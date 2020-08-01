@@ -19,21 +19,6 @@ public class Address implements Serializable {
 
     public Address() { }
 
-    public Address(
-        int id, String building,
-        String street, String suburb,
-        String state, String postCode,
-        String country
-    ) {
-        this.id = id;
-        this.building = building;
-        this.street = street;
-        this.suburb = suburb;
-        this.state = state;
-        this.postCode = postCode;
-        this.country = country;
-    }
-
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
