@@ -13,6 +13,7 @@ import helpers.utilities.Helpers;
 import javafx.util.Pair;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class ProjectView {
@@ -334,5 +335,12 @@ public class ProjectView {
         }
 
         return new Pair<>(selectedProject, false);
+    }
+
+    public void printShortlistedProjects(HashMap<String, Integer> shortlist) {
+        flasher.flash(new Flash("\nPlease view below the shortlisted Projects:", FLASH_TYPES.NONE));
+
+        for (Map.Entry<String, Integer> entry : shortlist.entrySet())
+            flasher.flash(new Flash("\t" + entry.getKey() + "\t" + entry.getValue(), FLASH_TYPES.NONE));
     }
 }

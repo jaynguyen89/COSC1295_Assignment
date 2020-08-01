@@ -15,3 +15,15 @@ String addressId = companyTokens[companyTokens.length - 1];
                         addressTokens[6]
                     ));
                 }
+
+
+
+HashMap<String, Integer> projectsRating = new HashMap<>();
+        List<Rating> ratings = new ArrayList<>();
+        for (Preference preference : preferences)
+            for (Map.Entry<String, Integer> entry : preference.getPreference().entrySet())
+                if (projectsRating.containsKey(entry.getKey())) {
+                    int rating = projectsRating.get(entry.getKey());
+                    projectsRating.put(entry.getKey(), rating + entry.getValue());
+                }
+                else projectsRating.put(entry.getKey(), entry.getValue());

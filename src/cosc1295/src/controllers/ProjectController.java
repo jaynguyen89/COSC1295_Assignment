@@ -3,15 +3,11 @@ package cosc1295.src.controllers;
 import cosc1295.providers.services.ProjectOwnerService;
 import cosc1295.providers.services.ProjectService;
 import cosc1295.providers.services.StudentService;
-import cosc1295.src.models.Flash;
-import cosc1295.src.models.Preference;
-import cosc1295.src.models.Project;
-import cosc1295.src.models.ProjectOwner;
+import cosc1295.src.models.*;
 import cosc1295.src.views.ProjectView;
 import helpers.commons.SharedEnums;
-import javafx.util.Pair;
+import helpers.utilities.Helpers;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +73,8 @@ public class ProjectController extends ControllerBase {
                 }
                 else projectsRating.put(entry.getKey(), entry.getValue());
 
-        //get 5 minimum rated projects
+        HashMap<String, Integer> shortlist = Helpers.sortDescending(projectsRating);
+        projectView.printShortlistedProjects(shortlist);
 
         return null;
     }

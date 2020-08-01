@@ -1,5 +1,7 @@
 package helpers.utilities;
 
+import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 import cosc1295.providers.bases.ServiceLocator;
 import cosc1295.providers.services.CompanyService;
 import cosc1295.providers.services.ProjectOwnerService;
@@ -11,9 +13,8 @@ import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 
 import javafx.util.Pair;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public final class Helpers {
         return matcher.matches();
     }
 
-    public static boolean isIntegerNumber(String any) {
+    public static boolean isIntegerNumber(@Nullable String any) {
         try {
             Integer.parseInt(any);
         } catch (NumberFormatException | NullPointerException ex) {
@@ -133,7 +134,7 @@ public final class Helpers {
     public static
         Pair<SharedEnums.SKILLS,
              SharedEnums.RANKINGS>
-    parseSkillRankingToken(String token) {
+    parseSkillRankingToken(@NotNull String token) {
         String skill = token.substring(0, 1);
         int ranking = Integer.parseInt(
                 token.substring(token.length() - 1)
@@ -149,5 +150,16 @@ public final class Helpers {
         SharedEnums.RANKINGS eRanking = SharedEnums.RANKINGS.values()[ranking];
 
         return new Pair<>(eSkill, eRanking);
+    }
+    
+    public static HashMap<String, Integer> sortDescending(HashMap<String, Integer> any) {
+        List<Map.Entry<String, Integer>> listToSort = new ArrayList<>(any.entrySet());
+        listToSort.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+        
+        HashMap<String, Integer> sortedMap = new HashMap<>();
+        for (Map.Entry<String, Integer> entry : listToSort)
+            sortedMap.put(entry.getKey(), entry.getValue());
+        
+        return sortedMap;
     }
 }
