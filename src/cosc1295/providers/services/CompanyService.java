@@ -17,18 +17,18 @@ public class CompanyService extends TextFileServiceBase implements ICompanyServi
 
     @Override
     public boolean saveNewCompany(Company company) {
-        int newInstanceId = getNextInstanceIdForNewEntry(DATA_TYPES.COMPANY);
+        int newInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.COMPANY);
         if (newInstanceId == -1) return false;
 
         company.setId(newInstanceId);
         String normalizedCompany = company.stringify();
 
-        return writeToFile(normalizedCompany, DATA_TYPES.COMPANY);
+        return saveEntryToFile(normalizedCompany, DATA_TYPES.COMPANY);
     }
 
     @Override
     public List<Company> readAllCompaniesFromFile() {
-        List<String> rawCompanyData = readEntireRawDataFromFile(DATA_TYPES.COMPANY);
+        List<String> rawCompanyData = readAllDataFromFile(DATA_TYPES.COMPANY);
 
         if (rawCompanyData == null) return null;
         if (rawCompanyData.isEmpty()) return new ArrayList<>();

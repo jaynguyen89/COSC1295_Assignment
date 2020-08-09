@@ -22,13 +22,13 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
 
     @Override
     public boolean saveNewProject(Project newProject) {
-        int newInstanceId = getNextInstanceIdForNewEntry(DATA_TYPES.PROJECT);
+        int newInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.PROJECT);
         if (newInstanceId == -1) return false;
 
         newProject.setId(newInstanceId);
         String normalizedProject = newProject.stringify();
 
-        return writeToFile(normalizedProject, DATA_TYPES.PROJECT);
+        return saveEntryToFile(normalizedProject, DATA_TYPES.PROJECT);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
 
     @Override
     public List<Project> readAllProjectsFromFile() {
-        List<String> rawProjectData = readEntireRawDataFromFile(DATA_TYPES.PROJECT);
+        List<String> rawProjectData = readAllDataFromFile(DATA_TYPES.PROJECT);
 
         if (rawProjectData == null) return null;
         if (rawProjectData.isEmpty()) return new ArrayList<>();

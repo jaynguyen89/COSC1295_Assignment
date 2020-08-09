@@ -12,13 +12,13 @@ public class AddressService extends TextFileServiceBase implements IAddressServi
 
     @Override
     public Address writeAddressToFile(Address address) {
-        int newInstanceId = getNextInstanceIdForNewEntry(DATA_TYPES.ADDRESS);
+        int newInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.ADDRESS);
         if (newInstanceId == -1) return null;
 
         address.setId(newInstanceId);
         String normalizedAddress = address.stringify();
 
-        if (writeToFile(normalizedAddress, DATA_TYPES.ADDRESS))
+        if (saveEntryToFile(normalizedAddress, DATA_TYPES.ADDRESS))
             return address;
 
         return null;

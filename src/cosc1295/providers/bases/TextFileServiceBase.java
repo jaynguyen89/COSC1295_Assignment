@@ -21,7 +21,7 @@ public class TextFileServiceBase {
      * @param type DATA_TYPES
      * @return List<String>
      */
-    public List<String> readEntireRawDataFromFile(DATA_TYPES type) {
+    public List<String> readAllDataFromFile(DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToRead = new File(filePath);
 
@@ -58,7 +58,7 @@ public class TextFileServiceBase {
      * @param type DATA_TYPES
      * @return String
      */
-    public String lookupRawDataFromFileById(String id, DATA_TYPES type) {
+    public String getEntryFromFileById(String id, DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToRead = new File(filePath);
 
@@ -111,7 +111,7 @@ public class TextFileServiceBase {
      * @param type DATA_TYPES
      * @return boolean
      */
-    public boolean writeToFile(String any, DATA_TYPES type) {
+    public boolean saveEntryToFile(String any, DATA_TYPES type) {
         String filePath = generateFilePathByDataType(type);
         File fileToWrite = new File(filePath);
 
@@ -233,7 +233,7 @@ public class TextFileServiceBase {
      * @param type DATA_TYPES
      * @return int
      */
-    public int getNextInstanceIdForNewEntry(DATA_TYPES type) {
+    public int getNextEntryIdForNewEntry(DATA_TYPES type) {
         final int UNDETERMINED_ID = -1;
         String filePath = generateFilePathByDataType(type);
         File fileToRead = new File(filePath);

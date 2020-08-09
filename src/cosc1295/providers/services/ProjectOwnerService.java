@@ -18,18 +18,18 @@ public class ProjectOwnerService extends TextFileServiceBase implements IProject
 
     @Override
     public boolean saveNewProjectOwner(ProjectOwner projectOwner) {
-        int newInstanceId = getNextInstanceIdForNewEntry(DATA_TYPES.PROJECT_OWNER);
+        int newInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.PROJECT_OWNER);
         if (newInstanceId == -1) return false;
 
         projectOwner.setId(newInstanceId);
         String normalizedProjectOwner = projectOwner.stringify();
 
-        return writeToFile(normalizedProjectOwner, DATA_TYPES.PROJECT_OWNER);
+        return saveEntryToFile(normalizedProjectOwner, DATA_TYPES.PROJECT_OWNER);
     }
 
     @Override
     public List<ProjectOwner> readAllProjectOwnersFromFile() {
-        List<String> rawProjectOwnerData = readEntireRawDataFromFile(DATA_TYPES.PROJECT_OWNER);
+        List<String> rawProjectOwnerData = readAllDataFromFile(DATA_TYPES.PROJECT_OWNER);
 
         if (rawProjectOwnerData == null) return null;
         if (rawProjectOwnerData.isEmpty()) return new ArrayList<>();

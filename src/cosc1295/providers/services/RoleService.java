@@ -16,7 +16,7 @@ public class RoleService extends TextFileServiceBase implements IRoleService {
 
     @Override
     public List<Role> readAllRolesFromFile() {
-        List<String> rawRoleData = readEntireRawDataFromFile(SharedEnums.DATA_TYPES.ROLE);
+        List<String> rawRoleData = readAllDataFromFile(SharedEnums.DATA_TYPES.ROLE);
 
         if (rawRoleData == null) return null;
         if (rawRoleData.isEmpty()) return new ArrayList<>();
@@ -42,12 +42,12 @@ public class RoleService extends TextFileServiceBase implements IRoleService {
 
     @Override
     public boolean saveNewRole(Role role) {
-        int newInstanceId = getNextInstanceIdForNewEntry(SharedEnums.DATA_TYPES.ROLE);
+        int newInstanceId = getNextEntryIdForNewEntry(SharedEnums.DATA_TYPES.ROLE);
         if (newInstanceId == -1) return false;
 
         role.setId(newInstanceId);
         String normalizedRole = role.stringify();
 
-        return writeToFile(normalizedRole, SharedEnums.DATA_TYPES.ROLE);
+        return saveEntryToFile(normalizedRole, SharedEnums.DATA_TYPES.ROLE);
     }
 }

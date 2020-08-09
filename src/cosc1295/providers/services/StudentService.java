@@ -23,7 +23,7 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
 
     @Override
     public List<Student> readAllStudentsFromFile() {
-        List<String> rawStudentData = readEntireRawDataFromFile(DATA_TYPES.STUDENT);
+        List<String> rawStudentData = readAllDataFromFile(DATA_TYPES.STUDENT);
 
         if (rawStudentData == null) return null;
         if (rawStudentData.isEmpty()) return new ArrayList<>();
@@ -75,12 +75,12 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
     @Override
     public Boolean saveStudentPreferences(Preference preference) {
         String normalizedPreference = preference.stringify();
-        return writeToFile(normalizedPreference, DATA_TYPES.PREFERENCE);
+        return saveEntryToFile(normalizedPreference, DATA_TYPES.PREFERENCE);
     }
 
     @Override
     public List<Preference> readAllStudentPreferencesFromFile() {
-        List<String> rawPreferences = readEntireRawDataFromFile(DATA_TYPES.PREFERENCE);
+        List<String> rawPreferences = readAllDataFromFile(DATA_TYPES.PREFERENCE);
 
         if (rawPreferences == null) return null;
         if (rawPreferences.isEmpty()) return new ArrayList<>();
