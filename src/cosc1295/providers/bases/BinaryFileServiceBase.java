@@ -191,12 +191,12 @@ public class BinaryFileServiceBase<T> {
         String sType = type.getSimpleName().toUpperCase();
 
         return ASSET_PATH + (
-            sType == DATA_TYPES.ADDRESS.name().replaceAll("_", SharedConstants.EMPTY_STRING) ? SharedConstants.ADDRESS_FILE_NAME
-                : (sType == DATA_TYPES.COMPANY.name().replaceAll("_", SharedConstants.EMPTY_STRING) ? SharedConstants.COMPANY_FILE_NAME
-                : (sType == DATA_TYPES.ROLE.name().replaceAll("_", SharedConstants.EMPTY_STRING) ? SharedConstants.ROLE_FILE_NAME
-                : (sType == DATA_TYPES.PROJECT.name().replaceAll("_", SharedConstants.EMPTY_STRING) ? SharedConstants.PROJECT_FILE_NAME
-                : (sType == DATA_TYPES.STUDENT.name().replaceAll("_", SharedConstants.EMPTY_STRING) ? SharedConstants.STUDENT_FILE_NAME
-                : (sType == DATA_TYPES.PREFERENCE.name().replaceAll("_", SharedConstants.EMPTY_STRING) ? SharedConstants.PREFERENCE_FILE_NAME
+            sType.equals(DATA_TYPES.ADDRESS.name().replaceAll("_", SharedConstants.EMPTY_STRING)) ? SharedConstants.ADDRESS_FILE_NAME
+                : (sType.equals(DATA_TYPES.COMPANY.name().replaceAll("_", SharedConstants.EMPTY_STRING)) ? SharedConstants.COMPANY_FILE_NAME
+                : (sType.equals(DATA_TYPES.ROLE.name().replaceAll("_", SharedConstants.EMPTY_STRING)) ? SharedConstants.ROLE_FILE_NAME
+                : (sType.equals(DATA_TYPES.PROJECT.name().replaceAll("_", SharedConstants.EMPTY_STRING)) ? SharedConstants.PROJECT_FILE_NAME
+                : (sType.equals(DATA_TYPES.STUDENT.name().replaceAll("_", SharedConstants.EMPTY_STRING)) ? SharedConstants.STUDENT_FILE_NAME
+                : (sType.equals(DATA_TYPES.PREFERENCE.name().replaceAll("_", SharedConstants.EMPTY_STRING)) ? SharedConstants.PREFERENCE_FILE_NAME
                 : SharedConstants.PROJECT_OWNER_FILE_NAME)))))
         );
     }

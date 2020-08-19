@@ -1,9 +1,6 @@
 package cosc1295.designs;
 
-import cosc1295.src.controllers.CompanyController;
-import cosc1295.src.controllers.ProjectController;
-import cosc1295.src.controllers.ProjectOwnerController;
-import cosc1295.src.controllers.StudentController;
+import cosc1295.src.controllers.*;
 
 /**
  * Facade Design Pattern
@@ -14,12 +11,14 @@ public class ApplicationFacade {
     private final ProjectOwnerController projectOwnerController;
     private final ProjectController projectController;
     private final StudentController studentController;
+    private final TeamFormationController teamController;
 
     public ApplicationFacade() {
         companyController = new CompanyController();
         projectOwnerController = new ProjectOwnerController();
         projectController = new ProjectController();
         studentController = new StudentController();
+        teamController = new TeamFormationController();
     }
 
     public void runAddCompanyFeature() {
@@ -78,5 +77,19 @@ public class ApplicationFacade {
 
     public void runProjectShortlistingFeature() {
         projectController.shortlistProjectsBasedOnPreferences();
+    }
+
+    public void runTeamFormationFeature() {
+        Boolean taskResult = teamController.executeTeamSelectionTask();
+
+        if (taskResult != null)
+            teamController.displayTeamSelectionResult(taskResult);
+    }
+
+    public void runTeamFitnessMetricsCalculation() {
+        Boolean taskResult = teamController.executeTeamFitnessMetricsTask();
+
+        if (taskResult != null)
+            teamController.displayTeamFitnessMetricsResult(taskResult);
     }
 }

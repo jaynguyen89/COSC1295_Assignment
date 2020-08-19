@@ -94,6 +94,12 @@ public final class ProjectTeamFormationApp {
             case F:
                 appFacade.runProjectShortlistingFeature();
                 break;
+            case G:
+                appFacade.runTeamFormationFeature();
+                break;
+            case H:
+                appFacade.runTeamFitnessMetricsCalculation();
+                break;
             default:
                 taskDone = true;
                 break;

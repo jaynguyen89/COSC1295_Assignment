@@ -280,7 +280,8 @@ public class TextFileServiceBase {
                     : (type == DATA_TYPES.PROJECT ? SharedConstants.PROJECT_FILE_NAME
                     : (type == DATA_TYPES.STUDENT ? SharedConstants.STUDENT_FILE_NAME
                     : (type == DATA_TYPES.PREFERENCE ? SharedConstants.PREFERENCE_FILE_NAME
-                    : SharedConstants.PROJECT_OWNER_FILE_NAME)))))
+                    : ( type == DATA_TYPES.PROJECT_TEAM ? SharedConstants.PROJECT_TEAM_FILE_NAME
+                    : SharedConstants.PROJECT_OWNER_FILE_NAME))))))
         );
     }
 }

@@ -36,4 +36,6 @@ public final class SharedConstants {
     public static final String STUDENT_FILE_NAME = "student_info.txt";
 
     public static final String PREFERENCE_FILE_NAME = "preferences.txt";
+
+    public static final String PROJECT_TEAM_FILE_NAME = "project_teams.txt";
 }

@@ -15,6 +15,8 @@ public final class SharedEnums {
         D("Capture Student Personalities"),
         E("Add Student Preferences"),
         F("Shortlist Projects"),
+        G("Form Teams"),
+        H("Team Fitness Metrics"),
         X("Quit");
 
         private final String value;
@@ -46,7 +48,7 @@ public final class SharedEnums {
     }
 
     public enum DATA_TYPES {
-        ADDRESS, COMPANY, ROLE, PROJECT_OWNER, PROJECT, STUDENT, PREFERENCE
+        ADDRESS, COMPANY, ROLE, PROJECT_OWNER, PROJECT, STUDENT, PREFERENCE, PROJECT_TEAM
     }
 
     public enum RANKINGS {
