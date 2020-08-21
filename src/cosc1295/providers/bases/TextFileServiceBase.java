@@ -65,7 +65,7 @@ public class TextFileServiceBase {
         if (!fileToRead.exists()) return SharedConstants.EMPTY_STRING;
         if (!fileToRead.canRead()) return null;
 
-        String entryInNeed = "";
+        String entryInNeed = SharedConstants.EMPTY_STRING;
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileToRead));
 
@@ -73,8 +73,9 @@ public class TextFileServiceBase {
             while (!found) {
                 entryInNeed = reader.readLine();
                 if (entryInNeed == null) {
-                    entryInNeed = SharedConstants.NA;
+                    entryInNeed = SharedConstants.EMPTY_STRING;
                     found = true;
+                    continue;
                 }
 
                 try {
@@ -82,7 +83,7 @@ public class TextFileServiceBase {
                     if (tokens[0].trim().equals(id)) found = true;
                 } catch (IndexOutOfBoundsException ex) {
                     flasher.flash(new Flash(
-                        "An error occurred while parsing file data for to search for an entry. " +
+                        "An error occurred while parsing file data to search for an entry. " +
                                 "The current failure entry will be skipped.",
                         SharedEnums.FLASH_TYPES.ERROR
                     ));
@@ -94,8 +95,8 @@ public class TextFileServiceBase {
             return null;
         } catch (IOException ex) {
             flasher.flash(new Flash(
-                    ex.getMessage(),
-                    SharedEnums.FLASH_TYPES.ERROR
+                ex.getMessage(),
+                SharedEnums.FLASH_TYPES.ERROR
             ));
 
             return null;
@@ -280,8 +281,9 @@ public class TextFileServiceBase {
                     : (type == DATA_TYPES.PROJECT ? SharedConstants.PROJECT_FILE_NAME
                     : (type == DATA_TYPES.STUDENT ? SharedConstants.STUDENT_FILE_NAME
                     : (type == DATA_TYPES.PREFERENCE ? SharedConstants.PREFERENCE_FILE_NAME
-                    : ( type == DATA_TYPES.PROJECT_TEAM ? SharedConstants.PROJECT_TEAM_FILE_NAME
-                    : SharedConstants.PROJECT_OWNER_FILE_NAME))))))
+                    : (type == DATA_TYPES.PROJECT_TEAM ? SharedConstants.PROJECT_TEAM_FILE_NAME
+                    : (type == DATA_TYPES.FITNESS_METRICS ? SharedConstants.TEAM_FITNESS_METRICS_FILE_NAME
+                    : SharedConstants.PROJECT_OWNER_FILE_NAME)))))))
         );
     }
 }

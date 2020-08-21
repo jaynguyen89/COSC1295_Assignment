@@ -7,4 +7,8 @@ import java.util.List;
 public interface ITeamService {
 
     List<Team> readAllTeamsFromFile();
+
+    boolean SaveNewTeam(Team newTeam);
+
+    boolean updateTeam(Team newTeam);
 }

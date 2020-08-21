@@ -44,6 +44,6 @@ public class FlashView {
         }
 
         return response.equals(SharedEnums.CONFIRMATIONS.Y.getValue()) ||
-                response.equals(SharedEnums.CONFIRMATIONS.Y.name());
+               response.equals(SharedEnums.CONFIRMATIONS.Y.name());
     }
 }

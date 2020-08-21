@@ -13,6 +13,8 @@ import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 
 import javafx.util.Pair;
+
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -244,5 +246,10 @@ public final class Helpers {
                 }
         
         return listToSort;
+    }
+
+    public static double round(double any) {
+        DecimalFormat format = new DecimalFormat("#.##");
+        return Double.parseDouble(format.format(any));
     }
 }

@@ -1,6 +1,7 @@
 package cosc1295.src.models;
 
 import cosc1295.src.models.generic.IThing;
+import helpers.commons.SharedConstants;
 
 import java.io.Serializable;
 import java.util.List;
@@ -8,14 +9,11 @@ import java.util.List;
 public class Team implements IThing, Serializable {
 
     private int id;
-
-    private String uniqueId;
-
-    private double fitnessMetrics;
-
+    private transient String uniqueId;
+    private TeamFitness fitnessMetrics;
     private List<Student> members;
-
     private Project project;
+    private transient boolean newlyAdded;
 
     @Override
     public void setId(int id) {
@@ -42,11 +40,11 @@ public class Team implements IThing, Serializable {
         return null;
     }
 
-    public void setFitnessMetrics(double value) {
+    public void setFitnessMetrics(TeamFitness value) {
         fitnessMetrics = value;
     }
 
-    public double getFitnessMetrics() {
+    public TeamFitness getFitnessMetrics() {
         return fitnessMetrics;
     }
 
@@ -63,7 +61,34 @@ public class Team implements IThing, Serializable {
     }
 
     public boolean removeMemberByUniqueId(String uniqueId) {
-        //TODO
+        Student memberToRemove = null;
+        for (Student member : members)
+            if (member.getUniqueId().equals(uniqueId)) {
+                memberToRemove = member;
+                break;
+            }
+
+        if (memberToRemove != null) {
+            members.remove(memberToRemove);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean replaceMemberByUniqueId(String uniqueId, Student other) {
+        Student memberToReplace = null;
+        for (Student member : members)
+            if (member.getUniqueId().equals(uniqueId)) {
+                memberToReplace = member;
+                break;
+            }
+
+        if (memberToReplace != null) {
+            members.set(members.indexOf(memberToReplace), other);
+            return true;
+        }
+
         return false;
     }
 
@@ -75,9 +100,30 @@ public class Team implements IThing, Serializable {
         return project;
     }
 
+    public void setNewlyAdded(boolean value) {
+        newlyAdded = value;
+    }
+
+    public boolean isNewlyAdded() {
+        return newlyAdded;
+    }
+
     @Override
     public String stringify() {
-        //TODO
-        return null;
+        StringBuilder teamString = new StringBuilder(
+            id + SharedConstants.TEXT_DELIMITER +
+            project.getId() + SharedConstants.TEXT_DELIMITER +
+            fitnessMetrics.getId() + SharedConstants.TEXT_DELIMITER
+        );
+
+        for (Student member : members)
+            teamString.append(member.getUniqueId())
+                      .append(SharedConstants.TEXT_DELIMITER);
+
+        return teamString.toString();
+    }
+
+    public String display() {
+        return "Team #" + id + ": " + project.getUniqueId() + "\t" + project.getProjectTitle();
     }
 }

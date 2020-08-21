@@ -20,6 +20,6 @@ public class AddressController extends ControllerBase {
     }
 
     public Address saveNewAddress(Address address) {
-        return addressService.writeAddressToFile(address);
+        return addressService.saveNewAddress(address);
     }
 }

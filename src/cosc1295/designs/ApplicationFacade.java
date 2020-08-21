@@ -81,15 +81,15 @@ public class ApplicationFacade {
 
     public void runTeamFormationFeature() {
         Boolean taskResult = teamController.executeTeamSelectionTask();
-
-        if (taskResult != null)
-            teamController.displayTeamSelectionResult(taskResult);
+        teamController.displayTeamSelectionFinalResult(taskResult);
     }
 
-    public void runTeamFitnessMetricsCalculation() {
-        Boolean taskResult = teamController.executeTeamFitnessMetricsTask();
+    public void displayTeamFitnessMetrics() {
+        teamController.printTeamFitnessMetricsTable();
+    }
 
-        if (taskResult != null)
-            teamController.displayTeamFitnessMetricsResult(taskResult);
+    public void runTeamProjectSetOrChange() {
+        Boolean taskResult = teamController.executeTeamProjectSelectionTask();
+        teamController.displayTeamSelectionFinalResult(taskResult);
     }
 }

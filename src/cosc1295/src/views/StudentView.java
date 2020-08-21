@@ -73,7 +73,7 @@ public class StudentView {
         Student selectedStudent = null;
 
         for (Student student : students)
-            flasher.flash(new Flash("\t" + student.toString(), FLASH_TYPES.NONE));
+            flasher.flash(new Flash("\t" + student.display(), FLASH_TYPES.NONE));
 
         String selectedStudentId = SharedConstants.EMPTY_STRING;
         while (selectedStudentId.isEmpty()) {
@@ -273,7 +273,7 @@ public class StudentView {
             ) continue;
 
             possibilities.add(entry);
-            flasher.flash(new Flash("\t" + entry.toString(), FLASH_TYPES.NONE));
+            flasher.flash(new Flash("\t" + entry.display(), FLASH_TYPES.NONE));
         }
 
         return possibilities;
@@ -288,8 +288,8 @@ public class StudentView {
      * @return Pair<Student, Boolean>
      */
     private Pair<Student, Boolean> searchStudentFromListByInput(
-            String selectedStudentId,
-            List<Student> students
+        String selectedStudentId,
+        List<Student> students
     ) {
         boolean found = false;
         Student selectedStudent = null;

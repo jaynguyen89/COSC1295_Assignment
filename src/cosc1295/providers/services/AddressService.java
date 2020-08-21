@@ -11,7 +11,7 @@ import helpers.commons.SharedEnums.DATA_TYPES;
 public class AddressService extends TextFileServiceBase implements IAddressService {
 
     @Override
-    public Address writeAddressToFile(Address address) {
+    public Address saveNewAddress(Address address) {
         int newInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.ADDRESS);
         if (newInstanceId == -1) return null;
 

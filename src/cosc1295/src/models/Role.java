@@ -7,7 +7,6 @@ import java.io.Serializable;
 public class Role implements Serializable {
 
     private int id;
-
     private String role;
 
     public Role() { }

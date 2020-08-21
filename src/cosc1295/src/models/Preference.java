@@ -10,7 +10,6 @@ import java.util.Map;
 public class Preference implements Serializable {
 
     private String studentUniqueId;
-
     private HashMap<String, Integer> preference;
 
     public Preference() {

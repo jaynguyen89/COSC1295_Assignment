@@ -111,4 +111,14 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
 
         return preferences;
     }
+
+    @Override
+    public Preference retrievePreferenceForStudent(String uniqueId) {
+        List<Preference> allPreferences = readAllStudentPreferencesFromFile();
+        for (Preference preference : allPreferences)
+            if (preference.getStudentUniqueId().equals(uniqueId))
+                return preference;
+
+        return null;
+    }
 }

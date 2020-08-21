@@ -4,6 +4,7 @@ import com.sun.istack.internal.NotNull;
 import cosc1295.designs.ApplicationFacade;
 import cosc1295.designs.Flasher;
 import cosc1295.src.models.Flash;
+import cosc1295.src.services.TeamFitnessMetricService;
 import helpers.commons.SharedEnums.FLASH_TYPES;
 import helpers.commons.SharedEnums.APPLICATION_MENU;
 import static helpers.commons.SharedEnums.APPLICATION_MENU.*;
@@ -19,6 +20,9 @@ public final class ProjectTeamFormationApp {
     private final Flasher flasher = Flasher.getInstance();
 
     public void run() {
+        Thread TeamMetricsService = new TeamFitnessMetricService();
+        TeamMetricsService.start();
+
         String menuSelection;
 
         while (true) {
@@ -98,8 +102,10 @@ public final class ProjectTeamFormationApp {
                 appFacade.runTeamFormationFeature();
                 break;
             case H:
-                appFacade.runTeamFitnessMetricsCalculation();
+                appFacade.displayTeamFitnessMetrics();
                 break;
+            case I:
+                appFacade.runTeamProjectSetOrChange();
             default:
                 taskDone = true;
                 break;

@@ -11,7 +11,6 @@ import java.io.Serializable;
 public class ProjectOwner extends People implements IThing, Serializable {
 
     private String uniqueId;
-
     private Company company;
 
     public void setUniqueId(String uniqueId) {

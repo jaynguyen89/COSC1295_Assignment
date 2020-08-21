@@ -17,4 +17,6 @@ public interface IStudentService {
     Boolean saveStudentPreferences(Preference preference);
 
     List<Preference> readAllStudentPreferencesFromFile();
+
+    Preference retrievePreferenceForStudent(String uniqueId);
 }

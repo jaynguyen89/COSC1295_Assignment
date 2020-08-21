@@ -16,13 +16,9 @@ import java.util.Map;
 public class Student implements IThing, Serializable {
 
     private int id;
-
     private String uniqueId;
-
     private HashMap<SKILLS, RANKINGS> skillRanking;
-
     private PERSONALITIES personality;
-
     private List<String> conflicters;
 
     public Student() {
@@ -58,6 +54,10 @@ public class Student implements IThing, Serializable {
         this.skillRanking = skillRanking;
     }
 
+    public HashMap<SKILLS, RANKINGS> getSkillRanking() {
+        return skillRanking;
+    }
+
     public void setPersonality(PERSONALITIES personality) {
         this.personality = personality;
     }
@@ -74,7 +74,7 @@ public class Student implements IThing, Serializable {
      * Creates a string information of Student to print out on console
      * @return String
      */
-    public String toString() {
+    public String display() {
         StringBuilder displayString = new StringBuilder(id + ". " + uniqueId + "\t\t");
 
         for (Map.Entry<SKILLS, RANKINGS> entry : skillRanking.entrySet())

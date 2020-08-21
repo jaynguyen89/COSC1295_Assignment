@@ -14,15 +14,10 @@ import java.util.Map;
 public class Project implements IThing, Serializable {
 
     private int id;
-
     private String uniqueId;
-
     private String projectTitle;
-
     private String briefDescription;
-
     private ProjectOwner projectOwner;
-
     private HashMap<SKILLS, RANKINGS> skillRanking;
 
     @Override
@@ -66,6 +61,10 @@ public class Project implements IThing, Serializable {
 
     public void setSkillRanking(HashMap<SKILLS, RANKINGS> rankings) {
         skillRanking = rankings;
+    }
+
+    public HashMap<SKILLS, RANKINGS> getSkillRanking() {
+        return skillRanking;
     }
 
     public Boolean validateAndPrettifyId() {

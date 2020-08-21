@@ -23,6 +23,10 @@ public final class SharedConstants {
 
     public static final int SHORTLISTED_NUM = 5;
 
+    public static final String ACTION_SWAP = "SWAP";
+
+    public static final String ACTION_ASSIGN = "ASSIGN";
+
     public static final String ADDRESS_FILE_NAME = "addresses.txt";
 
     public static final String COMPANY_FILE_NAME = "companies.txt";
@@ -38,4 +42,6 @@ public final class SharedConstants {
     public static final String PREFERENCE_FILE_NAME = "preferences.txt";
 
     public static final String PROJECT_TEAM_FILE_NAME = "project_teams.txt";
+
+    public static final String TEAM_FITNESS_METRICS_FILE_NAME = "fitness_metrics.txt";
 }
