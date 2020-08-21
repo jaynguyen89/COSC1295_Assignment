@@ -6,9 +6,7 @@ import cosc1295.providers.bases.ServiceLocator;
 import cosc1295.providers.services.CompanyService;
 import cosc1295.providers.services.ProjectOwnerService;
 import cosc1295.providers.services.ProjectService;
-import cosc1295.src.models.Company;
-import cosc1295.src.models.Project;
-import cosc1295.src.models.ProjectOwner;
+import cosc1295.src.models.*;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 
@@ -251,5 +249,98 @@ public final class Helpers {
     public static double round(double any) {
         DecimalFormat format = new DecimalFormat("#.##");
         return Double.parseDouble(format.format(any));
+    }
+
+    //null for any student, Key=true for leader type required, Value contains refused Student Unique Id
+    public static Pair<Boolean, List<String>> produceTeamRequirementsOnNewMember(List<Student> members, @NotNull List<Student> selectedStudents) {
+        boolean leaderTypeRequired = true;
+        List<String> refusedStudents = new ArrayList<>();
+
+        List<Student> teamMembers = new ArrayList<>();
+        teamMembers.addAll(members);
+        teamMembers.addAll(selectedStudents);
+
+        for (Student member : teamMembers) {
+            if (leaderTypeRequired && member.getPersonality().name().equals(SharedEnums.PERSONALITIES.A.name()))
+                leaderTypeRequired = false;
+
+            for (String studentUniqueId : member.getConflicters())
+                if (!refusedStudents.contains(studentUniqueId))
+                    refusedStudents.add(studentUniqueId);
+        }
+
+        if (!leaderTypeRequired && refusedStudents.size() == 0) return null;
+        return new Pair<>(
+            leaderTypeRequired,
+            refusedStudents.size() == 0 ? null : refusedStudents
+        );
+    }
+
+    public static Pair<Pair<Boolean, String>, Pair<Boolean, String>> isTeamRequirementsMutuallySatisfied(Pair<Team, Student> first, Pair<Team, Student> second) {
+        List<Student> firstTeamMembers = new ArrayList<>(first.getKey().getMembers());
+        firstTeamMembers.remove(first.getValue());
+
+        List<Student> secondTeamMembers = new ArrayList<>(second.getKey().getMembers());
+        if (second.getValue() != null) secondTeamMembers.remove(second.getValue());
+
+        Pair<Boolean, List<String>> firstTeamRequirements = produceTeamRequirementsOnNewMember(firstTeamMembers, new ArrayList<>());
+        Pair<Boolean, List<String>> secondTeamRequirements = produceTeamRequirementsOnNewMember(secondTeamMembers, new ArrayList<>());
+
+        //boolean isSatisfied = false;
+
+        assert firstTeamRequirements != null;
+        Boolean firstTeamLeaderRequired = firstTeamRequirements.getKey();
+        List<String> firstTeamRefusals = firstTeamRequirements.getValue();
+
+        assert secondTeamRequirements != null;
+        Boolean secondTeamLeaderRequired = secondTeamRequirements.getKey();
+        List<String> secondTeamRefusals = secondTeamRequirements.getValue();
+
+        //Team 2 does not send Student to Team 1, so no need to check Team 1,
+        //Only check if Student sent from Team 1 meets Team 2 requirements
+        if (second.getValue() == null) {
+            if (secondTeamLeaderRequired && secondTeamMembers.size() < 3)
+                secondTeamLeaderRequired = false;
+
+            if (secondTeamRefusals != null && secondTeamRefusals.contains(first.getValue().getUniqueId()))
+                return new Pair<>(null, new Pair<>(secondTeamLeaderRequired, first.getValue().getUniqueId()));
+
+            if (secondTeamLeaderRequired)
+                return new Pair<>(null, new Pair<>(true, null));
+        }
+        //Both Teams send Students to each other (swap), check both Team's requirements
+        else {
+            Pair<Boolean, String> firstTeamUnsatisfiedRequirements = checkForUnsatisfiedRequirements(
+                    second, firstTeamMembers, firstTeamLeaderRequired, firstTeamRefusals
+            );
+            Pair<Boolean, String> secondTeamUnsatisfiedRequirements = checkForUnsatisfiedRequirements(
+                    first, secondTeamMembers, secondTeamLeaderRequired, secondTeamRefusals
+            );
+
+            if (firstTeamUnsatisfiedRequirements != null || secondTeamUnsatisfiedRequirements != null)
+                return new Pair<>(firstTeamUnsatisfiedRequirements, secondTeamUnsatisfiedRequirements);
+        }
+
+        return null;
+    }
+
+    private static Pair<Boolean, String> checkForUnsatisfiedRequirements(
+            Pair<Team, Student> teamSelections,
+            List<Student> members,
+            Boolean isTeamLeaderRequired,
+            List<String> refusals
+    ) {
+        Pair<Boolean, String> unsatisfiedRequirements = null;
+
+        if (isTeamLeaderRequired && members.size() < 3)
+            isTeamLeaderRequired = false;
+
+        if (refusals != null && refusals.contains(teamSelections.getValue().getUniqueId()))
+            unsatisfiedRequirements = new Pair<>(isTeamLeaderRequired, teamSelections.getValue().getUniqueId());
+
+        if (isTeamLeaderRequired)
+            unsatisfiedRequirements = new Pair<>(true, null);
+
+        return unsatisfiedRequirements;
     }
 }

@@ -9,6 +9,7 @@ import cosc1295.src.models.*;
 import cosc1295.src.views.TeamView;
 import helpers.commons.SharedConstants;
 
+import helpers.utilities.Helpers;
 import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,6 +102,8 @@ public class TeamFormationController extends ControllerBase {
             selectedTeamToAssign.setProject(selectedProject);
 
         List<Student> selectedStudentsToAssign = teamView.selectStudentsToAssign(selectedTeamToAssign, students);
+        if (selectedStudentsToAssign.size() == 0) return null;
+
         for (Student student : selectedStudentsToAssign)
             selectedTeamToAssign.addMember(student);
 
@@ -108,22 +111,44 @@ public class TeamFormationController extends ControllerBase {
     }
 
     private List<Team> executeSwapTeamMembersFunction(List<Team> teams, List<Project> projects) {
-        Pair<Team, Student> teamAndStudentToRemove = teamView.selectTeamToAssignOrSwapStudents(
-                teams, SharedConstants.ACTION_SWAP, 1
-        );
+        @NotNull Team teamToRemoveStudent = null;
+        @NotNull Student studentToBeRemoved = null;
+        @NotNull Team teamToAssignStudent = null;
+        @Nullable Student studentToBeReplaced = null;
+        boolean shouldCreateNewTeam = false;
 
-        Team teamToRemoveStudent = teamAndStudentToRemove.getKey();
-        Student studentToBeRemoved = teamAndStudentToRemove.getValue();
+        boolean teamRequirementsMutuallySatisfied = false;
+        while (!teamRequirementsMutuallySatisfied) {
+            Pair<Team, Student> firstTeamAndStudentToRemove = teamView.selectTeamToAssignOrSwapStudents(
+                    teams, SharedConstants.ACTION_SWAP, 1
+            );
 
-        boolean shouldCreateNewTeam = teamView.promptForCreateNewTeam();
-        List<Team> selectableTeams = new ArrayList<>(teams);
-        selectableTeams.remove(teamToRemoveStudent);
-        Pair<Team, Student> teamSelection = createOrSelectTeam(
-                shouldCreateNewTeam, selectableTeams, projects, SharedConstants.ACTION_SWAP, 2
-        );
+            teamToRemoveStudent = firstTeamAndStudentToRemove.getKey();
+            studentToBeRemoved = firstTeamAndStudentToRemove.getValue();
 
-        Team teamToAssignStudent = teamSelection.getKey();
-        @Nullable Student studentToBeReplaced = teamSelection.getValue();
+            shouldCreateNewTeam = teamView.promptForCreateNewTeam();
+            List<Team> selectableTeams = new ArrayList<>(teams);
+            selectableTeams.remove(teamToRemoveStudent);
+            Pair<Team, Student> secondTeamAndStudentToBeRemoved = createOrSelectTeam(
+                    shouldCreateNewTeam, selectableTeams, projects, SharedConstants.ACTION_SWAP, 2
+            );
+
+            teamToAssignStudent = secondTeamAndStudentToBeRemoved.getKey();
+            studentToBeReplaced = secondTeamAndStudentToBeRemoved.getValue();
+
+            Pair<Pair<Boolean, String>, Pair<Boolean, String>> requirementChecks =
+                Helpers.isTeamRequirementsMutuallySatisfied(
+                    firstTeamAndStudentToRemove, secondTeamAndStudentToBeRemoved
+                );
+
+            if (requirementChecks == null) {
+                teamRequirementsMutuallySatisfied = true;
+                continue;
+            }
+
+            if (requirementChecks.getKey() != null) teamView.displayTeamFailedRequirements(requirementChecks.getKey(), 1);
+            if (requirementChecks.getValue() != null) teamView.displayTeamFailedRequirements(requirementChecks.getValue(), 2);
+        }
 
         boolean shouldReplaceProject = shouldCreateNewTeam || teamView.promptForShouldReplaceTeamProject();
         Project selectedProject = null;
@@ -158,7 +183,9 @@ public class TeamFormationController extends ControllerBase {
             return null;
         }
 
-        return new ArrayList<Team>() {{ add(teamToRemoveStudent); add(teamToAssignStudent); }};
+        Team finalTeamToRemoveStudent = teamToRemoveStudent;
+        Team finalTeamToAssignStudent = teamToAssignStudent;
+        return new ArrayList<Team>() {{ add(finalTeamToRemoveStudent); add(finalTeamToAssignStudent); }};
     }
 
     private Pair<Team, Student> createOrSelectTeam(

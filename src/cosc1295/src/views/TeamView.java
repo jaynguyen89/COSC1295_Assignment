@@ -1,17 +1,18 @@
 package cosc1295.src.views;
 
 import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import cosc1295.designs.Flasher;
 import cosc1295.src.models.Flash;
 import cosc1295.src.models.Project;
 import cosc1295.src.models.Student;
 import cosc1295.src.models.Team;
 import helpers.commons.SharedConstants;
+import helpers.commons.SharedEnums.PERSONALITIES;
 import helpers.commons.SharedEnums.FLASH_TYPES;
 
+import helpers.utilities.Helpers;
 import javafx.util.Pair;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -232,6 +233,8 @@ public class TeamView {
 
     public List<Student> selectStudentsToAssign(Team teamToAssign, List<Student> students) {
         List<Student> selectedStudents = new ArrayList<>();
+        Pair<Boolean, List<String>> teamRequirements = Helpers.produceTeamRequirementsOnNewMember(teamToAssign.getMembers(), selectedStudents);
+
         flasher.flash(new Flash("Please select Students to assign into new Team.\n", FLASH_TYPES.NONE));
 
         boolean taskDone = false;
@@ -240,7 +243,13 @@ public class TeamView {
             if (selectableCount == 0)
                 return selectedStudents;
 
-            for (Student student : students)
+            List<Student> selectableStudents = new ArrayList<>();
+            if (teamRequirements != null) {
+                if (teamRequirements.getValue() == null) selectableStudents.addAll(students);
+                else selectableStudents.addAll(removeRefusedStudents(students, teamRequirements.getValue()));
+            }
+
+            for (Student student : selectableStudents)
                 if (!teamToAssign.getMembers().contains(student) &&
                     !selectedStudents.contains(student)
                 )
@@ -249,6 +258,9 @@ public class TeamView {
 
             flasher.flash(new Flash(
                 "You can now select " + selectableCount + " more Student(s).\n" +
+                        (teamRequirements != null && teamRequirements.getKey()
+                                ? "This Team needs a Student with Leader personality type (A).\n" : SharedConstants.EMPTY_STRING
+                        ) +
                         "Your selection: (press Enter to skip and go back or if you have done selection)",
                 FLASH_TYPES.NONE
             ));
@@ -261,16 +273,17 @@ public class TeamView {
                 continue;
             }
 
-            for (Student student : students) {
+            Student selectedStudent = null;
+            for (Student student : selectableStudents) {
                 if (teamToAssign.getMembers().contains(student) ||
-                        selectedStudents.contains(student)
+                    selectedStudents.contains(student)
                 ) continue;
 
                 try {
                     if (student.getId() == Integer.parseInt(selectedStudentId) ||
                         student.getUniqueId().equals(selectedStudentId)
                     ) {
-                        selectedStudents.add(student);
+                        selectedStudent = student;
                         break;
                     }
                 } catch (NumberFormatException ex) {
@@ -278,9 +291,49 @@ public class TeamView {
                     inputScanner.nextLine();
                 }
             }
+
+            taskDone = selectedStudent != null;
+            if (!taskDone) {
+                flasher.flash(new Flash(
+                        "No Student was found with your selection. Please select again.\n" +
+                                "Press enter to continue.",
+                        FLASH_TYPES.ERROR
+                ));
+
+                inputScanner.nextLine();
+                continue;
+            }
+
+            if (teamToAssign.getMembers().size() + selectedStudents.size() < 3) {
+                selectedStudents.add(selectedStudent);
+                teamRequirements = Helpers.produceTeamRequirementsOnNewMember(teamToAssign.getMembers(), selectedStudents);
+            }
+            else if (teamRequirements.getKey() && (
+                     teamToAssign.getMembers().size() + selectedStudents.size() == 3
+            )) {
+                flasher.flash(new Flash(
+                    "You must select a Student with Leader personality type (A) " +
+                            "because this Team only has 1 slot left but no Leader is assigned.\n" +
+                            "Please press enter to select again.",
+                    FLASH_TYPES.ATTENTION
+                ));
+
+                inputScanner.nextLine();
+                taskDone = false;
+            }
         }
 
-        return null;
+        return selectedStudents;
+    }
+
+    private List<Student> removeRefusedStudents(List<Student> students, List<String> refusals) {
+        List<Student> selectableStudents = new ArrayList<>();
+
+        for (Student student : students)
+            if (!refusals.contains(student.getUniqueId()))
+                selectableStudents.add(student);
+
+        return selectableStudents;
     }
 
     public void printFitnessMetricsTable(List<Team> teams) {
@@ -303,5 +356,28 @@ public class TeamView {
 
         flasher.flash(new Flash("\nEnd of Team Fitness Metrics Table. Press enter to continue.", FLASH_TYPES.NONE));
         inputScanner.nextLine();
+    }
+
+    public void displayTeamFailedRequirements(Pair<Boolean, String> failures, int teamOrder) {
+        if (failures != null) {
+            String firstTeam = teamOrder == 1 ? "The first Team" : "The second Team";
+            String secondTeam = teamOrder == 1 ? "The second Team" : "The first Team";
+
+            String leaderMessage = !failures.getKey() ? SharedConstants.EMPTY_STRING
+                                                      : firstTeam + " requires a Student with Leader personality type (A). " +
+                                                        "You must select a Leader from " + secondTeam + ".\n";
+            String refusalMessage = failures.getValue() == null ? SharedConstants.EMPTY_STRING
+                                                                : firstTeam + " has a Student with personal conflict to Student " +
+                                                                  failures.getValue() + ", who is selected from " + secondTeam +
+                                                                  ". Please select another Student from " + secondTeam;
+
+            flasher.flash(new Flash(
+                "The Students selected from 2 Teams do not satisfied each other's requirement:\n" +
+                        "\t" + leaderMessage + "\t" + refusalMessage + "\nPress enter to select again.",
+                FLASH_TYPES.ERROR
+            ));
+
+            inputScanner.nextLine();
+        }
     }
 }
