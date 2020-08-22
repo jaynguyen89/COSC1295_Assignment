@@ -93,14 +93,14 @@ public class TeamView {
     }
 
     public Project selectTeamProject(List<Project> projects) {
-        flasher.flash(new Flash("Please select a Project to replace the current Team's Project:\n", FLASH_TYPES.NONE));
+        flasher.flash(new Flash("Please select a Project to set for the Team:\n", FLASH_TYPES.NONE));
         for (Project project : projects)
             flasher.flash(new Flash("\t" + project.display(), FLASH_TYPES.NONE));
 
         boolean taskDone = false;
         while (!taskDone) {
             flasher.flash(new Flash(
-                "Selected Project: (or press Enter if you change your mind and want to skip this)",
+                "\nSelected Project: (or press Enter if you change your mind and want to skip this)",
                 FLASH_TYPES.NONE
             ));
 
@@ -120,10 +120,11 @@ public class TeamView {
             } catch (NumberFormatException ex) {
                 flasher.flash(new Flash("Your selection is invalid. Press enter to continue.", FLASH_TYPES.ATTENTION));
                 inputScanner.nextLine();
+                continue;
             }
 
             flasher.flash(new Flash(
-                "No Team was found with your selection. Please select again.\n" +
+                "No Project was found with your selection. Please select again.\n" +
                         "Press enter to continue.",
                 FLASH_TYPES.ERROR
             ));
@@ -139,11 +140,24 @@ public class TeamView {
 
         if (action.equals(SharedConstants.ACTION_SWAP))
             flasher.flash(new Flash(
-                "Please select the " + (order == 1 ? "first" : "second") + " Team to swap Student:\n",
+                "\nPlease select the " + (order == 1 ? "first" : "second") + " Team to swap Student:\n",
                 FLASH_TYPES.NONE
             ));
-        else
+        else {
+            teams.removeIf(m -> m.getMembers().size() == SharedConstants.GROUP_LIMIT);
+            if (teams.size() == 0) {
+                flasher.flash(new Flash(
+                    "All Teams have enough 4 Students, unable to assign more." +
+                    "Please select another action. Press enter to continue.\n",
+                    FLASH_TYPES.NONE
+                ));
+
+                inputScanner.nextLine();
+                return null;
+            }
+
             flasher.flash(new Flash("Please select a team to assign Student:\n", FLASH_TYPES.NONE));
+        }
 
         for (Team team : teams)
             flasher.flash(new Flash("\t" + team.display(), FLASH_TYPES.NONE));
@@ -174,7 +188,7 @@ public class TeamView {
                 }
             }
 
-            if (!inputError) {
+            if (inputError) {
                 flasher.flash(new Flash(
                         "No Team was found with your selection. Please select again.\n" +
                                 "Press enter to continue.",
@@ -246,6 +260,9 @@ public class TeamView {
                 else selectableStudents.addAll(removeRefusedStudents(students, teamRequirements.getValue()));
             }
 
+            selectableStudents.removeAll(selectedStudents);
+            selectableStudents.removeAll(teamToAssign.getMembers());
+
             for (Student student : selectableStudents)
                 if (!teamToAssign.getMembers().contains(student) &&
                     !selectedStudents.contains(student)
@@ -271,6 +288,7 @@ public class TeamView {
             }
 
             Student selectedStudent = null;
+            boolean error = false;
             for (Student student : selectableStudents) {
                 if (teamToAssign.getMembers().contains(student) ||
                     selectedStudents.contains(student)
@@ -286,11 +304,14 @@ public class TeamView {
                 } catch (NumberFormatException ex) {
                     flasher.flash(new Flash("Your selection is invalid. Press enter to continue.", FLASH_TYPES.ATTENTION));
                     inputScanner.nextLine();
+
+                    error = true;
+                    break;
                 }
             }
 
             taskDone = selectedStudent != null;
-            if (!taskDone) {
+            if (!taskDone && !error) {
                 flasher.flash(new Flash(
                         "No Student was found with your selection, or the Student you select has been assigned to a Team.\n" +
                                 "Please select again. Press enter to continue.",
@@ -301,25 +322,29 @@ public class TeamView {
                 continue;
             }
 
-            if (teamRequirements.getKey() && (
-                     teamToAssign.getMembers().size() + selectedStudents.size() == 3) &&
-                     selectedStudent.getPersonality() != SharedEnums.PERSONALITIES.A
-            ) {
-                flasher.flash(new Flash(
-                        "You must select a Student with Leader personality type (A) " +
-                                "because this Team only has 1 slot left but no Leader is assigned.\n" +
-                                "Please press enter to select again.",
-                        FLASH_TYPES.ERROR
-                ));
+            if (selectedStudent != null) {
+                if (teamRequirements.getKey() && (
+                        teamToAssign.getMembers().size() + selectedStudents.size() == 3) &&
+                        selectedStudent.getPersonality() != SharedEnums.PERSONALITIES.A
+                ) {
+                    flasher.flash(new Flash(
+                            "You must select a Student with Leader personality type (A) " +
+                                    "because this Team only has 1 slot left but no Leader is assigned.\n" +
+                                    "Please press enter to select again.",
+                            FLASH_TYPES.ERROR
+                    ));
 
-                inputScanner.nextLine();
-                taskDone = false;
-                continue;
+                    inputScanner.nextLine();
+                    taskDone = false;
+                    continue;
+                }
+
+                selectedStudents.add(selectedStudent);
+                flasher.flash(new Flash("Student " + selectedStudent.getUniqueId() + " will be added to Team.\n", FLASH_TYPES.SUCCESS));
+                teamRequirements = Helpers.produceTeamRequirementsOnNewMember(teamToAssign.getMembers(), selectedStudents);
+
+                taskDone = selectedStudents.size() == SharedConstants.GROUP_LIMIT;
             }
-
-            selectedStudents.add(selectedStudent);
-            flasher.flash(new Flash("Student " + selectedStudent.getUniqueId() + " will be added to Team.", FLASH_TYPES.SUCCESS));
-            teamRequirements = Helpers.produceTeamRequirementsOnNewMember(teamToAssign.getMembers(), selectedStudents);
         }
 
         return selectedStudents;
@@ -353,7 +378,7 @@ public class TeamView {
             flasher.flash(new Flash(team.getFitnessMetrics().display() + "\n", FLASH_TYPES.NONE));
         }
 
-        flasher.flash(new Flash("\nEnd of Team Fitness Metrics Table. Press enter to continue.", FLASH_TYPES.NONE));
+        flasher.flash(new Flash("End of Team Fitness Metrics Table. Press enter to continue.", FLASH_TYPES.NONE));
         inputScanner.nextLine();
     }
 

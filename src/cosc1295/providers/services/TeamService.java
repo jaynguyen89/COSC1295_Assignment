@@ -38,6 +38,12 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
 
                 Project teamProject = new Project();
                 teamProject.setId(Integer.parseInt(teamTokens[1]));
+
+                String rawProject = getEntryFromFileById(teamTokens[1], DATA_TYPES.PROJECT);
+                String[] projectTokens = rawProject.split(SharedConstants.TEXT_DELIMITER);
+
+                teamProject.setUniqueId(projectTokens[1]);
+                teamProject.setProjectTitle(projectTokens[2]);
                 team.setProject(teamProject);
 
                 List<Student> members = new ArrayList<>();
@@ -98,10 +104,11 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
                     ));
 
             fitnessMetrics.setPreferenceSatisfaction(satisfactions);
+            fitnessMetrics.setAverageSkillShortfall(Double.parseDouble(fitnessTokens[13]));
 
             HashMap<String, Double> skillShortfall = new HashMap<>();
-            for (int i = 13; i < fitnessTokens.length; i++)
-                if (i % 2 == 0) {
+            for (int i = 14; i < fitnessTokens.length; i++)
+                if (i % 2 != 0) {
                     String projectUniqueId = fitnessTokens[i - 1];
                     double shortFallScore = Double.parseDouble(fitnessTokens[i]);
 
@@ -121,9 +128,14 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
         int newFitnessInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.FITNESS_METRICS);
         if (newFitnessInstanceId == -1) return false;
 
-        newTeam.getFitnessMetrics().setId(newFitnessInstanceId);
+        boolean fitnessSaved = false;
+        if (newTeam.getFitnessMetrics() != null) {
+            newTeam.getFitnessMetrics().setId(newFitnessInstanceId);
+            fitnessSaved = saveEntryToFile(newTeam.getFitnessMetrics().stringify(), DATA_TYPES.FITNESS_METRICS);
+        }
+        else fitnessSaved = true;
 
-        if (saveEntryToFile(newTeam.getFitnessMetrics().stringify(), DATA_TYPES.FITNESS_METRICS)) {
+        if (fitnessSaved) {
             int newTeamInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.PROJECT_TEAM);
             if (newTeamInstanceId == -1) return false;
 
@@ -138,8 +150,12 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
 
     @Override
     public boolean updateTeam(@NotNull Team newTeam) {
-        if (saveEntryToFile(newTeam.getFitnessMetrics().stringify(), DATA_TYPES.FITNESS_METRICS))
-            return saveEntryToFile(newTeam.stringify(), DATA_TYPES.PROJECT_TEAM);
+        if (updateEntryToFileById(
+            newTeam.getFitnessMetrics().stringify(),
+            newTeam.getFitnessMetrics().getId(),
+            DATA_TYPES.FITNESS_METRICS)
+        )
+            return updateEntryToFileById(newTeam.stringify(), newTeam.getId(), DATA_TYPES.PROJECT_TEAM);
 
         return false;
     }

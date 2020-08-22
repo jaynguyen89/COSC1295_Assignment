@@ -46,6 +46,8 @@ public class TeamFormationController extends ControllerBase {
             return false;
         }
 
+        setStudentDataInTeams(teams, students);
+
         String featureToRun;
         List<Student> unteamedStudents = filterUnteamedStudents(students, teams);
         if (teams.size() == 0) featureToRun = SharedConstants.ACTION_ASSIGN;
@@ -62,7 +64,7 @@ public class TeamFormationController extends ControllerBase {
 
         if (newTeams == null) return false;
         if (newTeams.size() != 0) {
-            boolean error;
+            boolean success;
 
             for (Team newTeam : newTeams) {
                 if (newTeam.getMembers().size() == SharedConstants.GROUP_LIMIT) {
@@ -70,10 +72,10 @@ public class TeamFormationController extends ControllerBase {
                     newTeam.setFitnessMetrics(teamFitness);
                 }
 
-                if (newTeam.isNewlyAdded()) error = teamService.SaveNewTeam(newTeam);
-                else error = teamService.updateTeam(newTeam);
+                if (newTeam.isNewlyAdded()) success = teamService.SaveNewTeam(newTeam);
+                else success = teamService.updateTeam(newTeam);
 
-                if (error) {
+                if (!success) {
                     teamView.displayUrgentFailedMessage();
                     return false;
                 }
@@ -83,17 +85,38 @@ public class TeamFormationController extends ControllerBase {
         return true;
     }
 
+    private void setStudentDataInTeams(List<Team> teams, List<Student> students) {
+        for (Team team : teams) {
+            List<Student> members = team.getMembers();
+            List<Student> memberData = new ArrayList<>();
+
+            for (Student member : members)
+                for (Student student : students)
+                    if (student.getUniqueId().equals(member.getUniqueId())) {
+                        memberData.add(student);
+                        break;
+                    }
+
+            team.setMembers(memberData);
+        }
+    }
+
     private List<Team> executeAssignStudentToTeamFunction(
         List<Student> students,
         List<Team> teams,
         List<Project> projects
     ) {
-        boolean shouldCreateNewTeam = teamView.promptForCreateNewTeam();
-        Team selectedTeamToAssign = createOrSelectTeam(
+        boolean shouldCreateNewTeam = teams.size() == 0 || teamView.promptForCreateNewTeam();
+        Pair<Team, Student> teamSelection = createOrSelectTeam(
                 shouldCreateNewTeam, teams, projects, SharedConstants.ACTION_ASSIGN, 0
-        ).getKey();
+        );
+        if (teamSelection == null) return null;
+        Team selectedTeamToAssign = teamSelection.getKey();
 
-        boolean shouldReplaceProject = shouldCreateNewTeam || teamView.promptForShouldReplaceTeamProject();
+        boolean shouldReplaceProject;
+        if (shouldCreateNewTeam) shouldReplaceProject = false;
+        else shouldReplaceProject = teamView.promptForShouldReplaceTeamProject();
+
         Project selectedProject = null;
         if (shouldReplaceProject)
             selectedProject = teamView.selectTeamProject(projects);
@@ -129,9 +152,15 @@ public class TeamFormationController extends ControllerBase {
             shouldCreateNewTeam = teamView.promptForCreateNewTeam();
             List<Team> selectableTeams = new ArrayList<>(teams);
             selectableTeams.remove(teamToRemoveStudent);
+            if (selectableTeams.size() == 0) {
+                teamView.displayInsufficientSelectionFor(Team.class);
+                shouldCreateNewTeam = true;
+            }
+
             Pair<Team, Student> secondTeamAndStudentToBeRemoved = createOrSelectTeam(
                     shouldCreateNewTeam, selectableTeams, projects, SharedConstants.ACTION_SWAP, 2
             );
+            if (secondTeamAndStudentToBeRemoved == null) return null;
 
             teamToAssignStudent = secondTeamAndStudentToBeRemoved.getKey();
             studentToBeReplaced = secondTeamAndStudentToBeRemoved.getValue();
@@ -150,17 +179,11 @@ public class TeamFormationController extends ControllerBase {
             if (requirementChecks.getValue() != null) teamView.displayTeamFailedRequirements(requirementChecks.getValue(), 2);
         }
 
-        boolean shouldReplaceProject = shouldCreateNewTeam || teamView.promptForShouldReplaceTeamProject();
-        Project selectedProject = null;
-        if (shouldReplaceProject)
-            selectedProject = teamView.selectTeamProject(projects);
-
-        if (selectedProject != null)
-            teamToAssignStudent.setProject(selectedProject);
-
-        boolean assignOrRemoveError = false;
-        if (shouldCreateNewTeam || studentToBeReplaced == null)
+        boolean assignOrRemoveError;
+        if (shouldCreateNewTeam || studentToBeReplaced == null) {
             teamToAssignStudent.addMember(studentToBeRemoved);
+            assignOrRemoveError = false;
+        }
         else
             assignOrRemoveError = !teamToAssignStudent.replaceMemberByUniqueId(
                                         studentToBeReplaced.getUniqueId(),
@@ -171,14 +194,15 @@ public class TeamFormationController extends ControllerBase {
                                         studentToBeReplaced
                                   );
 
-        if (!assignOrRemoveError) {
+        if (assignOrRemoveError) {
             teamView.displayAssignOrRemoveMemberError();
             return null;
         }
 
-        assignOrRemoveError = teamToRemoveStudent.removeMemberByUniqueId(studentToBeRemoved.getUniqueId());
+        assignOrRemoveError = !teamToRemoveStudent.removeMemberByUniqueId(studentToBeRemoved.getUniqueId());
+        teamToRemoveStudent.addMember(studentToBeReplaced);
 
-        if (!assignOrRemoveError) {
+        if (assignOrRemoveError) {
             teamView.displayAssignOrRemoveMemberError();
             return null;
         }
@@ -206,6 +230,7 @@ public class TeamFormationController extends ControllerBase {
         }
         else {
             Pair<Team, Student> teamToAssignStudent = teamView.selectTeamToSwapStudents(teams, action, order);
+            if (teamToAssignStudent == null) return null;
 
             teamInAction = teamToAssignStudent.getKey();
             studentInTeam = teamToAssignStudent.getValue();
@@ -215,19 +240,13 @@ public class TeamFormationController extends ControllerBase {
     }
 
     private List<Student> filterUnteamedStudents(List<Student> students, List<Team> teams) {
-        List<Student> unteamedStudents = new ArrayList<>();
+        List<Student> unteamedStudents = new ArrayList<>(students);
 
-        for (Student student : students) {
-            boolean teamed = false;
-
-            for (Team team : teams)
-                if (team.getMembers().contains(student)) {
-                    teamed = true;
-                    break;
-                }
-
-            if (!teamed) unteamedStudents.add(student);
-        }
+        for (Team team : teams)
+            for (Student member : team.getMembers())
+                unteamedStudents.removeIf(
+                    m -> m.getUniqueId().equals(member.getUniqueId())
+                );
 
         return unteamedStudents;
     }

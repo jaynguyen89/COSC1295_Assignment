@@ -114,7 +114,7 @@ public class Team implements IThing, Serializable {
         StringBuilder teamString = new StringBuilder(
             id + SharedConstants.TEXT_DELIMITER +
             project.getId() + SharedConstants.TEXT_DELIMITER +
-            fitnessMetrics.getId() + SharedConstants.TEXT_DELIMITER
+            (fitnessMetrics != null ? fitnessMetrics.getId() : 0) + SharedConstants.TEXT_DELIMITER
         );
 
         for (Student member : members)

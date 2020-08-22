@@ -279,7 +279,8 @@ public final class Helpers {
         );
     }
 
-    public static Pair<Pair<Boolean, String>, Pair<Boolean, String>> isTeamRequirementsMutuallySatisfied(Pair<Team, Student> first, Pair<Team, Student> second) {
+    public static Pair<Pair<Boolean, String>, Pair<Boolean, String>>
+    isTeamRequirementsMutuallySatisfied(Pair<Team, Student> first, Pair<Team, Student> second) {
         List<Student> firstTeamMembers = new ArrayList<>(first.getKey().getMembers());
         firstTeamMembers.remove(first.getValue());
 
@@ -289,13 +290,13 @@ public final class Helpers {
         Pair<Boolean, List<String>> firstTeamRequirements = produceTeamRequirementsOnNewMember(firstTeamMembers, new ArrayList<>());
         Pair<Boolean, List<String>> secondTeamRequirements = produceTeamRequirementsOnNewMember(secondTeamMembers, new ArrayList<>());
 
-        assert firstTeamRequirements != null;
-        Boolean firstTeamLeaderRequired = firstTeamRequirements.getKey();
-        List<String> firstTeamRefusals = firstTeamRequirements.getValue();
+        //assert firstTeamRequirements != null;
+        Boolean firstTeamLeaderRequired = firstTeamRequirements != null && firstTeamRequirements.getKey();
+        List<String> firstTeamRefusals = firstTeamRequirements == null ? null : firstTeamRequirements.getValue();
 
-        assert secondTeamRequirements != null;
-        Boolean secondTeamLeaderRequired = secondTeamRequirements.getKey();
-        List<String> secondTeamRefusals = secondTeamRequirements.getValue();
+        //assert secondTeamRequirements != null;
+        Boolean secondTeamLeaderRequired = secondTeamRequirements!= null && secondTeamRequirements.getKey();
+        List<String> secondTeamRefusals = secondTeamRequirements == null ? null : secondTeamRequirements.getValue();
 
         //Team 2 does not send Student to Team 1, so no need to check Team 1,
         //Only check if Student sent from Team 1 meets Team 2 requirements
@@ -346,5 +347,65 @@ public final class Helpers {
             unsatisfiedRequirements = new Pair<>(true, null);
 
         return unsatisfiedRequirements;
+    }
+
+    //Key indicates if Personality is imbalance, when Key==true,
+    // Value indicates the Personalities it requires for the next added member (not the current one)
+    public static Pair<Boolean, List<SharedEnums.PERSONALITIES>> checkImbalancePersonalityOnAssign(Pair<Team, Student> selection) {
+        List<SharedEnums.PERSONALITIES> allPersonalities = new ArrayList<SharedEnums.PERSONALITIES>() {{
+            add(SharedEnums.PERSONALITIES.A);
+            add(SharedEnums.PERSONALITIES.B);
+            add(SharedEnums.PERSONALITIES.C);
+            add(SharedEnums.PERSONALITIES.D);
+        }};
+        List<Student> teamMembers = new ArrayList<>(selection.getKey().getMembers());
+
+        //Team has no member, no PERSONALITIES enforcement is required yet.
+        if (teamMembers.size() < 1) return null;
+
+        teamMembers.add(selection.getValue()); //Add the student to Team, so we have a prospective Team to inspect
+        //Student assignee = selection.getValue();
+
+        List<SharedEnums.PERSONALITIES> teamPersonalities = new ArrayList<>();
+        for (Student member : teamMembers)
+            if (!teamPersonalities.contains(member.getPersonality()))
+                teamPersonalities.add(member.getPersonality());
+
+        //The prospective team has 3 or more Personality types, no requirement is needed
+        if (teamPersonalities.size() > 2) return null;
+
+        //The prospective team has only 1 or 2 Personality types, but team has rooms for 2 more Personality types
+        //So personality enforcement is not yet required, but indicates Team's requirement on Personality
+        List<SharedEnums.PERSONALITIES> required = new ArrayList<>(allPersonalities);
+        required.removeAll(teamPersonalities);
+
+        if (teamMembers.size() == 1 || (
+            teamMembers.size() == 2 && teamPersonalities.size() >= 1) || (
+            teamMembers.size() == 3 && teamPersonalities.size() >= 2)
+        ) return new Pair<>(false, required);
+
+        return new Pair<>(true, required);
+    }
+
+    public static
+    Pair<
+        Pair<Boolean, List<SharedEnums.PERSONALITIES>>,
+        Pair<Boolean, List<SharedEnums.PERSONALITIES>>
+    > isImbalancePersonalityOnSwap(Pair<Team, Student> first, Pair<Team, Student> second) {
+        Team firstTeam = first.getKey();
+        Team secondTeam = second.getKey();
+
+        firstTeam.getMembers().remove(first.getValue());
+        secondTeam.getMembers().remove(second.getValue());
+
+        Pair<Boolean, List<SharedEnums.PERSONALITIES>> firstTeamImbalanceCheck =
+                checkImbalancePersonalityOnAssign(new Pair<>(firstTeam, second.getValue()));
+        Pair<Boolean, List<SharedEnums.PERSONALITIES>> secondTeamImbalanceCheck =
+                checkImbalancePersonalityOnAssign(new Pair<>(secondTeam, first.getValue()));
+
+        if (firstTeamImbalanceCheck != null || secondTeamImbalanceCheck != null)
+            return new Pair<>(firstTeamImbalanceCheck, secondTeamImbalanceCheck);
+
+        return null;
     }
 }

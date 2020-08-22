@@ -106,6 +106,8 @@ public class TeamFitness implements Serializable {
 
         for (Map.Entry<SKILLS, Double> entry : teamCompetencyBySkills.entrySet())
             fitnessString.append(entry.getKey().name())
+                         .append(SharedConstants.TEXT_DELIMITER)
+                         .append(entry.getValue())
                          .append(SharedConstants.TEXT_DELIMITER);
 
         fitnessString.append(preferenceSatisfaction.getKey())
@@ -113,6 +115,9 @@ public class TeamFitness implements Serializable {
                      .append(preferenceSatisfaction.getValue().getKey())
                      .append(SharedConstants.TEXT_DELIMITER)
                      .append(preferenceSatisfaction.getValue().getValue())
+                     .append(SharedConstants.TEXT_DELIMITER);
+
+        fitnessString.append(averageSkillShortfall)
                      .append(SharedConstants.TEXT_DELIMITER);
 
         for (Map.Entry<String, Double> entry : skillShortFall.entrySet())

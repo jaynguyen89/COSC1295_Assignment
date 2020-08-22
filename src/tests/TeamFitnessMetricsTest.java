@@ -143,18 +143,18 @@ public class TeamFitnessMetricsTest {
 
             //Asserting average Team's satisfaction
             TestCase.assertEquals(
-                i == 3 ? 25.0 : (i == 4 ? 0.0 : 25.0),
+                i == 3 ? 25.0 : (i == 4 ? 75.0 : 100.0),
                 fitnessMetrics.getPreferenceSatisfaction().getKey()
             );
 
             //Asserting average satisfaction by first and second preference
             TestCase.assertEquals(
-                i == 3 ? 25.0 : (i == 4 ? 0.0 : 25.0),
+                i == 3 ? 0.0 : (i == 4 ? 25.0 : 50.0),
                 fitnessMetrics.getPreferenceSatisfaction().getValue().getKey()
             );
 
             TestCase.assertEquals(
-                i == 3 ? 0.0 : (i == 4 ? 0.0 : 0.0),
+                i == 3 ? 25.0 : (i == 4 ? 50.0 : 50.0),
                 fitnessMetrics.getPreferenceSatisfaction().getValue().getValue()
             );
         }
