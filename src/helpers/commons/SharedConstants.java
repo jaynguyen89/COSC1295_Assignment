@@ -15,6 +15,8 @@ public final class SharedConstants {
 
     public static final String NA = "N/A";
 
+    public static final int DECIMAL_PRECISION = 2;
+
     public static final int GROUP_LIMIT = 4; //Number of students in a group
 
     public static final int MAX_CONFLICTERS = 2;

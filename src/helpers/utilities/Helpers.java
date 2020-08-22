@@ -11,7 +11,6 @@ import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 
 import javafx.util.Pair;
-
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -246,8 +245,12 @@ public final class Helpers {
         return listToSort;
     }
 
-    public static double round(double any) {
-        DecimalFormat format = new DecimalFormat("#.##");
+    public static double round(double any, int precision) {
+        precision = precision == 0 ? 1 : Math.min(precision, 3);
+
+        DecimalFormat format = new DecimalFormat(
+                precision == 2 ? "#.##" : "#.###"
+        );
         return Double.parseDouble(format.format(any));
     }
 
@@ -285,8 +288,6 @@ public final class Helpers {
 
         Pair<Boolean, List<String>> firstTeamRequirements = produceTeamRequirementsOnNewMember(firstTeamMembers, new ArrayList<>());
         Pair<Boolean, List<String>> secondTeamRequirements = produceTeamRequirementsOnNewMember(secondTeamMembers, new ArrayList<>());
-
-        //boolean isSatisfied = false;
 
         assert firstTeamRequirements != null;
         Boolean firstTeamLeaderRequired = firstTeamRequirements.getKey();
@@ -333,6 +334,9 @@ public final class Helpers {
         Pair<Boolean, String> unsatisfiedRequirements = null;
 
         if (isTeamLeaderRequired && members.size() < 3)
+            isTeamLeaderRequired = false;
+
+        if (members.size() == 3 && teamSelections.getValue().getPersonality() == SharedEnums.PERSONALITIES.A)
             isTeamLeaderRequired = false;
 
         if (refusals != null && refusals.contains(teamSelections.getValue().getUniqueId()))

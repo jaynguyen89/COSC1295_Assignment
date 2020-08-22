@@ -112,13 +112,15 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
         return preferences;
     }
 
+    //Reversed traversal is needed because only the last preference entry of the student is effective
     @Override
     public Preference retrievePreferenceForStudent(String uniqueId) {
         List<Preference> allPreferences = readAllStudentPreferencesFromFile();
-        for (Preference preference : allPreferences)
-            if (preference.getStudentUniqueId().equals(uniqueId))
-                return preference;
 
-        return null;
+        for (int i = allPreferences.size() - 1; i >= 0; i--)
+            if (allPreferences.get(i).getStudentUniqueId().equals(uniqueId))
+                return allPreferences.get(i);
+
+        return null; //no preference entry found
     }
 }

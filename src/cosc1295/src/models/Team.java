@@ -4,6 +4,7 @@ import cosc1295.src.models.generic.IThing;
 import helpers.commons.SharedConstants;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Team implements IThing, Serializable {
@@ -11,7 +12,7 @@ public class Team implements IThing, Serializable {
     private int id;
     private transient String uniqueId;
     private TeamFitness fitnessMetrics;
-    private List<Student> members;
+    private List<Student> members = new ArrayList<>();
     private Project project;
     private transient boolean newlyAdded;
 

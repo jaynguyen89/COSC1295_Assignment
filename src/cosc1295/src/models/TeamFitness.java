@@ -14,6 +14,7 @@ public class TeamFitness implements Serializable {
     private double averageTeamSkillCompetency;
     private HashMap<SKILLS, Double> teamCompetencyBySkills;
     private Pair<Double, Pair<Double, Double>> preferenceSatisfaction;
+    private double averageSkillShortfall;
     private HashMap<String, Double> skillShortFall;
 
     public void setId(int id) {
@@ -77,6 +78,14 @@ public class TeamFitness implements Serializable {
         );
     }
 
+    public void setAverageSkillShortfall(double score) {
+        averageSkillShortfall = score;
+    }
+
+    public double getAverageSkillShortfall() {
+        return averageSkillShortfall;
+    }
+
     public void setSkillShortFall(HashMap<String, Double> scores) {
         skillShortFall = scores;
     }
@@ -136,7 +145,10 @@ public class TeamFitness implements Serializable {
         fitnessString.append("\t\t\tSecond Preference Satisfaction: ")
                      .append(preferenceSatisfaction.getValue().getValue()).append("\n");
 
+        fitnessString.append("\t\tAverage Team Skill Shortfall: ")
+                     .append(averageSkillShortfall).append("\n");
         fitnessString.append("\t\tSkill Shortfalls By Projects:").append("\n");
+
         int i = 0;
         for (Map.Entry<String, Double> entry : skillShortFall.entrySet()) {
             fitnessString.append("\t\t\t")

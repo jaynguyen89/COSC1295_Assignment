@@ -119,7 +119,7 @@ public class TeamFormationController extends ControllerBase {
 
         boolean teamRequirementsMutuallySatisfied = false;
         while (!teamRequirementsMutuallySatisfied) {
-            Pair<Team, Student> firstTeamAndStudentToRemove = teamView.selectTeamToAssignOrSwapStudents(
+            Pair<Team, Student> firstTeamAndStudentToRemove = teamView.selectTeamToSwapStudents(
                     teams, SharedConstants.ACTION_SWAP, 1
             );
 
@@ -205,7 +205,7 @@ public class TeamFormationController extends ControllerBase {
             teamInAction.setProject(selectedProjectForNewTeam);
         }
         else {
-            Pair<Team, Student> teamToAssignStudent = teamView.selectTeamToAssignOrSwapStudents(teams, action, order);
+            Pair<Team, Student> teamToAssignStudent = teamView.selectTeamToSwapStudents(teams, action, order);
 
             teamInAction = teamToAssignStudent.getKey();
             studentInTeam = teamToAssignStudent.getValue();
@@ -260,7 +260,7 @@ public class TeamFormationController extends ControllerBase {
             return false;
         }
 
-        Team selectedTeam = teamView.selectTeamToAssignOrSwapStudents(
+        Team selectedTeam = teamView.selectTeamToSwapStudents(
                 teams, SharedConstants.ACTION_ASSIGN, 0
         ).getKey();
         if (selectedTeam == null) return false;
@@ -280,5 +280,17 @@ public class TeamFormationController extends ControllerBase {
         }
 
         return true;
+    }
+
+    public List<Student> getAssignableStudentsForTest(List<Student> students, List<Team> teams) {
+        return filterUnteamedStudents(students, teams);
+    }
+
+    public List<Team> runFeatureAssignStudentForTest(
+        List<Student> students,
+        List<Team> teams,
+        List<Project> projects
+    ) {
+        return executeAssignStudentToTeamFunction(students, teams, projects);
     }
 }

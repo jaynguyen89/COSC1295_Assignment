@@ -1,18 +1,19 @@
 package cosc1295.src.views;
 
 import com.sun.istack.internal.NotNull;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import cosc1295.designs.Flasher;
 import cosc1295.src.models.Flash;
 import cosc1295.src.models.Project;
 import cosc1295.src.models.Student;
 import cosc1295.src.models.Team;
 import helpers.commons.SharedConstants;
-import helpers.commons.SharedEnums.PERSONALITIES;
+import helpers.commons.SharedEnums;
 import helpers.commons.SharedEnums.FLASH_TYPES;
 
 import helpers.utilities.Helpers;
 import javafx.util.Pair;
+
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -20,7 +21,7 @@ import java.util.Scanner;
 public class TeamView {
 
     private final Flasher flasher = Flasher.getInstance();
-    private final Scanner inputScanner;
+    private Scanner inputScanner;
 
     public TeamView() {
         inputScanner = new Scanner(System.in);
@@ -28,7 +29,7 @@ public class TeamView {
 
     public <T> void displayInsufficientSelectionFor(Class<T> type) {
         flasher.flash(new Flash(
-            "The number of " + type.getSimpleName() + "is insufficient to assign to teams. Please go back to add more " + type.getSimpleName(),
+            "The number of " + type.getSimpleName() + " is insufficient to assign to teams. Please go back to add more " + type.getSimpleName() + ".",
             FLASH_TYPES.ATTENTION
         ));
 
@@ -132,11 +133,7 @@ public class TeamView {
         return null;
     }
 
-    public Pair<Team, Student> selectTeamToAssignOrSwapStudents(
-        List<Team> teams,
-        @NotNull String action,
-        int order
-    ) {
+    public Pair<Team, Student> selectTeamToSwapStudents(List<Team> teams, @NotNull String action, int order) {
         Team selectedTeam = null;
         Student selectedStudent = null;
 
@@ -153,7 +150,7 @@ public class TeamView {
 
         boolean taskDone = false;
         while (!taskDone) {
-            flasher.flash(new Flash("Your Selection:", FLASH_TYPES.NONE));
+            flasher.flash(new Flash("\nYour Selection:", FLASH_TYPES.NONE));
 
             String selectedTeamId = inputScanner.next();
             inputScanner.nextLine();
@@ -200,7 +197,7 @@ public class TeamView {
 
             taskDone = false;
             while (!taskDone) {
-                flasher.flash(new Flash("Your Selection:", FLASH_TYPES.NONE));
+                flasher.flash(new Flash("\nYour Selection:", FLASH_TYPES.NONE));
 
                 String selectedStudentId = inputScanner.next();
                 inputScanner.nextLine();
@@ -257,7 +254,7 @@ public class TeamView {
 
 
             flasher.flash(new Flash(
-                "You can now select " + selectableCount + " more Student(s).\n" +
+                "\nYou can now select " + selectableCount + " more Student(s).\n" +
                         (teamRequirements != null && teamRequirements.getKey()
                                 ? "This Team needs a Student with Leader personality type (A).\n" : SharedConstants.EMPTY_STRING
                         ) +
@@ -295,8 +292,8 @@ public class TeamView {
             taskDone = selectedStudent != null;
             if (!taskDone) {
                 flasher.flash(new Flash(
-                        "No Student was found with your selection. Please select again.\n" +
-                                "Press enter to continue.",
+                        "No Student was found with your selection, or the Student you select has been assigned to a Team.\n" +
+                                "Please select again. Press enter to continue.",
                         FLASH_TYPES.ERROR
                 ));
 
@@ -304,23 +301,25 @@ public class TeamView {
                 continue;
             }
 
-            if (teamToAssign.getMembers().size() + selectedStudents.size() < 3) {
-                selectedStudents.add(selectedStudent);
-                teamRequirements = Helpers.produceTeamRequirementsOnNewMember(teamToAssign.getMembers(), selectedStudents);
-            }
-            else if (teamRequirements.getKey() && (
-                     teamToAssign.getMembers().size() + selectedStudents.size() == 3
-            )) {
+            if (teamRequirements.getKey() && (
+                     teamToAssign.getMembers().size() + selectedStudents.size() == 3) &&
+                     selectedStudent.getPersonality() != SharedEnums.PERSONALITIES.A
+            ) {
                 flasher.flash(new Flash(
-                    "You must select a Student with Leader personality type (A) " +
-                            "because this Team only has 1 slot left but no Leader is assigned.\n" +
-                            "Please press enter to select again.",
-                    FLASH_TYPES.ATTENTION
+                        "You must select a Student with Leader personality type (A) " +
+                                "because this Team only has 1 slot left but no Leader is assigned.\n" +
+                                "Please press enter to select again.",
+                        FLASH_TYPES.ERROR
                 ));
 
                 inputScanner.nextLine();
                 taskDone = false;
+                continue;
             }
+
+            selectedStudents.add(selectedStudent);
+            flasher.flash(new Flash("Student " + selectedStudent.getUniqueId() + " will be added to Team.", FLASH_TYPES.SUCCESS));
+            teamRequirements = Helpers.produceTeamRequirementsOnNewMember(teamToAssign.getMembers(), selectedStudents);
         }
 
         return selectedStudents;
@@ -379,5 +378,10 @@ public class TeamView {
 
             inputScanner.nextLine();
         }
+    }
+
+    public void sendTestInput(ByteArrayInputStream in) {
+        System.setIn(in);
+        inputScanner = new Scanner(System.in);
     }
 }

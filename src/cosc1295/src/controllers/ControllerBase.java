@@ -6,20 +6,22 @@ import cosc1295.src.models.*;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 import helpers.utilities.Helpers;
+
 import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import static java.lang.Math.abs;
+import static java.lang.Math.sqrt;
 
-class ControllerBase {
+public class ControllerBase {
 
     protected final Flasher flasher = Flasher.getInstance();
     private final StudentService studentService = new StudentService();
 
-    protected TeamFitness calculateTeamFitnessMetricsFor(Team team, List<Project> projects) {
+    public TeamFitness calculateTeamFitnessMetricsFor(Team team, List<Project> projects) {
         TeamFitness teamFitness = team.getFitnessMetrics() == null
                                   ? new TeamFitness()
                                   : team.getFitnessMetrics();
@@ -40,6 +42,8 @@ class ControllerBase {
                     skillCompetencies.put(entry.getKey(), (double) entry.getValue().getValue());
 
             Preference memberPreferences = studentService.retrievePreferenceForStudent(member.getUniqueId());
+            if (memberPreferences == null) continue;
+
             for (Map.Entry<String, Integer> entry : memberPreferences.getPreference().entrySet()) {
                 if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 4)
                     satisfactions = new Pair<>(satisfactions.getKey() + 1, satisfactions.getValue());
@@ -73,17 +77,30 @@ class ControllerBase {
         }
 
         teamFitness.setSkillShortFall(skillShortFalls);
+        teamFitness.setAverageSkillShortfall(computeAverageTeamSkillShortFall(skillShortFalls));
 
         return teamFitness;
     }
 
+    private double computeAverageTeamSkillShortFall(HashMap<String, Double> skillShortfall) {
+        double totalShortfall = 0;
+        for (Map.Entry<String, Double> entry : skillShortfall.entrySet())
+            totalShortfall += entry.getValue();
+
+        return Helpers.round(totalShortfall / skillShortfall.size(), SharedConstants.DECIMAL_PRECISION);
+    }
+
     private Pair<Double, Pair<Double, Double>> computeAverageSatisfactions(Pair<Double, Double> satisfactions) {
         return new Pair<>(
-                Helpers.round((satisfactions.getKey() + satisfactions.getValue()) * 100 / SharedConstants.GROUP_LIMIT),
-                new Pair<>(
-                        Helpers.round(satisfactions.getKey() * 100 / SharedConstants.GROUP_LIMIT),
-                        Helpers.round(satisfactions.getValue() * 100 / SharedConstants.GROUP_LIMIT)
-                ));
+            Helpers.round(
+                (satisfactions.getKey() + satisfactions.getValue()) * 100 / SharedConstants.GROUP_LIMIT,
+                SharedConstants.DECIMAL_PRECISION
+            ),
+            new Pair<>(
+                Helpers.round(satisfactions.getKey() * 100 / SharedConstants.GROUP_LIMIT, SharedConstants.DECIMAL_PRECISION),
+                Helpers.round(satisfactions.getValue() * 100 / SharedConstants.GROUP_LIMIT, SharedConstants.DECIMAL_PRECISION)
+            )
+        );
     }
 
     private Pair<Double, HashMap<SharedEnums.SKILLS, Double>> computeAverageCompetencies(HashMap<SharedEnums.SKILLS, Double> competencies) {
@@ -92,7 +109,7 @@ class ControllerBase {
         for (Map.Entry<SharedEnums.SKILLS, Double> competency : competencies.entrySet())
             averageCompetencies.put(
                     competency.getKey(),
-                    Helpers.round(competency.getValue() / SharedConstants.GROUP_LIMIT)
+                    Helpers.round(competency.getValue() / SharedConstants.GROUP_LIMIT, SharedConstants.DECIMAL_PRECISION)
             );
 
         double totalCompetency = 0;
@@ -100,8 +117,46 @@ class ControllerBase {
             totalCompetency += entry.getValue();
 
         return new Pair<>(
-                Helpers.round(totalCompetency / SharedConstants.GROUP_LIMIT),
+                Helpers.round(totalCompetency / SharedConstants.GROUP_LIMIT, SharedConstants.DECIMAL_PRECISION),
                 averageCompetencies
         );
+    }
+
+    public List<Double> calculateSkillCompetencyStandardDeviation(List<Team> teams, List<Project> projects) {
+        double totalCompetencyAcrossProjects = 0;
+        double totalSatisfactionAcrossProjects = 0;
+        double totalShortfallsAcrossTeams = 0;
+
+        for (Team team : teams) {
+            TeamFitness teamFitness = calculateTeamFitnessMetricsFor(team, projects);
+            team.setFitnessMetrics(teamFitness);
+
+            totalCompetencyAcrossProjects += teamFitness.getAverageTeamSkillCompetency();
+            totalSatisfactionAcrossProjects += teamFitness.getPreferenceSatisfaction().getKey();
+            totalShortfallsAcrossTeams += teamFitness.getAverageSkillShortfall();
+        }
+
+        double averageAllTeamsCompetency = totalCompetencyAcrossProjects / teams.size();
+        double averageAllTeamsSatisfaction = totalSatisfactionAcrossProjects / teams.size();
+        double averageAllTeamsShortfall = totalShortfallsAcrossTeams / teams.size();
+
+        double sumCompetencyDeltaSquares = 0;
+        double sumSatisfactionDeltaSquares = 0;
+        double sumShortfallDeltaSquares = 0;
+        for (Team team : teams) {
+            double competencyDelta = abs(team.getFitnessMetrics().getAverageTeamSkillCompetency() - averageAllTeamsCompetency);
+            double satisfactionDelta = abs(team.getFitnessMetrics().getPreferenceSatisfaction().getKey() - averageAllTeamsSatisfaction);
+            double shortfallDelta = abs(team.getFitnessMetrics().getAverageSkillShortfall() - averageAllTeamsShortfall);
+
+            sumCompetencyDeltaSquares += (competencyDelta * competencyDelta);
+            sumSatisfactionDeltaSquares += (satisfactionDelta * satisfactionDelta);
+            sumShortfallDeltaSquares += (shortfallDelta * shortfallDelta);
+        }
+
+        double competencySD = Helpers.round(sqrt(sumCompetencyDeltaSquares / teams.size()), SharedConstants.DECIMAL_PRECISION + 1);
+        double satisfactionSD = Helpers.round(sqrt(sumSatisfactionDeltaSquares / teams.size()), SharedConstants.DECIMAL_PRECISION + 1);
+        double shortfallSD = Helpers.round(sqrt(sumShortfallDeltaSquares / teams.size()), SharedConstants.DECIMAL_PRECISION + 1);
+
+        return new ArrayList<Double>() {{ add(competencySD); add(satisfactionSD); add(shortfallSD); }};
     }
 }
