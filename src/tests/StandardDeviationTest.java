@@ -116,7 +116,7 @@ public class StandardDeviationTest {
         double set2SatisfactionSD = controllerBase.calculateSkillCompetencyStandardDeviation(testData2, projects).get(1);
 
         //Assert correct preference satisfaction SD for each Teams set
-        TestCase.assertEquals(11.785, set1SatisfactionSD);
+        TestCase.assertEquals(31.18, set1SatisfactionSD);
         TestCase.assertEquals(23.57, set2SatisfactionSD);
     }
 
