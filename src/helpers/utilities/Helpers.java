@@ -295,7 +295,7 @@ public final class Helpers {
         List<String> firstTeamRefusals = firstTeamRequirements == null ? null : firstTeamRequirements.getValue();
 
         //assert secondTeamRequirements != null;
-        Boolean secondTeamLeaderRequired = secondTeamRequirements!= null && secondTeamRequirements.getKey();
+        boolean secondTeamLeaderRequired = secondTeamRequirements!= null && secondTeamRequirements.getKey();
         List<String> secondTeamRefusals = secondTeamRequirements == null ? null : secondTeamRequirements.getValue();
 
         //Team 2 does not send Student to Team 1, so no need to check Team 1,

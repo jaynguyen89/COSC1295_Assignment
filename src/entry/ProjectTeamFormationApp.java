@@ -90,7 +90,7 @@ public final class ProjectTeamFormationApp {
                 appFacade.runAddProjectFeature();
                 break;
             case D:
-                appFacade.runStudentPersonalityCapturingFeature();;
+                appFacade.runStudentPersonalityCapturingFeature();
                 break;
             case E:
                 appFacade.runStudentPreferenceCapturingFeature();

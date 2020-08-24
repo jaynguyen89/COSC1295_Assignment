@@ -9,7 +9,7 @@ import cosc1295.src.views.CompanyView;
 public class CompanyController extends ControllerBase {
 
     private final CompanyView companyView;
-    AddressController addressController;
+    private final AddressController addressController;
     private final ICompanyService companyService;
 
     public CompanyController() {

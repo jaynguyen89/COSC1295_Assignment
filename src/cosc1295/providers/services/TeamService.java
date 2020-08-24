@@ -128,7 +128,7 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
         int newFitnessInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.FITNESS_METRICS);
         if (newFitnessInstanceId == -1) return false;
 
-        boolean fitnessSaved = false;
+        boolean fitnessSaved;
         if (newTeam.getFitnessMetrics() != null) {
             newTeam.getFitnessMetrics().setId(newFitnessInstanceId);
             fitnessSaved = saveEntryToFile(newTeam.getFitnessMetrics().stringify(), DATA_TYPES.FITNESS_METRICS);
