@@ -33,8 +33,8 @@ public final class Helpers {
      * @return boolean
      */
     public static boolean validateMenuSelection(@NotNull String selection) {
-        List<String> allMenuItems = SharedEnums.getAllEnumItemsAsList(
-                SharedEnums.APPLICATION_MENU.class
+        List<String> allMenuItems = SharedEnums.getAllEnumAttributesAsList(
+            SharedEnums.APPLICATION_MENU.class
         );
 
         return allMenuItems.contains(selection);
@@ -43,25 +43,25 @@ public final class Helpers {
     /**
      * Validates user inputs for the Confirmation Dialog for `Y=YES` or `N=NO` selection.
      * Checks the input against an Enum class's attribute names and values.
-     * Returns true if selection is found in Enum, otherwise false.
+     * Returns true if input selection is found in Enum, otherwise false.
      * @param confirmation String
      * @return boolean
      */
     public static boolean validateConfirmation(String confirmation) {
-        List<String> confirmationItems = SharedEnums.getAllEnumItemsAsList(
+        List<String> confirmationItems = SharedEnums.getAllEnumAttributesAsList(
             SharedEnums.CONFIRMATIONS.class
-        );
+        ); //Get {"Y", "N"}
 
         List<String> confirmationValues = Stream.of(SharedEnums.CONFIRMATIONS.values())
                 .map(SharedEnums.CONFIRMATIONS::getValue)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); //Get {"Yes", "No"}
 
         return confirmationItems.contains(confirmation) ||
                confirmationValues.contains(confirmation);
     }
 
     /**
-     * Returns true if a string is NULL or empty by its own or empty after trimming spaces.
+     * Returns true if a string is NULL or empty by its own, or empty after trimming spaces.
      * @param any String
      * @return boolean
      */
@@ -71,6 +71,8 @@ public final class Helpers {
 
     /**
      * Pre-processes a string basing on strictMode. Turns an ugly string to a pretty one.
+     * strictMode == false -> only trim and remove spaces.
+     * strictMode == true -> capitalize first letter of every word in the string.
      * @param any String
      * @param strictMode boolean
      * @return String
@@ -128,7 +130,7 @@ public final class Helpers {
     }
 
     /**
-     * Validates unique ID string, and prettifies it by removing all spaces then capitalize.
+     * Validates unique ID string, and prettifies it by removing all spaces then capitalizing.
      * Returns NULL if the ID is NULL or empty or blank, otherwise returns Pair with the Key
      * being the prettified ID, and the Value indicating if the ID is valid or not.
      * @param uniqueId String
@@ -141,12 +143,12 @@ public final class Helpers {
         //Prettify
         uniqueId = uniqueId.trim()
                 .replaceAll(
-                        SharedConstants.MULTIPLE_SPACE,
-                        SharedConstants.EMPTY_STRING
+                    SharedConstants.MULTIPLE_SPACE,
+                    SharedConstants.EMPTY_STRING
                 )
                 .toUpperCase();
 
-        //Validate
+        //Validate: Unique ID is valid if it contains no special characters
         Pattern idRegex = Pattern.compile("^[\\w]+$", Pattern.CASE_INSENSITIVE);
         Matcher matcher = idRegex.matcher(uniqueId);
 
@@ -154,7 +156,7 @@ public final class Helpers {
     }
 
     /**
-     * Checks if a uniqueId is safe to use for saving new data into file. For this purpose,
+     * Checks if a uniqueId is safe to use for saving new entry into file. For this purpose,
      * it checks if a uniqueId is found in data saved in a text file determined by the type T of object.
      * Eg. if type T is Student then check if a uniqueId is found in students.txt file.
      * Returns true if the uniqueId is safe to use, otherwise false.
@@ -164,7 +166,7 @@ public final class Helpers {
      * @return <T>
      */
     public static <T> Boolean checkUniqueIdAvailableFor(Class<T> type, String uniqId) {
-        //Singleton object that provides access to Services
+        //Singleton object that provides access to the Dependency Injection Services
         ServiceLocator locator = ServiceLocator.getInstance();
 
         CompanyService companyService;
@@ -199,14 +201,14 @@ public final class Helpers {
     /**
      * To be used by any data processing Service if required. This method parses a
      * Skill-Ranking token saved in file to produce corresponding Enum values.
-     * Eg. token W1 parses into SKILLS.W and RANKING.LOW.
+     * Eg. token "W1" parses into SKILLS.W and RANKING.LOW
      * Returns a Skill-Ranking Pair.
      * @param token String
      * @return Pair<SharedEnums.SKILLS, SharedEnums.RANKINGS>
      */
     public static
         Pair<SharedEnums.SKILLS,
-             SharedEnums.RANKINGS>
+        SharedEnums.RANKINGS>
     parseSkillRankingToken(@NotNull String token) {
         String skill = token.substring(0, 1);
         int ranking = Integer.parseInt(
@@ -227,6 +229,7 @@ public final class Helpers {
 
     /**
      * Sort a HashMap by values, the result is an ArrayList of Map.Entry in descending order.
+     * Uses to shortlist projects: Key holds the Project unique ID, Value holds Preference
      * @param any HashMap<String, Integer>
      * @return List<Map.Entry<String, Integer>>
      */
@@ -245,6 +248,13 @@ public final class Helpers {
         return listToSort;
     }
 
+    /**
+     * Round a floating-point number, taking the decimal numbers by precision.
+     * Eg. 1.23456789 is rounded in 1.23 if precision == 2, or 1.234 if precision == 3
+     * @param any double
+     * @param precision int
+     * @return double
+     */
     public static double round(double any, int precision) {
         precision = precision == 0 ? 1 : Math.min(precision, 3);
 
@@ -254,24 +264,38 @@ public final class Helpers {
         return Double.parseDouble(format.format(any));
     }
 
+    /**
+     * Produce the requirements on new member for a Team when user assign a Student into Team.
+     * Requirements include Leader type and Personality.
+     * The selectedStudents is list of Students that are pending to be added (these students are validated against the Team requirements priorly).
+     * Returns a Pair, with Key indicating if Leader type is required, and Value indicating the Students that are refused to be added.
+     * @param members List<Student>
+     * @param selectedStudents List<Student>
+     * @return Pair<Boolean, List<String>>
+     */
     //null for any student, Key=true for leader type required, Value contains refused Student Unique Id
-    public static Pair<Boolean, List<String>> produceTeamRequirementsOnNewMember(List<Student> members, @NotNull List<Student> selectedStudents) {
-        boolean leaderTypeRequired = true;
-        List<String> refusedStudents = new ArrayList<>();
+    public static Pair<Boolean, List<String>> produceTeamRequirementsOnNewMember(List<Student> members, @Nullable List<Student> selectedStudents) {
+        boolean leaderTypeRequired = true; //Key of the Pair to be returned
+        List<String> refusedStudents = new ArrayList<>(); //Value of the Pair to be returned
 
+        //Temporarily add the pending Students to Team to check the resulting Team
         List<Student> teamMembers = new ArrayList<>();
         teamMembers.addAll(members);
         teamMembers.addAll(selectedStudents);
 
+        //Check the resulting Team
         for (Student member : teamMembers) {
+            //leaderTypeRequired is combined in this condition to omit this checking if Leader type is already assigned in Team
             if (leaderTypeRequired && member.getPersonality().name().equals(SharedEnums.PERSONALITIES.A.name()))
                 leaderTypeRequired = false;
 
+            //Get the Students that cannot be added to Team due to conflicts
             for (String studentUniqueId : member.getConflicters())
                 if (!refusedStudents.contains(studentUniqueId))
                     refusedStudents.add(studentUniqueId);
         }
 
+        //No requirements, any Students can be added, returns null, otherwise, returns the requirements
         if (!leaderTypeRequired && refusedStudents.size() == 0) return null;
         return new Pair<>(
             leaderTypeRequired,
@@ -279,22 +303,33 @@ public final class Helpers {
         );
     }
 
+    /**
+     * Checks the requirements of both Teams in swapping Students. Each Team passes into this method its
+     * Team details and the Student it offers for swap. The user will get a result as follow:
+     * Pair<Key, Value> with Key is the requirements of First Team, Value is the requirements of Second Team.
+     * Each Key, Value is Pair<Boolean, String>, with Boolean indicating if the Team needs Leader type, and
+     * Value indicating the Students it refuses.
+     * @param first Pair<Team, Student>
+     * @param second Pair<Team, Student>
+     * @return Pair<Pair<Boolean, String>, Pair<Boolean, String>>
+     */
     public static Pair<Pair<Boolean, String>, Pair<Boolean, String>>
     isTeamRequirementsMutuallySatisfied(Pair<Team, Student> first, Pair<Team, Student> second) {
         List<Student> firstTeamMembers = new ArrayList<>(first.getKey().getMembers());
-        firstTeamMembers.remove(first.getValue());
+        firstTeamMembers.remove(first.getValue()); //Fake removing the Student offered for swap in first Team
 
         List<Student> secondTeamMembers = new ArrayList<>(second.getKey().getMembers());
-        if (second.getValue() != null) secondTeamMembers.remove(second.getValue());
+        if (second.getValue() != null) secondTeamMembers.remove(second.getValue()); //Fake removing the Student offered for swap in second Team
 
+        //Call the above method to produce requirements of each Team
         Pair<Boolean, List<String>> firstTeamRequirements = produceTeamRequirementsOnNewMember(firstTeamMembers, new ArrayList<>());
         Pair<Boolean, List<String>> secondTeamRequirements = produceTeamRequirementsOnNewMember(secondTeamMembers, new ArrayList<>());
 
-        //assert firstTeamRequirements != null;
+        //Pick up requirements of first Team
         Boolean firstTeamLeaderRequired = firstTeamRequirements != null && firstTeamRequirements.getKey();
         List<String> firstTeamRefusals = firstTeamRequirements == null ? null : firstTeamRequirements.getValue();
 
-        //assert secondTeamRequirements != null;
+        //Pick up requirements of second Team
         boolean secondTeamLeaderRequired = secondTeamRequirements!= null && secondTeamRequirements.getKey();
         List<String> secondTeamRefusals = secondTeamRequirements == null ? null : secondTeamRequirements.getValue();
 
@@ -326,29 +361,55 @@ public final class Helpers {
         return null;
     }
 
+    /**
+     * When swapping Students between Teams, if both Teams refuse each other, pick up what is being refused.
+     * Eg. Pick up what Team 1 needs on Team 2 and vice versa.
+     * Return a Pair with Key indicating if one Team requires Leader from the other,
+     * and Value indicating the Students that one Team refuses.
+     * @param teamSelections Pair<Team, Student>
+     * @param members List<Student>
+     * @param isTeamLeaderRequired Boolean
+     * @param refusals List<String>
+     * @return Pair<Boolean, String>
+     */
     private static Pair<Boolean, String> checkForUnsatisfiedRequirements(
-            Pair<Team, Student> teamSelections,
-            List<Student> members,
-            Boolean isTeamLeaderRequired,
-            List<String> refusals
+        Pair<Team, Student> teamSelections,
+        List<Student> members,
+        Boolean isTeamLeaderRequired,
+        List<String> refusals
     ) {
         Pair<Boolean, String> unsatisfiedRequirements = null;
 
+        //Team only has 0-2 Student, not yet enforce Leader type as there are slot available later
         if (isTeamLeaderRequired && members.size() < 3)
             isTeamLeaderRequired = false;
 
+        //Team has 3 Students and Leader already assigned, no need to enforce Leader type
         if (members.size() == 3 && teamSelections.getValue().getPersonality() == SharedEnums.PERSONALITIES.A)
             isTeamLeaderRequired = false;
 
+        //Team refuses some Students, check if the offered Student is among the refused ones
+        //If yes, return isTeamLeaderRequired along with refusal to simplify the next return
         if (refusals != null && refusals.contains(teamSelections.getValue().getUniqueId()))
             unsatisfiedRequirements = new Pair<>(isTeamLeaderRequired, teamSelections.getValue().getUniqueId());
 
+        //Team does not refuse the offered Student
         if (isTeamLeaderRequired)
             unsatisfiedRequirements = new Pair<>(true, null);
 
+        //Team is cool with the offered student, return null here
         return unsatisfiedRequirements;
     }
 
+    /**
+     * The selection param holds Team being the Team to get the assigned Student.
+     * Checks for Personality Imbalance if the Team actually gets the offered Student.
+     * Returns a Pair with Key indicating if Team's Personality is imbalance,
+     * and Value indicating the Personalities that the Team needs, so user know what
+     * Student they should select.
+     * @param selection Pair<Team, Student>
+     * @return Pair<Boolean, List<SharedEnums.PERSONALITIES>>
+     */
     //Key indicates if Personality is imbalance, when Key==true,
     // Value indicates the Personalities it requires for the next added member (not the current one)
     public static Pair<Boolean, List<SharedEnums.PERSONALITIES>> checkImbalancePersonalityOnAssign(Pair<Team, Student> selection) {
@@ -362,9 +423,7 @@ public final class Helpers {
 
         //Team has no member, no PERSONALITIES enforcement is required yet.
         if (teamMembers.size() < 1) return null;
-
         teamMembers.add(selection.getValue()); //Add the student to Team, so we have a prospective Team to inspect
-        //Student assignee = selection.getValue();
 
         List<SharedEnums.PERSONALITIES> teamPersonalities = new ArrayList<>();
         for (Student member : teamMembers)
@@ -387,22 +446,37 @@ public final class Helpers {
         return new Pair<>(true, required);
     }
 
-    public static
-    Pair<
+    /**
+     * Checks for Personality Imbalance of 2 Teams in swapping Students.
+     * Params are the Teams and the Student it offered for swap.
+     * Returns a Pair for each Team, with Boolean indicating if Personality imbalance occurs,
+     * and List of Personalities that it needs on the offered Student.
+     * @param first Pair<Team, Student>
+     * @param second Pair<Team, Student>
+     * @return Pair<
+            * Pair<Boolean, List<SharedEnums.PERSONALITIES>>,
+     *        Pair<Boolean, List<SharedEnums.PERSONALITIES>>
+     *      >
+     */
+    public static Pair<
         Pair<Boolean, List<SharedEnums.PERSONALITIES>>,
         Pair<Boolean, List<SharedEnums.PERSONALITIES>>
     > isImbalancePersonalityOnSwap(Pair<Team, Student> first, Pair<Team, Student> second) {
         Team firstTeam = first.getKey();
         Team secondTeam = second.getKey();
 
+        //Fake removing the Student that each Team offers for swap,
+        // and add the offered Student from the other Team to have the prospective Teams
         firstTeam.getMembers().remove(first.getValue());
         secondTeam.getMembers().remove(second.getValue());
 
+        //Call the above method to produce requirements for each Team
         Pair<Boolean, List<SharedEnums.PERSONALITIES>> firstTeamImbalanceCheck =
                 checkImbalancePersonalityOnAssign(new Pair<>(firstTeam, second.getValue()));
         Pair<Boolean, List<SharedEnums.PERSONALITIES>> secondTeamImbalanceCheck =
                 checkImbalancePersonalityOnAssign(new Pair<>(secondTeam, first.getValue()));
 
+        //If 1 or both Teams disagree on the offered Student, return at this
         if (firstTeamImbalanceCheck != null || secondTeamImbalanceCheck != null)
             return new Pair<>(firstTeamImbalanceCheck, secondTeamImbalanceCheck);
 

@@ -35,7 +35,7 @@ public class StandardDeviationTest {
 
     @Before
     public void setUp() {
-        //Team set 1
+        //Team set 1: contains 3 Teams
         Team testTeam1 = new Team();
         testTeam1.setId(111);
         testTeam1.setProject(projects.get(1));
@@ -66,7 +66,7 @@ public class StandardDeviationTest {
         testTeam3.setFitnessMetrics(fitness3);
         testData1.add(testTeam3);
 
-        //Team set 2
+        //Team set 2: contains 3 Teams
         Team testTeam4 = new Team();
         testTeam4.setId(444);
         testTeam4.setProject(projects.get(0));
@@ -101,6 +101,7 @@ public class StandardDeviationTest {
     @Test
     public void skillCompetencyStandardDeviationShouldBeCorrect() {
         controllerBase = new ControllerBase();
+        //Calculate skill competency SD for each Team set
         double set1CompetencySD = controllerBase.calculateSkillCompetencyStandardDeviation(testData1, projects).get(0);
         double set2CompetencySD = controllerBase.calculateSkillCompetencyStandardDeviation(testData2, projects).get(0);
 
@@ -112,6 +113,7 @@ public class StandardDeviationTest {
     @Test
     public void preferenceSatisfactionStandardDeviationShouldBeCorrect() {
         controllerBase = new ControllerBase();
+        //Calculate preference satisfaction SD for each Team set
         double set1SatisfactionSD = controllerBase.calculateSkillCompetencyStandardDeviation(testData1, projects).get(1);
         double set2SatisfactionSD = controllerBase.calculateSkillCompetencyStandardDeviation(testData2, projects).get(1);
 
@@ -123,6 +125,7 @@ public class StandardDeviationTest {
     @Test
     public void skillShortfallsStandardDeviationShouldBeCorrect() {
         controllerBase = new ControllerBase();
+        //Calculate skill shortfall SD for each Team set
         double set1ShortfallSD = controllerBase.calculateSkillCompetencyStandardDeviation(testData1, projects).get(2);
         double set2ShortfallSD = controllerBase.calculateSkillCompetencyStandardDeviation(testData2, projects).get(2);
 

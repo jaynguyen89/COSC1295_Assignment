@@ -98,6 +98,10 @@ public class TeamFitness implements Serializable {
         skillShortFall.put(projectUniqueId, score);
     }
 
+    /**
+     * Turns data in this Fitness Metrics object into Delimiterized String to be saved into a file.
+     * @return String
+     */
     public String stringify() {
         StringBuilder fitnessString = new StringBuilder(
             id + SharedConstants.TEXT_DELIMITER +
@@ -129,6 +133,10 @@ public class TeamFitness implements Serializable {
         return fitnessString.toString();
     }
 
+    /**
+     * Prepare formatted String with line breaks and tabs to be printed out on console.
+     * @return String
+     */
     public String display() {
         StringBuilder fitnessString = new StringBuilder();
 

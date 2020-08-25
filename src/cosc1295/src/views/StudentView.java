@@ -76,16 +76,17 @@ public class StudentView {
             flasher.flash(new Flash("\t" + student.display(), FLASH_TYPES.NONE));
 
         String selectedStudentId = SharedConstants.EMPTY_STRING;
-        while (selectedStudentId.isEmpty()) {
+        while (selectedStudentId.isEmpty()) { //While no user input is given
             flasher.flash(new Flash("\nSelected Student: ", FLASH_TYPES.NONE));
 
             selectedStudentId = inputScanner.next();
             inputScanner.nextLine();
 
+            //Value==true -> Invalid input, Value==false -> Student found, Key -> the selected Student
             Pair<Student, Boolean> searchResult = searchStudentFromListByInput(selectedStudentId, students);
             if (searchResult == null) return null; //Signal app to return to Main Menu
-            else if (searchResult.getValue()) { //Rerun this while statement
-                selectedStudentId = SharedConstants.EMPTY_STRING;
+            else if (searchResult.getValue()) {
+                selectedStudentId = SharedConstants.EMPTY_STRING; //Set back to empty to rerun this while statement
                 continue;
             }
 
@@ -97,7 +98,7 @@ public class StudentView {
 
     /**
      * Prompts user to set a PERSONALITIES for the selected Student. Each PERSONALITIES can only be added up to
-     * n times, with n = total(students)/4 assuming the number of students is always enough to make groups of 4 students.
+     * n times, with n = total(students)/4 assuming the number of students is always a multiple of 4 (group limit).
      * Returns NULL to signal the app returning to Main Menu, otherwise, the updated Student having a PERSONALITIES.
      * @param student Student
      * @param students List<Student>
@@ -149,7 +150,7 @@ public class StudentView {
                     personalityInput = SharedConstants.EMPTY_STRING;
                     continue;
                 }
-            } catch (NullPointerException ex) {
+            } catch (NullPointerException ex) { //This exception may occurred if the assumption is violated (read documentation on method)
                 flasher.flash(new Flash("An error occurred while mapping personality. Please try again.", FLASH_TYPES.ERROR));
                 boolean response = flasher.promptForConfirmation(new Flash(
                                 "Do you wish to retry or go back to main menu?\n" +
@@ -186,7 +187,7 @@ public class StudentView {
      * @return Student
      */
     public Student captureStudentConflicters(Student student, List<Student> students) {
-        int conflicterCount = student.getConflicters().size();
+        int conflicterCount = student.getConflicters().size(); //Count number of conflicters to inform user
         flasher.flash(new Flash("Capture the conflicters of Student " + student.getUniqueId() + ".\n", FLASH_TYPES.NONE));
 
         String selectedConflicterId;
@@ -196,12 +197,14 @@ public class StudentView {
                 FLASH_TYPES.NONE
             ));
 
+            //The selectable Students for a conflicter, so user can't hack selecting an illegal Student
             List<Student> possibleConflicters = printConflictersTableFor(student, students);
             flasher.flash(new Flash("\nConflicter No." + (conflicterCount + 1) + ": ", FLASH_TYPES.NONE));
 
             selectedConflicterId = inputScanner.next();
             inputScanner.nextLine();
 
+            //Value==true -> exception thrown, Value==false no error so the Key holds a Student
             Pair<Student, Boolean> searchResult = searchStudentFromListByInput(selectedConflicterId, possibleConflicters);
             if (searchResult == null) return null; //Signal app to return to Main Menu
             else if (searchResult.getValue()) continue; //Rerun this while statement
@@ -223,14 +226,35 @@ public class StudentView {
                     FLASH_TYPES.NONE
                 ));
 
-                if (!response) return student; //User don't want
+                if (!response) return student; //User don't want to add more conflicter
             }
         }
 
         return student;
     }
 
-    //This method is quite simple to understand right?
+    /**
+     * Displays the selectable Students for a conflicter, and pick up these selectable Students to return back.
+     * @param student Student
+     * @param students List<Student>
+     * @return List<Student>
+     */
+    private List<Student> printConflictersTableFor(Student student, List<Student> students) {
+        List<Student> possibilities = new ArrayList<>();
+
+        for (Student entry : students) {
+            if (student.getConflicters().contains(entry.getUniqueId()) || //The entry is found in the Student's conflicter so skip it
+                entry.getUniqueId().equals(student.getUniqueId()) //The entry is the Student itself so skip it too
+            ) continue;
+
+            possibilities.add(entry);
+            flasher.flash(new Flash("\t" + entry.display(), FLASH_TYPES.NONE));
+        }
+
+        return possibilities;
+    }
+
+    //Count the occurrence of each PERSONALITY in Student list
     private HashMap<PERSONALITIES, Integer> countPersonalityDistributions(List<Student> students) {
         HashMap<PERSONALITIES, Integer> personalityCounts = new HashMap<PERSONALITIES, Integer>() {{
             put(PERSONALITIES.A, 0);
@@ -240,43 +264,28 @@ public class StudentView {
         }};
 
         for (Student student : students) {
-            if (student.getPersonality() == PERSONALITIES.A) {
+            if (student.getPersonality() == PERSONALITIES.A) { //Leader type
                 int count = personalityCounts.get(PERSONALITIES.A);
                 personalityCounts.replace(PERSONALITIES.A, ++count);
             }
 
-            if (student.getPersonality() == PERSONALITIES.B) {
+            if (student.getPersonality() == PERSONALITIES.B) { //Socializer type
                 int count = personalityCounts.get(PERSONALITIES.B);
                 personalityCounts.replace(PERSONALITIES.B, ++count);
             }
 
-            if (student.getPersonality() == PERSONALITIES.C) {
+            if (student.getPersonality() == PERSONALITIES.C) { //Thinker type
                 int count = personalityCounts.get(PERSONALITIES.C);
                 personalityCounts.replace(PERSONALITIES.C, ++count);
             }
 
-            if (student.getPersonality() == PERSONALITIES.D) {
+            if (student.getPersonality() == PERSONALITIES.D) { //Supporter type
                 int count = personalityCounts.get(PERSONALITIES.D);
                 personalityCounts.replace(PERSONALITIES.D, ++count);
             }
         }
 
         return personalityCounts;
-    }
-
-    private List<Student> printConflictersTableFor(Student student, List<Student> students) {
-        List<Student> possibilities = new ArrayList<>();
-
-        for (Student entry : students) {
-            if (student.getConflicters().contains(entry.getUniqueId()) ||
-                entry.getUniqueId().equals(student.getUniqueId())
-            ) continue;
-
-            possibilities.add(entry);
-            flasher.flash(new Flash("\t" + entry.display(), FLASH_TYPES.NONE));
-        }
-
-        return possibilities;
     }
 
     /**
@@ -392,7 +401,7 @@ public class StudentView {
         flasher.flash(new Flash("\nUpdate the conflicters for Student " + student.getUniqueId() + ".\n", FLASH_TYPES.NONE));
 
         boolean shouldReplaceConflicter = true;
-        if (student.getConflicters().size() == 2) //Student has 2 Conflicter, can only replace
+        if (student.getConflicters().size() == 2) //Student has 2 Conflicters, can only replace
             flasher.flash(new Flash(
                 "Student " + student.getUniqueId() + " has had 2 conflicters.\n" +
                         "You can now select a conflicter to replace:\n",

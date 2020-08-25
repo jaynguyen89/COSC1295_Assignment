@@ -61,6 +61,7 @@ public class Team implements IThing, Serializable {
         members.add(member);
     }
 
+    //Return true if member is removed successfully, otherwise false
     public boolean removeMemberByUniqueId(String uniqueId) {
         Student memberToRemove = null;
         for (Student member : members)
@@ -77,6 +78,7 @@ public class Team implements IThing, Serializable {
         return false;
     }
 
+    //Return true if member is replaced successfully, otherwise false
     public boolean replaceMemberByUniqueId(String uniqueId, Student other) {
         Student memberToReplace = null;
         for (Student member : members)

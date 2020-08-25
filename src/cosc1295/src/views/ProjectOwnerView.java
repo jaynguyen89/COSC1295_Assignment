@@ -135,9 +135,9 @@ public class ProjectOwnerView {
                                 inputScanner.nextLine();
 
                                 boolean response = flasher.promptForConfirmation(new Flash(
-                                                "Do you wish to select Role again or go back to previous menu?\n" +
-                                                "Y: Select again\tN: Back to previous menu",
-                                        FLASH_TYPES.ATTENTION
+                                    "Do you wish to select Role again or go back to previous menu?\n" +
+                                    "Y: Select again\tN: Back to previous menu",
+                                    FLASH_TYPES.ATTENTION
                                 ));
 
                                 if (!response) { //User wants to return to the outer while at line 51
@@ -164,9 +164,9 @@ public class ProjectOwnerView {
                     if (idAvailable == null) { //An exception was thrown while checking saved data
                         flasher.flash(new Flash("An error occurred while checking saved data.", FLASH_TYPES.ERROR));
                         boolean response = flasher.promptForConfirmation(new Flash(
-                                "Do you wish to try again or go back to main menu?\n" +
-                                        "Y: Try again\tN: Back to main menu",
-                                FLASH_TYPES.ATTENTION
+                            "Do you wish to try again or go back to main menu?\n" +
+                                    "Y: Try again\tN: Back to main menu",
+                            FLASH_TYPES.ATTENTION
                         ));
 
                         if (!response) return null; //Return to Main Menu
@@ -175,9 +175,9 @@ public class ProjectOwnerView {
 
                     if (!idAvailable) { //uniqueId is unsafe
                         flasher.flash(new Flash(
-                                "Project Owner ID " + projectOwner.getUniqueId() + " is duplicated. Please set another ID.\n" +
-                                        "Press enter to continue.",
-                                FLASH_TYPES.ERROR
+                            "Project Owner ID " + projectOwner.getUniqueId() + " is duplicated. Please set another ID.\n" +
+                                    "Press enter to continue.",
+                            FLASH_TYPES.ERROR
                         ));
 
                         inputScanner.nextLine();
@@ -220,10 +220,10 @@ public class ProjectOwnerView {
 
                             if (!setCompanyDone) { //No associated company
                                 boolean response = flasher.promptForConfirmation(new Flash(
-                                        "Company not found.\n" +
-                                                "Do you wish to select again or go back to main menu?\n" +
-                                                "Y: Select again\tN: Back to main menu",
-                                        FLASH_TYPES.ATTENTION
+                                    "Company not found.\n" +
+                                            "Do you wish to select again or go back to main menu?\n" +
+                                            "Y: Select again\tN: Back to main menu",
+                                    FLASH_TYPES.ATTENTION
                                 ));
 
                                 if (!response) return null; //User wants to return to Main Menu

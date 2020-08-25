@@ -101,7 +101,12 @@ public final class SharedEnums {
         PERSONALITIES(String value) { this.value = value; }
     }
 
-    public static List<String> getAllEnumItemsAsList(Class<? extends Enum<?>> any) {
+    /**
+     * Get all attributes' name in an Enum class into a List of String through reflection
+     * @param any Class<? extends Enum<?>>
+     * @return List<String>
+     */
+    public static List<String> getAllEnumAttributesAsList(Class<? extends Enum<?>> any) {
         String[] items = Arrays.stream(any.getEnumConstants())
                                .map(Enum::name)
                                .toArray(String[]::new);

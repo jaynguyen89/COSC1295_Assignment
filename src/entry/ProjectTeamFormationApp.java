@@ -20,34 +20,38 @@ public final class ProjectTeamFormationApp {
     private final Flasher flasher = Flasher.getInstance();
 
     public void run() {
+        // TeamMetricsService is a background job that execute once every 10 seconds
+        // to calculate fitness metrics for all Teams, view the class for more information
         Thread TeamMetricsService = new TeamFitnessMetricService();
         TeamMetricsService.start();
 
-        String menuSelection;
+        String menuSelection; //Get user input for Main Menu
 
         while (true) {
-            printProgramMenuInternally();
+            printProgramMenuInternally(); // Print the Main Menu
             flasher.flash(new Flash(
                     "\nSelect an option: ",
                     FLASH_TYPES.NONE
             ));
 
             Scanner inputScanner = new Scanner(System.in);
+            //The first input token matters, don't care the rest, so use next() instead of nextLine()
             menuSelection = inputScanner.next().toUpperCase();
             inputScanner.nextLine(); //remove left-over from buffer, place cursor on new line for next input reading
 
-            if (!Helpers.validateMenuSelection(menuSelection)) {
+            if (!Helpers.validateMenuSelection(menuSelection)) { //Wrong input for menu selection
+                //Let user read status message before they want to advance
                 flasher.flash(new Flash(
                         "\nYour selection is out of scope. Press enter to view menu again.",
                         FLASH_TYPES.ATTENTION
                 ));
 
-                inputScanner.nextLine();
+                inputScanner.nextLine(); //Advance the program
                 continue;
             }
 
-            APPLICATION_MENU selectedOption = valueOf(menuSelection);
-            boolean shouldQuit = runApplicationWithSelection(selectedOption);
+            APPLICATION_MENU selectedOption = valueOf(menuSelection); //Correct input for a menu item
+            boolean shouldQuit = runApplicationWithSelection(selectedOption); //Run the feature according to menu selection
 
             if (shouldQuit) {
                 flasher.flash(new Flash(
