@@ -108,7 +108,7 @@ public class TeamFitnessMetricsTest {
 
         for (int i = 3; i < testData.size(); i++) {
             Team testTeam = testData.get(i);
-            TeamFitness fitnessMetrics = controllerBase.calculateTeamFitnessMetricsFor(testTeam, projects);
+            TeamFitness fitnessMetrics = controllerBase.executeFitnessMetricCalculationForTest(testTeam, projects);
 
             //Asserting average competency of team
             TestCase.assertEquals(
@@ -139,7 +139,7 @@ public class TeamFitnessMetricsTest {
 
         for (int i = 3; i < testData.size(); i++) {
             Team testTeam = testData.get(i);
-            TeamFitness fitnessMetrics = controllerBase.calculateTeamFitnessMetricsFor(testTeam, projects);
+            TeamFitness fitnessMetrics = controllerBase.executeFitnessMetricCalculationForTest(testTeam, projects);
 
             //Asserting average Team's satisfaction
             TestCase.assertEquals(
@@ -166,7 +166,7 @@ public class TeamFitnessMetricsTest {
 
         for (int i = 3; i < testData.size(); i++) {
             Team testTeam = testData.get(i);
-            TeamFitness fitnessMetrics = controllerBase.calculateTeamFitnessMetricsFor(testTeam, projects);
+            TeamFitness fitnessMetrics = controllerBase.executeFitnessMetricCalculationForTest(testTeam, projects);
 
             if (i == 5) TestCase.assertEquals(334, fitnessMetrics.getId());
 

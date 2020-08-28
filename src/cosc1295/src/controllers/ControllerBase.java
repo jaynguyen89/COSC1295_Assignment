@@ -21,22 +21,32 @@ public class ControllerBase {
     protected final Flasher flasher = Flasher.getInstance();
     private final StudentService studentService = new StudentService();
 
-    public TeamFitness calculateTeamFitnessMetricsFor(Team team, List<Project> projects) {
+    /**
+     * Calculates the Fitness Metrics for a Team, including Skill Competency (average and categorized x4),
+     * Preference Satisfaction (team overall and 1st-2nd Projects), and Skill Shortfall (average and per-project).
+     * @param team Team
+     * @param projects List<Project>
+     * @return TeamFitness
+     */
+    protected TeamFitness calculateTeamFitnessMetricsFor(Team team, List<Project> projects) {
+        //Create FitnessMetrics for Team that never has, otherwise update Team's FitnessMetrics
         TeamFitness teamFitness = team.getFitnessMetrics() == null
                                   ? new TeamFitness()
                                   : team.getFitnessMetrics();
 
+        /* At first, all competency and satisfaction ratings/preferences are summed up into these 2 containers,
+        * then use these 2 containers to calculate average competency and satisfaction metrics. */
         HashMap<SharedEnums.SKILLS, Double> skillCompetencies = new HashMap<>();
         Pair<Double, Double> satisfactions = new Pair<>(0.0, 0.0);
 
-        for (Student member : team.getMembers()) {
+        for (Student member : team.getMembers()) { //Perform the sums
             HashMap<SharedEnums.SKILLS, SharedEnums.RANKINGS> memberSkillRanking = member.getSkillRanking();
 
             for (Map.Entry<SharedEnums.SKILLS, SharedEnums.RANKINGS> entry : memberSkillRanking.entrySet())
                 if (skillCompetencies.containsKey(entry.getKey()))
                     skillCompetencies.put(
                             entry.getKey(),
-                            skillCompetencies.get(entry.getKey()) + entry.getValue().getValue()
+                            skillCompetencies.get(entry.getKey()) + entry.getValue().getValue() //sum up competency ratings
                     );
                 else
                     skillCompetencies.put(entry.getKey(), (double) entry.getValue().getValue());
@@ -44,6 +54,7 @@ public class ControllerBase {
             Preference memberPreferences = studentService.retrievePreferenceForStudent(member.getUniqueId());
             if (memberPreferences == null) continue;
 
+            //Sum up satisfaction preferences
             for (Map.Entry<String, Integer> entry : memberPreferences.getPreference().entrySet()) {
                 if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 4)
                     satisfactions = new Pair<>(satisfactions.getKey() + 1, satisfactions.getValue());
@@ -53,14 +64,18 @@ public class ControllerBase {
             }
         }
 
+        //Compute metrics for competency
         Pair<Double, HashMap<SharedEnums.SKILLS, Double>> computedCompetencies = computeAverageCompetencies(skillCompetencies);
         teamFitness.setAverageTeamSkillCompetency(computedCompetencies.getKey());
 
         HashMap<SharedEnums.SKILLS, Double> teamCompetencyBySkills = computedCompetencies.getValue();
         teamFitness.setTeamCompetency(teamCompetencyBySkills);
 
+        //Compute metrics for satisfaction
         teamFitness.setPreferenceSatisfaction(computeAverageSatisfactions(satisfactions));
 
+        //Calculate the Skill Shortfall: average of all Projects, and per Project.
+        //At first, all shortfall differences are summed up into a container, then use the container to calculate the averages
         HashMap<String, Double> skillShortFalls = new HashMap<>();
         for (Project project : projects) {
             double shortfall = 0;
@@ -70,14 +85,14 @@ public class ControllerBase {
                 double teamSkillRanking = teamCompetencyBySkills.get(ranking.getKey());
 
                 if (requestedSkillRanking > teamSkillRanking)
-                    shortfall += abs(requestedSkillRanking - teamSkillRanking);
+                    shortfall += abs(requestedSkillRanking - teamSkillRanking); //sum up the differences
             }
 
             skillShortFalls.put(project.getUniqueId(), shortfall);
         }
 
-        teamFitness.setSkillShortFall(skillShortFalls);
-        teamFitness.setAverageSkillShortfall(computeAverageTeamSkillShortFall(skillShortFalls));
+        teamFitness.setSkillShortFall(skillShortFalls); //Per-Project Shortfalls
+        teamFitness.setAverageSkillShortfall(computeAverageTeamSkillShortFall(skillShortFalls)); //Average of all Projects
 
         return teamFitness;
     }
@@ -117,16 +132,27 @@ public class ControllerBase {
             totalCompetency += entry.getValue();
 
         return new Pair<>(
-                Helpers.round(totalCompetency / SharedConstants.GROUP_LIMIT, SharedConstants.DECIMAL_PRECISION),
+                Helpers.round(
+                        totalCompetency / SharedConstants.GROUP_LIMIT * SharedEnums.getAllEnumAttributesAsList(SharedEnums.SKILLS.class).size(),
+                        SharedConstants.DECIMAL_PRECISION
+                ),
                 averageCompetencies
         );
     }
 
-    public List<Double> calculateSkillCompetencyStandardDeviation(List<Team> teams, List<Project> projects) {
+    /**
+     * Calculates the Standard Deviation for Skill Competency, Preference Satisfaction and Skill Shortfalls.
+     * Returns a List containing 3 numbers of double type for 3 deviations respectively.
+     * @param teams List<Team>
+     * @param projects List<Project>
+     * @return List<Double>
+     */
+    protected List<Double> calculateSkillCompetencyStandardDeviation(List<Team> teams, List<Project> projects) {
         double totalCompetencyAcrossProjects = 0;
         double totalSatisfactionAcrossProjects = 0;
         double totalShortfallsAcrossTeams = 0;
 
+        //Step 1: Calculate the sums for each metric
         for (Team team : teams) {
             TeamFitness teamFitness = calculateTeamFitnessMetricsFor(team, projects);
             team.setFitnessMetrics(teamFitness);
@@ -136,10 +162,12 @@ public class ControllerBase {
             totalShortfallsAcrossTeams += teamFitness.getAverageSkillShortfall();
         }
 
+        //Step 2: Calculate the mean for each metric
         double averageAllTeamsCompetency = totalCompetencyAcrossProjects / teams.size();
         double averageAllTeamsSatisfaction = totalSatisfactionAcrossProjects / teams.size();
         double averageAllTeamsShortfall = totalShortfallsAcrossTeams / teams.size();
 
+        //Step 3: Calculate the deltas and sums of deltas for each metric
         double sumCompetencyDeltaSquares = 0;
         double sumSatisfactionDeltaSquares = 0;
         double sumShortfallDeltaSquares = 0;
@@ -153,10 +181,19 @@ public class ControllerBase {
             sumShortfallDeltaSquares += (shortfallDelta * shortfallDelta);
         }
 
+        //Step 4: calculate the deviation for each metric
         double competencySD = Helpers.round(sqrt(sumCompetencyDeltaSquares / teams.size()), SharedConstants.DECIMAL_PRECISION + 1);
         double satisfactionSD = Helpers.round(sqrt(sumSatisfactionDeltaSquares / teams.size()), SharedConstants.DECIMAL_PRECISION + 1);
         double shortfallSD = Helpers.round(sqrt(sumShortfallDeltaSquares / teams.size()), SharedConstants.DECIMAL_PRECISION + 1);
 
-        return new ArrayList<Double>() {{ add(competencySD); add(satisfactionSD); add(shortfallSD); }};
+        return new ArrayList<Double>() {{ add(competencySD); add(satisfactionSD); add(shortfallSD); }}; //done
+    }
+
+    public TeamFitness executeFitnessMetricCalculationForTest(Team team, List<Project> projects) {
+        return calculateTeamFitnessMetricsFor(team, projects);
+    }
+
+    public List<Double> executeStandardDeviationCalculationForTest(List<Team> teams, List<Project> projects) {
+        return calculateSkillCompetencyStandardDeviation(teams, projects);
     }
 }

@@ -102,8 +102,8 @@ public class StandardDeviationTest {
     public void skillCompetencyStandardDeviationShouldBeCorrect() {
         controllerBase = new ControllerBase();
         //Calculate skill competency SD for each Team set
-        double set1CompetencySD = controllerBase.calculateSkillCompetencyStandardDeviation(testData1, projects).get(0);
-        double set2CompetencySD = controllerBase.calculateSkillCompetencyStandardDeviation(testData2, projects).get(0);
+        double set1CompetencySD = controllerBase.executeStandardDeviationCalculationForTest(testData1, projects).get(0);
+        double set2CompetencySD = controllerBase.executeStandardDeviationCalculationForTest(testData2, projects).get(0);
 
         //Assert correct skill competency SD for each Teams set
         TestCase.assertEquals(0.057, set1CompetencySD);
@@ -114,8 +114,8 @@ public class StandardDeviationTest {
     public void preferenceSatisfactionStandardDeviationShouldBeCorrect() {
         controllerBase = new ControllerBase();
         //Calculate preference satisfaction SD for each Team set
-        double set1SatisfactionSD = controllerBase.calculateSkillCompetencyStandardDeviation(testData1, projects).get(1);
-        double set2SatisfactionSD = controllerBase.calculateSkillCompetencyStandardDeviation(testData2, projects).get(1);
+        double set1SatisfactionSD = controllerBase.executeStandardDeviationCalculationForTest(testData1, projects).get(1);
+        double set2SatisfactionSD = controllerBase.executeStandardDeviationCalculationForTest(testData2, projects).get(1);
 
         //Assert correct preference satisfaction SD for each Teams set
         TestCase.assertEquals(31.18, set1SatisfactionSD);
@@ -126,8 +126,8 @@ public class StandardDeviationTest {
     public void skillShortfallsStandardDeviationShouldBeCorrect() {
         controllerBase = new ControllerBase();
         //Calculate skill shortfall SD for each Team set
-        double set1ShortfallSD = controllerBase.calculateSkillCompetencyStandardDeviation(testData1, projects).get(2);
-        double set2ShortfallSD = controllerBase.calculateSkillCompetencyStandardDeviation(testData2, projects).get(2);
+        double set1ShortfallSD = controllerBase.executeStandardDeviationCalculationForTest(testData1, projects).get(2);
+        double set2ShortfallSD = controllerBase.executeStandardDeviationCalculationForTest(testData2, projects).get(2);
 
         //Assert correct skill shortfall SD for each Teams set
         TestCase.assertEquals(0.329, set1ShortfallSD);
