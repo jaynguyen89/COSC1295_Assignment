@@ -34,7 +34,7 @@ public final class ProjectTeamFormationApp {
                     FLASH_TYPES.NONE
             ));
 
-            Scanner inputScanner = new Scanner(System.in);
+			Scanner inputScanner = new Scanner(System.in);
             //The first input token matters, don't care the rest, so use next() instead of nextLine()
             menuSelection = inputScanner.next().toUpperCase();
             inputScanner.nextLine(); //remove left-over from buffer, place cursor on new line for next input reading
@@ -110,6 +110,8 @@ public final class ProjectTeamFormationApp {
                 break;
             case I:
                 appFacade.runTeamProjectSetOrChange();
+            case J:
+                appFacade.runTeamManagementGui();
             default:
                 taskDone = true;
                 break;

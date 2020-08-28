@@ -11,7 +11,9 @@ import java.util.regex.Pattern;
 
 public class Company implements IThing, Serializable {
 
-    private int id;
+	private static final long serialVersionUID = -8320255446735221050L;
+
+	private int id;
     private String uniqueId;
     private String companyName;
     private String abnNumber;

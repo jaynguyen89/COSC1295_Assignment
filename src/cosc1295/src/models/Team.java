@@ -9,7 +9,9 @@ import java.util.List;
 
 public class Team implements IThing, Serializable {
 
-    private int id;
+	private static final long serialVersionUID = -35799684266491980L;
+
+	private int id;
     private transient String uniqueId;
     private TeamFitness fitnessMetrics;
     private List<Student> members = new ArrayList<>();

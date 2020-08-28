@@ -10,7 +10,12 @@ import java.util.regex.Pattern;
 
 public class People implements Serializable {
 
-    protected int id;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2845987566274710291L;
+
+	protected int id;
 
     protected String firstName;
 

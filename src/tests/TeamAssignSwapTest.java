@@ -8,8 +8,8 @@ import cosc1295.src.models.Student;
 import cosc1295.src.models.Team;
 import cosc1295.src.views.TeamView;
 import helpers.commons.SharedEnums.PERSONALITIES;
-import helpers.utilities.Helpers;
 
+import helpers.utilities.LogicalAssistant;
 import javafx.util.Pair;
 import junit.framework.TestCase;
 import org.junit.*;
@@ -76,7 +76,12 @@ public class TeamAssignSwapTest {
     //Test that a Student already having Team won't be assigned to another Team
     @Test
     public void invalidMemberTest_Negative() {
-        List<Team> teams = new ArrayList<Team>() {{ add(testTeam1); add(testTeam2); add(testTeam3); }};
+        List<Team> teams = new ArrayList<Team>() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = 297111981103698088L;
+
+		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
         List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
 
         try {
@@ -90,7 +95,12 @@ public class TeamAssignSwapTest {
 
     @Test
     public void invalidMemberTest_Positive() {
-        List<Team> teams = new ArrayList<Team>() {{ add(testTeam1); add(testTeam2); add(testTeam3); }};
+        List<Team> teams = new ArrayList<Team>() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = -5309334361410531771L;
+
+		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
         List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
 
         try {
@@ -111,7 +121,7 @@ public class TeamAssignSwapTest {
         Pair<Team, Student> teamAndStudentToSwap2 = new Pair<>(testTeam2, testTeam2.getMembers().get(0));
 
         Pair<Pair<Boolean, String>, Pair<Boolean, String>> agreementResults =
-                Helpers.isTeamRequirementsMutuallySatisfied(teamAndStudentToSwap1, teamAndStudentToSwap2);
+            LogicalAssistant.isTeamRequirementsMutuallySatisfied(teamAndStudentToSwap1, teamAndStudentToSwap2);
 
         TestCase.assertNotNull(agreementResults); //Teams disagree
 
@@ -135,7 +145,7 @@ public class TeamAssignSwapTest {
         Pair<Team, Student> teamAndStudentToSwap2 = new Pair<>(testTeam2, testTeam2.getMembers().get(1));
 
         Pair<Pair<Boolean, String>, Pair<Boolean, String>> agreementResults =
-                Helpers.isTeamRequirementsMutuallySatisfied(teamAndStudentToSwap1, teamAndStudentToSwap2);
+            LogicalAssistant.isTeamRequirementsMutuallySatisfied(teamAndStudentToSwap1, teamAndStudentToSwap2);
 
         TestCase.assertNull(agreementResults);
     }
@@ -153,7 +163,7 @@ public class TeamAssignSwapTest {
         Pair<Team, Student> teamAndStudentToSwap2 = new Pair<>(testTeam2, testTeam2.getMembers().get(2));
 
         Pair<Pair<Boolean, String>, Pair<Boolean, String>> agreementResults =
-                Helpers.isTeamRequirementsMutuallySatisfied(teamAndStudentToSwap1, teamAndStudentToSwap2);
+            LogicalAssistant.isTeamRequirementsMutuallySatisfied(teamAndStudentToSwap1, teamAndStudentToSwap2);
 
         TestCase.assertNotNull(agreementResults);
 
@@ -172,7 +182,12 @@ public class TeamAssignSwapTest {
     //Test that a Student won't be assigned twice to a Team
     @Test
     public void repeatedMemberTest_Negative() {
-        List<Team> teams = new ArrayList<Team>() {{ add(testTeam1); add(testTeam2); add(testTeam3); }};
+        List<Team> teams = new ArrayList<Team>() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = -784806039847708982L;
+
+		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
         List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
 
         try {
@@ -197,14 +212,19 @@ public class TeamAssignSwapTest {
         Pair<Team, Student> teamAndStudentToSwap2 = new Pair<>(testTeam2, testTeam2.getMembers().get(0));
 
         Pair<Pair<Boolean, String>, Pair<Boolean, String>> agreementResults =
-                Helpers.isTeamRequirementsMutuallySatisfied(teamAndStudentToSwap1, teamAndStudentToSwap2);
+            LogicalAssistant.isTeamRequirementsMutuallySatisfied(teamAndStudentToSwap1, teamAndStudentToSwap2);
 
         TestCase.assertNull(agreementResults); //Both Teams meet each other's requirements
     }
 
     @Test
     public void repeatedMemberTest_Positive() {
-        List<Team> teams = new ArrayList<Team>() {{ add(testTeam1); add(testTeam2); add(testTeam3); }};
+        List<Team> teams = new ArrayList<Team>() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = 8498102672531333817L;
+
+		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
         List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
 
         try {
@@ -219,7 +239,12 @@ public class TeamAssignSwapTest {
     //Test that a Team must have at lest 1 Student with Leader type
     @Test
     public void noLeaderTest_Negative() {
-        List<Team> teams = new ArrayList<Team>() {{ add(testTeam1); add(testTeam2); add(testTeam3); }};
+        List<Team> teams = new ArrayList<Team>() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = -7002655101849027773L;
+
+		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
         List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
 
         try {
@@ -234,7 +259,12 @@ public class TeamAssignSwapTest {
 
     @Test
     public void noLeaderTest_Positive() {
-        List<Team> teams = new ArrayList<Team>() {{ add(testTeam1); add(testTeam2); add(testTeam3); }};
+        List<Team> teams = new ArrayList<Team>() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = 7277754089895533172L;
+
+		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
         List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
 
         try {
@@ -254,19 +284,19 @@ public class TeamAssignSwapTest {
         Pair<Boolean, List<PERSONALITIES>> imbalance;
 
         //Check 1: Team 3 has 0 member.
-        imbalance = Helpers.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(7))); //S8-A
+        imbalance = LogicalAssistant.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(7))); //S8-A
         TestCase.assertNull(imbalance); //Personality Imbalance does not occur
 
         //Check 2: Team 3 has 1 member with Personality A. Adding another A
         testTeam3.addMember(students.get(7)); //Add S8-A
-        imbalance = Helpers.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(8))); //S9-A
+        imbalance = LogicalAssistant.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(8))); //S9-A
         TestCase.assertNotNull(imbalance); //Personality Imbalance indicates something
         TestCase.assertEquals((Boolean) false, imbalance.getKey()); //Personality enforcement is not applied yet
         TestCase.assertEquals(3, imbalance.getValue().size()); //Team needs 3 types of Personality
 
         //Check 3: Team 3 has 2 members with same Personality A. Adding another A
         testTeam3.addMember(students.get(8)); //Add S9-A
-        imbalance = Helpers.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(3))); //S4-A
+        imbalance = LogicalAssistant.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(3))); //S4-A
         TestCase.assertNotNull(imbalance); //Personality Imbalance indicates something
         TestCase.assertEquals((Boolean) true, imbalance.getKey()); //Personality enforcement is applied
         TestCase.assertEquals(3, imbalance.getValue().size()); //Team needs 2 more types of Personality
@@ -274,25 +304,25 @@ public class TeamAssignSwapTest {
         //Check 4: Team 3 has 2 members with Personality A, B. Adding another A
         testTeam3.removeMemberByUniqueId(students.get(8).getUniqueId()); //Remove S9-A
         testTeam3.addMember(students.get(5)); //Add S6-B
-        imbalance = Helpers.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(8))); //S9-A
+        imbalance = LogicalAssistant.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(8))); //S9-A
         TestCase.assertNotNull(imbalance); //Personality Imbalance indicates something
         TestCase.assertEquals((Boolean) false, imbalance.getKey()); //Personality enforcement is not applied yet
         TestCase.assertEquals(2, imbalance.getValue().size()); //Team needs 2 more types of Personality
 
         //Check 5: Team 3 has 3 members with Personality A, B. Adding another B
         testTeam3.addMember(students.get(8)); //Add S9-A
-        imbalance = Helpers.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(9))); //S10-B
+        imbalance = LogicalAssistant.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(9))); //S10-B
         TestCase.assertNotNull(imbalance); //Personality Imbalance indicates something
         TestCase.assertEquals((Boolean) true, imbalance.getKey()); //Personality enforcement is applied
         TestCase.assertEquals(2, imbalance.getValue().size()); //Team needs 2 more types of Personality
 
         //Check 6: Team 3 has 4 members with Personality A, B, D
-        imbalance = Helpers.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(6))); //S7-D
+        imbalance = LogicalAssistant.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(6))); //S7-D
         TestCase.assertNull(imbalance); //Personality Imbalance does not occur
 
         //Check 7: Team 3 has 4 members with Personality A, B, C, D
         testTeam3.removeMemberByUniqueId("S9"); //Remove S9-A
-        imbalance = Helpers.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(2))); //S3-C
+        imbalance = LogicalAssistant.checkImbalancePersonalityOnAssign(new Pair<>(testTeam3, students.get(2))); //S3-C
         TestCase.assertNull(imbalance); //Personality Imbalance does not occur
     }
 

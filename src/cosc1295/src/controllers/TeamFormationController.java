@@ -9,7 +9,7 @@ import cosc1295.src.models.*;
 import cosc1295.src.views.TeamView;
 import helpers.commons.SharedConstants;
 
-import helpers.utilities.Helpers;
+import helpers.utilities.LogicalAssistant;
 import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,7 +148,12 @@ public class TeamFormationController extends ControllerBase {
         for (Student student : selectedStudentsToAssign)
             selectedTeamToAssign.addMember(student);
 
-        return new ArrayList<Team>() {{ add(selectedTeamToAssign); }};
+        return new ArrayList<Team>() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = -1309752910091385980L;
+
+		{ add(selectedTeamToAssign); }};
     }
 
     //Actually run the Swapping task
@@ -199,7 +204,7 @@ public class TeamFormationController extends ControllerBase {
 
             //Check both Teams' requirements on the new Member using the utility method
             Pair<Pair<Boolean, String>, Pair<Boolean, String>> requirementChecks =
-                Helpers.isTeamRequirementsMutuallySatisfied(
+                LogicalAssistant.isTeamRequirementsMutuallySatisfied(
                     firstTeamAndStudentToRemove, secondTeamAndStudentToBeRemoved
                 );
 
@@ -246,7 +251,12 @@ public class TeamFormationController extends ControllerBase {
 
         Team finalTeamToRemoveStudent = teamToRemoveStudent;
         Team finalTeamToAssignStudent = teamToAssignStudent;
-        return new ArrayList<Team>() {{ add(finalTeamToRemoveStudent); add(finalTeamToAssignStudent); }};
+        return new ArrayList<Team>() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = 3071345686511809968L;
+
+		{ add(finalTeamToRemoveStudent); add(finalTeamToAssignStudent); }};
     }
 
     //Handle the situations create/select Team when swapping Students

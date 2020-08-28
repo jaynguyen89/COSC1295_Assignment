@@ -10,7 +10,9 @@ import java.util.Map;
 
 public class TeamFitness implements Serializable {
 
-    private int id;
+	private static final long serialVersionUID = 9102396648922501096L;
+
+	private int id;
     private double averageTeamSkillCompetency;
     private HashMap<SKILLS, Double> teamCompetencyBySkills;
     private Pair<Double, Pair<Double, Double>> preferenceSatisfaction;

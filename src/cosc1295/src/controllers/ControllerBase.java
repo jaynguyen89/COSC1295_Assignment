@@ -186,7 +186,12 @@ public class ControllerBase {
         double satisfactionSD = Helpers.round(sqrt(sumSatisfactionDeltaSquares / teams.size()), SharedConstants.DECIMAL_PRECISION + 1);
         double shortfallSD = Helpers.round(sqrt(sumShortfallDeltaSquares / teams.size()), SharedConstants.DECIMAL_PRECISION + 1);
 
-        return new ArrayList<Double>() {{ add(competencySD); add(satisfactionSD); add(shortfallSD); }}; //done
+        return new ArrayList<Double>() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = 2543652074411051826L;
+
+		{ add(competencySD); add(satisfactionSD); add(shortfallSD); }}; //done
     }
 
     public TeamFitness executeFitnessMetricCalculationForTest(Team team, List<Project> projects) {

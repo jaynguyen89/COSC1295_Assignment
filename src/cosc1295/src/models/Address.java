@@ -9,7 +9,9 @@ import java.util.regex.Pattern;
 
 public class Address implements Serializable {
 
-    private int id;
+	private static final long serialVersionUID = -8536053812128714190L;
+	
+	private int id;
     private String building;
     private String street;
     private String suburb;

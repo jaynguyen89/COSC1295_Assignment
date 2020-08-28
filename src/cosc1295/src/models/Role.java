@@ -6,7 +6,9 @@ import java.io.Serializable;
 
 public class Role implements Serializable {
 
-    private int id;
+	private static final long serialVersionUID = -6076212206068900878L;
+
+	private int id;
     private String role;
 
     public Role() { }

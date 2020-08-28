@@ -9,8 +9,8 @@ import helpers.commons.SharedEnums.SKILLS;
 import helpers.commons.SharedEnums.RANKINGS;
 import helpers.commons.SharedEnums.DATA_TYPES;
 import helpers.commons.SharedEnums.PERSONALITIES;
+import helpers.utilities.LogicalAssistant;
 
-import helpers.utilities.Helpers;
 import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
 
                 HashMap<SKILLS, RANKINGS> skillRanking = new HashMap<>();
                 for (int i = 2; i <= 5; i++) {
-                    Pair<SKILLS, RANKINGS> skPair = Helpers.parseSkillRankingToken(studentTokens[i]);
+                    Pair<SKILLS, RANKINGS> skPair = LogicalAssistant.parseSkillRankingToken(studentTokens[i]);
                     skillRanking.put(skPair.getKey(), skPair.getValue());
                 }
 

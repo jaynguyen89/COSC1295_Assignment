@@ -9,10 +9,9 @@ import cosc1295.src.models.Team;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 import helpers.commons.SharedEnums.FLASH_TYPES;
+import helpers.utilities.LogicalAssistant;
 
-import helpers.utilities.Helpers;
 import javafx.util.Pair;
-
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -306,7 +305,7 @@ public class TeamView {
     public List<Student> selectStudentsToAssign(Team teamToAssign, List<Student> students) {
         List<Student> selectedStudents = new ArrayList<>(); //user can assign multiple Students at once
         //Get Team requirements on the assigned Student
-        Pair<Boolean, List<String>> teamRequirements = Helpers.produceTeamRequirementsOnNewMember(teamToAssign.getMembers(), selectedStudents);
+        Pair<Boolean, List<String>> teamRequirements = LogicalAssistant.produceTeamRequirementsOnNewMember(teamToAssign.getMembers(), selectedStudents);
 
         flasher.flash(new Flash("Please select Students to assign into new Team.\n", FLASH_TYPES.NONE));
 
@@ -410,7 +409,7 @@ public class TeamView {
                 flasher.flash(new Flash("Student " + selectedStudent.getUniqueId() + " will be added to Team.\n", FLASH_TYPES.SUCCESS));
 
                 //Reproduce the Team requirements for the next members
-                teamRequirements = Helpers.produceTeamRequirementsOnNewMember(teamToAssign.getMembers(), selectedStudents);
+                teamRequirements = LogicalAssistant.produceTeamRequirementsOnNewMember(teamToAssign.getMembers(), selectedStudents);
                 taskDone = selectedStudents.size() == SharedConstants.GROUP_LIMIT;
             }
         }

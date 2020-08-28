@@ -9,7 +9,9 @@ import java.util.Map;
 
 public class Preference implements Serializable {
 
-    private String studentUniqueId;
+	private static final long serialVersionUID = 8820778787277011380L;
+
+	private String studentUniqueId;
     private HashMap<String, Integer> preference;
 
     public Preference() {

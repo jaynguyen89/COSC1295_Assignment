@@ -17,7 +17,8 @@ public class BinaryFileServiceBase<T> {
 
     private final String ASSET_PATH = System.getProperty("user.dir") + "\\src\\assets\\binaries";
 
-    public List<T> readAllDataFromFile(Class<T> type) {
+    @SuppressWarnings("unchecked")
+	public List<T> readAllDataFromFile(Class<T> type) {
         String filePath = generateFilePathByDataType(type);
         List<T> data;
 

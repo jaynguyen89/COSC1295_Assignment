@@ -13,7 +13,9 @@ import java.util.Map;
 
 public class Project implements IThing, Serializable {
 
-    private int id;
+	private static final long serialVersionUID = -9117417140291903090L;
+
+	private int id;
     private String uniqueId;
     private String projectTitle;
     private String briefDescription;

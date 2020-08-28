@@ -15,7 +15,9 @@ import java.util.Map;
 
 public class Student implements IThing, Serializable {
 
-    private int id;
+	private static final long serialVersionUID = 8281202876066671060L;
+
+	private int id;
     private String uniqueId;
     private HashMap<SKILLS, RANKINGS> skillRanking;
     private PERSONALITIES personality;

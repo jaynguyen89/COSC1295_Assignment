@@ -256,7 +256,12 @@ public class StudentView {
 
     //Count the occurrence of each PERSONALITY in Student list
     private HashMap<PERSONALITIES, Integer> countPersonalityDistributions(List<Student> students) {
-        HashMap<PERSONALITIES, Integer> personalityCounts = new HashMap<PERSONALITIES, Integer>() {{
+        HashMap<PERSONALITIES, Integer> personalityCounts = new HashMap<PERSONALITIES, Integer>() {/**
+			 * 
+			 */
+			private static final long serialVersionUID = 8011274363268165619L;
+
+		{
             put(PERSONALITIES.A, 0);
             put(PERSONALITIES.B, 0);
             put(PERSONALITIES.C, 0);

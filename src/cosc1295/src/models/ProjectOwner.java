@@ -10,7 +10,9 @@ import java.io.Serializable;
 
 public class ProjectOwner extends People implements IThing, Serializable {
 
-    private String uniqueId;
+	private static final long serialVersionUID = -3139865993517131561L;
+
+	private String uniqueId;
     private Company company;
 
     public void setUniqueId(String uniqueId) {

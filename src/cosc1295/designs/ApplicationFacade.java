@@ -12,6 +12,7 @@ public class ApplicationFacade {
     private final ProjectController projectController;
     private final StudentController studentController;
     private final TeamFormationController teamController;
+    private final TeamGuiController teamGuiController;
 
     public ApplicationFacade() {
         companyController = new CompanyController();
@@ -19,6 +20,7 @@ public class ApplicationFacade {
         projectController = new ProjectController();
         studentController = new StudentController();
         teamController = new TeamFormationController();
+        teamGuiController = new TeamGuiController();
     }
 
     public void runAddCompanyFeature() {
@@ -91,5 +93,8 @@ public class ApplicationFacade {
     public void runTeamProjectSetOrChange() {
         Boolean taskResult = teamController.executeTeamProjectSelectionTask();
         teamController.displayTeamSelectionFinalResult(taskResult);
+    }
+
+    public void runTeamManagementGui() {
     }
 }
