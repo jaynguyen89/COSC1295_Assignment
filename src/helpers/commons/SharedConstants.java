@@ -1,5 +1,9 @@
 package helpers.commons;
 
+import helpers.commons.SharedEnums.GUI_ACTION_CONTEXT;
+
+import java.util.HashMap;
+
 /**
  * All the constants values that will be used in the whole project.
  */
@@ -46,4 +50,30 @@ public final class SharedConstants {
     public static final String PROJECT_TEAM_FILE_NAME = "project_teams.txt";
 
     public static final String TEAM_FITNESS_METRICS_FILE_NAME = "fitness_metrics.txt";
+
+    public static final double GUI_ASPECT_RATIO = 16/9.0;
+
+    public static final int BASE_FONT = 20;
+
+    public static final String FONT_FAMILY = "Tahoma";
+
+    public static final HashMap<String, Integer> DIMENSIONS =
+            new HashMap<String, Integer>() {{
+                put("WIDTH", 896);
+                put("HEIGHT", 504);
+                put("MIN_WIDTH", 640);
+                put("MIN_HEIGHT", 360);
+                put("MAX_WIDTH", 1024);
+                put("MAX_HEIGHT", 576);
+            }};
+
+    public static final HashMap<GUI_ACTION_CONTEXT, String> RESOURCES =
+            new HashMap<GUI_ACTION_CONTEXT, String>() {{
+                put(GUI_ACTION_CONTEXT.LAUNCH, "onlaunch-styles.css");
+                put(GUI_ACTION_CONTEXT.ASSIGN, "onassign-styles.css");
+                put(GUI_ACTION_CONTEXT.SWAP, "onswap-styles.css");
+                put(GUI_ACTION_CONTEXT.REMOVE, "onremove-styles.css");
+                put(GUI_ACTION_CONTEXT.PROJECT, "onproject-styles.css");
+                put(GUI_ACTION_CONTEXT.STATS, "onstats-styles.css");
+            }};
 }

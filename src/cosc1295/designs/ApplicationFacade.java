@@ -96,5 +96,6 @@ public class ApplicationFacade {
     }
 
     public void runTeamManagementGui() {
+    	teamGuiController.runGuiTeamManagementFeatures();
     }
 }

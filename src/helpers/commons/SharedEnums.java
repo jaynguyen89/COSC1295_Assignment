@@ -102,6 +102,20 @@ public final class SharedEnums {
         PERSONALITIES(String value) { this.value = value; }
     }
 
+    public enum GUI_ACTION_CONTEXT {
+        LAUNCH("Feature Selection"),
+        ASSIGN("Assign Students To Teams"),
+        SWAP("Swap Students Between Teams"),
+        REMOVE("Remove Students From Teams"),
+        PROJECT("Set Or Change Team Project"),
+        STATS("Show Statistics Charts");
+
+        private final String value;
+        public String getValue() { return value; }
+
+        GUI_ACTION_CONTEXT(String value) { this.value = value; }
+    }
+
     /**
      * Get all attributes' name in an Enum class into a List of String through reflection
      * @param any Class<? extends Enum<?>>

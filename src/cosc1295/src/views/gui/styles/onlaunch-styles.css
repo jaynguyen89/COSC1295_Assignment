@@ -1,0 +1,33 @@
+.panel-wrapper {
+    -fx-font-family: Tahoma;
+    -fx-font-size: 20;
+}
+
+.title {
+    -fx-text-alignment: center;
+    -fx-font-weight: bold;
+    -fx-font-size: 1.75em;
+    -fx-alignment: center;
+}
+
+.subtitle {
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+    -fx-font-size: 1em;
+}
+
+.task-dropdown {
+    -fx-alignment: center;
+    -fx-font-size: 0.75em;
+}
+
+.go-button {
+    -fx-background-color: #4da3ff;
+    -fx-text-fill: white;
+    -fx-font-size: 1.1em;
+    -fx-pref-width: 5em;
+}
+
+.go-button:hover {
+    -fx-background-color: #3996e3;
+}
