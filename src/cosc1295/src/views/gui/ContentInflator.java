@@ -1,6 +1,6 @@
 package cosc1295.src.views.gui;
 
-import cosc1295.src.views.gui.activities.LaunchActivity;
+import cosc1295.src.controllers.activities.*;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.GUI_ACTION_CONTEXT;
 import javafx.scene.Scene;
@@ -9,27 +9,90 @@ import javafx.scene.layout.Pane;
 import java.util.HashMap;
 import java.util.Map;
 
-class ContentInflator {
+/**
+ * Singleton object class
+ */
+public class ContentInflator {
 
     private final String STYLES_DIR = System.getProperty("user.dir").replace("\\", "/") +
                                       "/src/cosc1295/src/views/gui/styles/";
 
     private static final HashMap<GUI_ACTION_CONTEXT, Pane> sceneCollection = new HashMap<>();
+    private static ContentInflator inflator;
 
-    void gatherResources() {
+    private ContentInflator() { }
+
+    public static ContentInflator getInstance() {
+        if (inflator == null) {
+            synchronized (ContentInflator.class) {
+                if (inflator == null) {
+                    inflator = new ContentInflator();
+                }
+            }
+        }
+
+        if (sceneCollection.isEmpty())
+            inflator.gatherResources();
+
+        return inflator;
+    }
+
+    private void gatherResources() {
         for (Map.Entry<GUI_ACTION_CONTEXT, String> entry : SharedConstants.RESOURCES.entrySet()) {
-            LaunchActivity activity = new LaunchActivity();
+            Pane activity;
+
+            switch (entry.getKey()) {
+                case LAUNCH:
+                    activity = new LaunchActivity();
+                    break;
+                case ASSIGN:
+                    activity = new AssignActivity();
+                    break;
+                case SWAP:
+                    activity = new SwapActivity();
+                    break;
+                case REMOVE:
+                    activity = new RemoveActivity();
+                    break;
+                case PROJECT:
+                    activity = new ProjectActivity();
+                    break;
+                default: //STATS
+                    activity = new StatisticsActivity();
+                    break;
+            }
+
             sceneCollection.put(entry.getKey(), activity);
-            //TODO
         }
     }
 
-    Scene inflate(GUI_ACTION_CONTEXT context, Scene container) {
+    public Scene inflate(GUI_ACTION_CONTEXT context, Scene container) {
+        container.getStylesheets().clear();
         container.getStylesheets().add("file:///" + STYLES_DIR + SharedConstants.RESOURCES.get(context));
 
-        LaunchActivity activity = (LaunchActivity) sceneCollection.get(context);
-        container = activity.drawContentsToScene(container);
+        Pane activity = sceneCollection.get(context);
+        switch (context) {
+            case LAUNCH:
+                ((LaunchActivity) activity).drawLaunchingContents(container);
+                break;
+            case ASSIGN:
+                ((AssignActivity) activity).drawAssigningTaskContents(container);
+                break;
+            case SWAP:
+                ((SwapActivity) activity).drawSwappingTaskContents(container);
+                break;
+            case REMOVE:
+                ((RemoveActivity) activity).drawRemovalTaskContents(container);
+                break;
+            case PROJECT:
+                ((ProjectActivity) activity).drawProjectSettingTaskContents(container);
+                break;
+            default: //STATS
+                ((StatisticsActivity) activity).drawStatisticsContents(container);
+                break;
+        }
 
+        container.setRoot(activity);
         return container;
     }
 }

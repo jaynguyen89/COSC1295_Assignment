@@ -16,6 +16,17 @@
     -fx-font-size: 1em;
 }
 
+.message {
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-text-fill: #ff654d;
+    -fx-font-size: 0.7em;
+    -fx-background-color: #ffd3cc;
+    -fx-background-radius: 0.2em;
+    -fx-padding: 0.5em;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 10, 0, 0, 0);
+}
+
 .task-dropdown {
     -fx-alignment: center;
     -fx-font-size: 0.75em;
@@ -26,8 +37,11 @@
     -fx-text-fill: white;
     -fx-font-size: 1.1em;
     -fx-pref-width: 5em;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 10, 0, 0, 0);
 }
 
 .go-button:hover {
     -fx-background-color: #3996e3;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.4), 10, 0, 0, 0);
 }

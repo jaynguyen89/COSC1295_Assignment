@@ -1,5 +1,6 @@
 package cosc1295.src.views.gui;
 
+import cosc1295.src.controllers.activities.Activity;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.GUI_ACTION_CONTEXT;
 import javafx.application.Application;
@@ -7,23 +8,16 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
 public class TeamGuiView extends Application {
 
-	private final ContentInflator inflator = new ContentInflator();
-	private Stage applicationWindow;
+	private final ContentInflator inflator = ContentInflator.getInstance();
 
-	public TeamGuiView() { }
-
-	public void setupGuiWindow() {
+	public void launchGuiWindow() {
 		launch();
 	}
 
 	@Override
-	public void start(Stage primaryStage) {
-		applicationWindow = primaryStage;
-
+	public void start(Stage applicationWindow) {
 		applicationWindow.setAlwaysOnTop(true);
 		applicationWindow.setFullScreen(false);
 		applicationWindow.setMaximized(false);
@@ -43,18 +37,19 @@ public class TeamGuiView extends Application {
 				SharedConstants.DIMENSIONS.get("WIDTH"),
 				SharedConstants.DIMENSIONS.get("HEIGHT")
 		);
-		appScene = inflator.inflate(GUI_ACTION_CONTEXT.LAUNCH, appScene);
 
 		applicationWindow.minWidthProperty().bind(appScene.heightProperty().multiply(SharedConstants.GUI_ASPECT_RATIO));
 		applicationWindow.minHeightProperty().bind(appScene.widthProperty().divide(SharedConstants.GUI_ASPECT_RATIO));
 
+		appScene = inflator.inflate(GUI_ACTION_CONTEXT.LAUNCH, appScene);
+
+		Scene finalAppScene = appScene;
+		((Activity) appScene.getRoot()).setIntent(context -> {
+			inflator.inflate((GUI_ACTION_CONTEXT) context, finalAppScene);
+			applicationWindow.setScene(finalAppScene);
+		});
+
 		applicationWindow.setScene(appScene);
 		applicationWindow.show();
 	}
-
-	public void prepareActivities() throws IOException {
-		inflator.gatherResources();
-	}
-
-
 }

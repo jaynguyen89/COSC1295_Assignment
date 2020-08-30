@@ -1,0 +1,11 @@
+.panel-wrapper {
+    -fx-font-family: Tahoma;
+    -fx-font-size: 20;
+}
+
+.title {
+    -fx-text-alignment: center;
+    -fx-font-weight: bold;
+    -fx-font-size: 1.75em;
+    -fx-alignment: center;
+}
