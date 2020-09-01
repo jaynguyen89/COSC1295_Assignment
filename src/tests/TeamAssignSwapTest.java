@@ -82,7 +82,7 @@ public class TeamAssignSwapTest {
 			private static final long serialVersionUID = 297111981103698088L;
 
 		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
-        List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
+        List<Student> unteamedStudents = LogicalAssistant.filterUnteamedStudents(students, teams);
 
         try {
             teamView.sendTestInput(new ByteArrayInputStream("7\n".getBytes())); //S7 from Team 1
@@ -101,7 +101,7 @@ public class TeamAssignSwapTest {
 			private static final long serialVersionUID = -5309334361410531771L;
 
 		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
-        List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
+        List<Student> unteamedStudents = LogicalAssistant.filterUnteamedStudents(students, teams);
 
         try {
             teamView.sendTestInput(new ByteArrayInputStream("10\n".getBytes())); //An unteamed Student
@@ -188,7 +188,7 @@ public class TeamAssignSwapTest {
 			private static final long serialVersionUID = -784806039847708982L;
 
 		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
-        List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
+        List<Student> unteamedStudents = LogicalAssistant.filterUnteamedStudents(students, teams);
 
         try {
             teamView.sendTestInput(new ByteArrayInputStream("8\n".getBytes())); //S8 from Team 2 itself
@@ -225,7 +225,7 @@ public class TeamAssignSwapTest {
 			private static final long serialVersionUID = 8498102672531333817L;
 
 		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
-        List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
+        List<Student> unteamedStudents = LogicalAssistant.filterUnteamedStudents(students, teams);
 
         try {
             teamView.sendTestInput(new ByteArrayInputStream("4\n".getBytes())); //An unteamed Student
@@ -245,7 +245,7 @@ public class TeamAssignSwapTest {
 			private static final long serialVersionUID = -7002655101849027773L;
 
 		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
-        List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
+        List<Student> unteamedStudents = LogicalAssistant.filterUnteamedStudents(students, teams);
 
         try {
             teamView.sendTestInput(new ByteArrayInputStream("3\n".getBytes())); //An unteamed Student
@@ -265,7 +265,7 @@ public class TeamAssignSwapTest {
 			private static final long serialVersionUID = 7277754089895533172L;
 
 		{ add(testTeam1); add(testTeam2); add(testTeam3); }};
-        List<Student> unteamedStudents = teamController.getAssignableStudentsForTest(students, teams);
+        List<Student> unteamedStudents = LogicalAssistant.filterUnteamedStudents(students, teams);
 
         try {
             teamView.sendTestInput(new ByteArrayInputStream("9\n".getBytes())); //An unteamed Student

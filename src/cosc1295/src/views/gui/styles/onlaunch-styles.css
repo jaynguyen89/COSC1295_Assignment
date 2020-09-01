@@ -36,7 +36,6 @@
     -fx-background-color: #4da3ff;
     -fx-text-fill: white;
     -fx-font-size: 1.1em;
-    -fx-pref-width: 5em;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 10, 0, 0, 0);
 }
 

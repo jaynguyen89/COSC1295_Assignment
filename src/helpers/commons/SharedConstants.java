@@ -61,8 +61,6 @@ public final class SharedConstants {
             new HashMap<String, Integer>() {{
                 put("WIDTH", 896);
                 put("HEIGHT", 504);
-                put("MIN_WIDTH", 640);
-                put("MIN_HEIGHT", 360);
                 put("MAX_WIDTH", 1024);
                 put("MAX_HEIGHT", 576);
             }};

@@ -9,3 +9,62 @@
     -fx-font-size: 1.75em;
     -fx-alignment: center;
 }
+
+.subtitle {
+    -fx-font-size: 0.75em;
+}
+
+.message {
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-text-fill: #ff654d;
+    -fx-font-size: 0.7em;
+    -fx-background-color: #ffd3cc;
+    -fx-background-radius: 0.2em;
+    -fx-padding: 0.5em;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 10, 0, 0, 0);
+}
+
+.back-button {
+    -fx-background-color: #6e6e6e;
+    -fx-text-fill: white;
+    -fx-font-size: 0.6em;
+    -fx-pref-width: 4em;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 0);
+}
+
+.back-button:hover {
+    -fx-background-color: #636363;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 10, 0, 0, 0);
+}
+
+.warning {
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-pref-height: 15em;
+    -fx-padding: 3em 2em;
+    -fx-background-color: #fffae6;
+    -fx-text-fill: #d9b100;
+    -fx-font-size: 1em;
+    -fx-background-radius: 0.2em;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 10, 0, 0, 0);
+}
+
+.data-table {
+    -fx-font-size: 0.65em;
+    -fx-font-weight: lighter;
+}
+
+.done-button {
+    -fx-background-color: #4da3ff;
+    -fx-text-fill: white;
+    -fx-font-size: 1.1em;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 0);
+}
+
+.done-button:hover {
+    -fx-background-color: #3996e3;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 10, 0, 0, 0);
+}

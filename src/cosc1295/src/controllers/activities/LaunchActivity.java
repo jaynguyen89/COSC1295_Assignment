@@ -1,8 +1,8 @@
 package cosc1295.src.controllers.activities;
 
-import cosc1295.src.views.gui.ContentInflator;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.GUI_ACTION_CONTEXT;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -29,7 +29,7 @@ public class LaunchActivity extends AnchorPane implements Activity {
 
         title.getStyleClass().add("title");
         title.prefWidthProperty().bind(container.widthProperty());
-        title.setLayoutY(40);
+        title.setLayoutY(MARGIN * 2);
 
         Label subtitle = new Label();
         subtitle.setText("Please select your task");
@@ -37,7 +37,7 @@ public class LaunchActivity extends AnchorPane implements Activity {
 
         subtitle.getStyleClass().add("subtitle");
         subtitle.prefWidthProperty().bind(container.widthProperty());
-        subtitle.setLayoutY(90);
+        subtitle.setLayoutY(MARGIN * 4.5);
 
         ComboBox<String> taskDropdown = new ComboBox<>();
         this.getChildren().add(taskDropdown);
@@ -51,22 +51,45 @@ public class LaunchActivity extends AnchorPane implements Activity {
         taskDropdown.setValue(menuItems.get(0));
 
         taskDropdown.prefWidthProperty().bind(container.widthProperty().divide(SharedConstants.GUI_ASPECT_RATIO));
-        taskDropdown.setLayoutY(190);
-        taskDropdown.setLayoutX((this.getPrefWidth() - taskDropdown.getPrefWidth())/2);
+        taskDropdown.setLayoutY(MARGIN * 9.5);
+
+        AnchorPane.setLeftAnchor(taskDropdown, (this.getPrefWidth() - taskDropdown.getPrefWidth())/2);
+        container.widthProperty().addListener(((observable, oldValue, newValue) -> {
+            AnchorPane.setLeftAnchor(
+                taskDropdown, (
+                AnchorPane.getLeftAnchor(taskDropdown) + ((Double) newValue - (Double) oldValue) / 2
+            ));
+        }));
 
         Button goButton = new Button();
         goButton.getStyleClass().add("go-button");
         this.getChildren().add(goButton);
 
         goButton.setText("Go");
-        goButton.setLayoutY(390);
-        goButton.setLayoutX((this.getPrefWidth() - goButton.getPrefWidth())/2 - 30);
+        goButton.setPrefWidth(MARGIN * 5);
+        AnchorPane.setBottomAnchor(goButton, MARGIN * 1.5);
+        AnchorPane.setLeftAnchor(goButton, (this.getPrefWidth() - goButton.getPrefWidth())/2);
+
+        container.widthProperty().addListener(((observable, oldValue, newValue) -> {
+            AnchorPane.setLeftAnchor(
+                goButton, (
+                AnchorPane.getLeftAnchor(goButton) + ((Double) newValue - (Double) oldValue) / 2
+            ));
+        }));
 
         Label message = new Label();
         message.setVisible(false);
         message.prefWidthProperty().bind(container.widthProperty().divide(SharedConstants.GUI_ASPECT_RATIO));
-        message.setLayoutY(350);
-        message.setLayoutX((this.getPrefWidth() - message.getPrefWidth())/2);
+        AnchorPane.setBottomAnchor(message, MARGIN * 4.25);
+
+        AnchorPane.setLeftAnchor(message, (this.getPrefWidth() - message.getPrefWidth())/2);
+        container.widthProperty().addListener(((observable, oldValue, newValue) -> {
+            AnchorPane.setLeftAnchor(
+                message, (
+                AnchorPane.getLeftAnchor(message) + ((Double) newValue - (Double) oldValue) / 2
+            ));
+        }));
+
         message.getStyleClass().add("message");
         this.getChildren().add(message);
 

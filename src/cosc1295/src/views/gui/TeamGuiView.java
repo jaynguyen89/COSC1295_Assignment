@@ -18,10 +18,10 @@ public class TeamGuiView extends Application {
 
 	@Override
 	public void start(Stage applicationWindow) {
-		applicationWindow.setAlwaysOnTop(true);
-		applicationWindow.setFullScreen(false);
-		applicationWindow.setMaximized(false);
 		applicationWindow.setTitle("Team Management UI");
+		applicationWindow.maximizedProperty().addListener(((observable, oldValue, newValue) -> {
+			if (newValue) applicationWindow.setMaximized(false);
+		}));
 
 		applicationWindow.setWidth(SharedConstants.DIMENSIONS.get("WIDTH"));
 		applicationWindow.setHeight(SharedConstants.DIMENSIONS.get("HEIGHT"));
@@ -29,8 +29,8 @@ public class TeamGuiView extends Application {
 		applicationWindow.setMaxWidth(SharedConstants.DIMENSIONS.get("MAX_WIDTH"));
 		applicationWindow.setMaxHeight(SharedConstants.DIMENSIONS.get("MAX_HEIGHT"));
 
-		applicationWindow.setMinWidth(SharedConstants.DIMENSIONS.get("MIN_WIDTH"));
-		applicationWindow.setMinHeight(SharedConstants.DIMENSIONS.get("MIN_HEIGHT"));
+		applicationWindow.setMinWidth(SharedConstants.DIMENSIONS.get("WIDTH"));
+		applicationWindow.setMinHeight(SharedConstants.DIMENSIONS.get("HEIGHT"));
 
 		Scene appScene = new Scene(
 				new Pane(),
@@ -46,6 +46,12 @@ public class TeamGuiView extends Application {
 		Scene finalAppScene = appScene;
 		((Activity) appScene.getRoot()).setIntent(context -> {
 			inflator.inflate((GUI_ACTION_CONTEXT) context, finalAppScene);
+
+			((Activity) finalAppScene.getRoot()).setIntent(secondaryContext -> {
+				inflator.inflate((GUI_ACTION_CONTEXT) secondaryContext, finalAppScene);
+				applicationWindow.setScene(finalAppScene);
+			});
+
 			applicationWindow.setScene(finalAppScene);
 		});
 

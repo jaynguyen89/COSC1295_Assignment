@@ -41,6 +41,36 @@ public final class LogicalAssistant {
         return new Pair<>(eSkill, eRanking);
     }
 
+    //Set full Student data into Team members
+    public static void setStudentDataInTeams(List<Team> teams, List<Student> students) {
+        for (Team team : teams) {
+            List<Student> members = team.getMembers();
+            List<Student> memberData = new ArrayList<>();
+
+            for (Student member : members)
+                for (Student student : students)
+                    if (student.getUniqueId().equals(member.getUniqueId())) {
+                        memberData.add(student);
+                        break;
+                    }
+
+            team.setMembers(memberData);
+        }
+    }
+
+    //Pick up only the Students who have not already in any Teams when user want to assign a Student to a Team
+    public static List<Student> filterUnteamedStudents(List<Student> students, List<Team> teams) {
+        List<Student> unteamedStudents = new ArrayList<>(students);
+
+        for (Team team : teams)
+            for (Student member : team.getMembers())
+                unteamedStudents.removeIf(
+                        m -> m.getUniqueId().equals(member.getUniqueId())
+                );
+
+        return unteamedStudents;
+    }
+
     /**
      * Produce the requirements on new member for a Team when user assign a Student into Team.
      * Requirements include Leader type and Personality.

@@ -8,8 +8,8 @@ import cosc1295.providers.services.TeamService;
 import cosc1295.src.models.*;
 import cosc1295.src.views.TeamView;
 import helpers.commons.SharedConstants;
-
 import helpers.utilities.LogicalAssistant;
+
 import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,11 +48,11 @@ public class TeamFormationController extends ControllerBase {
 
         //Teams read from file holds members data with only Student Unique ID,
         //So set Student from Student List into Team members before any further tasks
-        setStudentDataInTeams(teams, students);
+        LogicalAssistant.setStudentDataInTeams(teams, students);
 
         String featureToRun; //Task to run: assign Students to Teams, or swap Students between Teams
         //Get only Students that do not already in a Team for assigning task
-        List<Student> unteamedStudents = filterUnteamedStudents(students, teams);
+        List<Student> unteamedStudents = LogicalAssistant.filterUnteamedStudents(students, teams);
 
         //No Team was formed, so user can only assign
         if (teams.size() == 0) featureToRun = SharedConstants.ACTION_ASSIGN;
@@ -92,23 +92,6 @@ public class TeamFormationController extends ControllerBase {
         }
 
         return true;
-    }
-
-    //Set full Student data into Team members
-    private void setStudentDataInTeams(List<Team> teams, List<Student> students) {
-        for (Team team : teams) {
-            List<Student> members = team.getMembers();
-            List<Student> memberData = new ArrayList<>();
-
-            for (Student member : members)
-                for (Student student : students)
-                    if (student.getUniqueId().equals(member.getUniqueId())) {
-                        memberData.add(student);
-                        break;
-                    }
-
-            team.setMembers(memberData);
-        }
     }
 
     //Actually run the Assigning task
@@ -287,19 +270,6 @@ public class TeamFormationController extends ControllerBase {
         return new Pair<>(teamInAction, studentInTeam);
     }
 
-    //Pick up only the Students who have not already in any Teams when user want to assign a Student to a Team
-    private List<Student> filterUnteamedStudents(List<Student> students, List<Team> teams) {
-        List<Student> unteamedStudents = new ArrayList<>(students);
-
-        for (Team team : teams)
-            for (Student member : team.getMembers())
-                unteamedStudents.removeIf(
-                    m -> m.getUniqueId().equals(member.getUniqueId())
-                );
-
-        return unteamedStudents;
-    }
-
     public void displayTeamSelectionFinalResult(Boolean taskResult) {
         teamView.displayTaskFinalResult(taskResult);
     }
@@ -355,11 +325,6 @@ public class TeamFormationController extends ControllerBase {
         }
 
         return true;
-    }
-
-    //Used for Unittest
-    public List<Student> getAssignableStudentsForTest(List<Student> students, List<Team> teams) {
-        return filterUnteamedStudents(students, teams);
     }
 
     //Used for Unittest

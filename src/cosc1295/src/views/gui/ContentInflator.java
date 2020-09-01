@@ -67,10 +67,12 @@ public class ContentInflator {
     }
 
     public Scene inflate(GUI_ACTION_CONTEXT context, Scene container) {
+
         container.getStylesheets().clear();
         container.getStylesheets().add("file:///" + STYLES_DIR + SharedConstants.RESOURCES.get(context));
 
         Pane activity = sceneCollection.get(context);
+        activity.getChildren().clear();
         switch (context) {
             case LAUNCH:
                 ((LaunchActivity) activity).drawLaunchingContents(container);
