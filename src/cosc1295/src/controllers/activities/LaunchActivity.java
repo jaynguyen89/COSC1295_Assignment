@@ -2,7 +2,6 @@ package cosc1295.src.controllers.activities;
 
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.GUI_ACTION_CONTEXT;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -14,7 +13,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class LaunchActivity extends AnchorPane implements Activity {
+public class LaunchActivity extends AnchorPane implements IActivity {
 
     private Consumer<GUI_ACTION_CONTEXT> intent;
 

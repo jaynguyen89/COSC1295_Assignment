@@ -5,7 +5,7 @@ import javafx.scene.layout.AnchorPane;
 
 import java.util.function.Consumer;
 
-public class RemoveActivity extends AnchorPane implements Activity {
+public class RemoveActivity extends AnchorPane implements IActivity {
     public void drawRemovalTaskContents(Scene container) {
         //TODO
     }

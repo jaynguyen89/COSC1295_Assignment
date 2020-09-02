@@ -18,7 +18,7 @@ import javafx.scene.layout.AnchorPane;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class AssignActivity extends AnchorPane implements Activity {
+public class AssignActivity extends AnchorPane implements IActivity {
 
     private final StudentService studentService;
     private final TeamService teamService;
@@ -62,7 +62,7 @@ public class AssignActivity extends AnchorPane implements Activity {
 
             List<Student> assignableStudents = LogicalAssistant.filterUnteamedStudents(students, teams);
             LogicalAssistant.setStudentDataInTeams(teams, students);
-            drawWidgetsForAssigningStudentsTaskTo(container, assignableStudents, teams);
+            drawWidgetsForAssigningStudentsTask(container, assignableStudents, teams);
         }
     }
 
@@ -87,7 +87,7 @@ public class AssignActivity extends AnchorPane implements Activity {
         drawBackButton(container, true);
     }
 
-    private void drawWidgetsForAssigningStudentsTaskTo(Scene container, List<Student> students, List<Team> teams) {
+    private void drawWidgetsForAssigningStudentsTask(Scene container, List<Student> students, List<Team> teams) {
         Label selectStudentTitle = new Label();
         selectStudentTitle.setText("Select at least 1 Student to assign");
         this.getChildren().add(selectStudentTitle);
@@ -125,7 +125,13 @@ public class AssignActivity extends AnchorPane implements Activity {
         studentsTable.setPrefWidth(initialWidth);
         studentsTable.setPrefHeight(MARGIN * 15.5);
         AnchorPane.setTopAnchor(studentsTable, MARGIN * 5.25);
-        //TODO: set left anchor
+        AnchorPane.setLeftAnchor(studentsTable, MARGIN);
+
+        this.prefWidthProperty().addListener(((observable, oldValue, newValue) -> {
+            studentsTable.setPrefWidth(
+                studentsTable.getPrefWidth() + (((Double) newValue - (Double) oldValue) / 2)
+            );
+        }));
 
         TableColumn<String, StudentVM> uniqueIdCol = new TableColumn<>("Id");
         uniqueIdCol.setCellValueFactory(new PropertyValueFactory<>("uniqueId"));
@@ -145,12 +151,16 @@ public class AssignActivity extends AnchorPane implements Activity {
         rankWCol.setCellValueFactory(new PropertyValueFactory<>("wVal"));
 
         rankingCol.getColumns().addAll(rankACol, rankNCol, rankPCol, rankWCol);
+        for (TableColumn<String, ?> column : rankingCol.getColumns())
+            column.setPrefWidth(MARGIN * 2);
 
         TableColumn<String, StudentVM> personaCol = new TableColumn<>("Personality");
         personaCol.setCellValueFactory(new PropertyValueFactory<>("personality"));
+        personaCol.setPrefWidth(MARGIN * 5);
 
         TableColumn<String, StudentVM> conflictCol = new TableColumn<>("Conflicters");
         conflictCol.setCellValueFactory(new PropertyValueFactory<>("conflicters"));
+        conflictCol.setPrefWidth(MARGIN * 5);
 
         ObservableList<StudentVM> studentsData = FXCollections.observableArrayList();
         for (Student student : students) {
@@ -160,6 +170,8 @@ public class AssignActivity extends AnchorPane implements Activity {
 
         studentsTable.setItems(studentsData);
         studentsTable.getColumns().addAll(uniqueIdCol, rankingCol, personaCol, conflictCol);
+
+
 
         return null;
     }

@@ -5,7 +5,7 @@ import javafx.scene.layout.AnchorPane;
 
 import java.util.function.Consumer;
 
-public class StatisticsActivity extends AnchorPane implements Activity {
+public class StatisticsActivity extends AnchorPane implements IActivity {
     public void drawStatisticsContents(Scene container) {
         //TODO
     }

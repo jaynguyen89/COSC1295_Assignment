@@ -5,7 +5,7 @@ import javafx.scene.layout.AnchorPane;
 
 import java.util.function.Consumer;
 
-public class SwapActivity extends AnchorPane implements Activity {
+public class SwapActivity extends AnchorPane implements IActivity {
     public void drawSwappingTaskContents(Scene container) {
         //TODO
     }

@@ -1,5 +1,3 @@
-package tests;
-
 import cosc1295.providers.services.ProjectService;
 import cosc1295.providers.services.StudentService;
 import cosc1295.src.controllers.ControllerBase;

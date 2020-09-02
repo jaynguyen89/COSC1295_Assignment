@@ -5,7 +5,7 @@ import javafx.scene.control.Control;
 
 import java.util.function.Consumer;
 
-public interface Activity {
+public interface IActivity {
 
     double MARGIN = 20.0;
 

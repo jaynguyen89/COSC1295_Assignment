@@ -5,7 +5,7 @@ import javafx.scene.layout.AnchorPane;
 
 import java.util.function.Consumer;
 
-public class ProjectActivity extends AnchorPane implements Activity {
+public class ProjectActivity extends AnchorPane implements IActivity {
     public void drawProjectSettingTaskContents(Scene container) {
         //TODO
     }

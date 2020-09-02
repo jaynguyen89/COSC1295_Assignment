@@ -1,6 +1,6 @@
 package cosc1295.src.views.gui;
 
-import cosc1295.src.controllers.activities.Activity;
+import cosc1295.src.controllers.activities.IActivity;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.GUI_ACTION_CONTEXT;
 import javafx.application.Application;
@@ -44,10 +44,10 @@ public class TeamGuiView extends Application {
 		appScene = inflator.inflate(GUI_ACTION_CONTEXT.LAUNCH, appScene);
 
 		Scene finalAppScene = appScene;
-		((Activity) appScene.getRoot()).setIntent(context -> {
+		((IActivity) appScene.getRoot()).setIntent(context -> {
 			inflator.inflate((GUI_ACTION_CONTEXT) context, finalAppScene);
 
-			((Activity) finalAppScene.getRoot()).setIntent(secondaryContext -> {
+			((IActivity) finalAppScene.getRoot()).setIntent(secondaryContext -> {
 				inflator.inflate((GUI_ACTION_CONTEXT) secondaryContext, finalAppScene);
 				applicationWindow.setScene(finalAppScene);
 			});
