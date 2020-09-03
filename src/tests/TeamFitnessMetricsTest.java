@@ -3,11 +3,9 @@ package tests;
 import cosc1295.providers.services.ProjectService;
 import cosc1295.providers.services.StudentService;
 import cosc1295.src.controllers.ControllerBase;
-import cosc1295.src.models.Project;
-import cosc1295.src.models.Student;
-import cosc1295.src.models.Team;
-import cosc1295.src.models.TeamFitness;
+import cosc1295.src.models.*;
 import helpers.commons.SharedEnums.SKILLS;
+import helpers.utilities.LogicalAssistant;
 import junit.framework.TestCase;
 import org.junit.*;
 
@@ -22,6 +20,7 @@ public class TeamFitnessMetricsTest {
 
     private static List<Student> students;
     private static List<Project> projects;
+    private static List<Preference> preferences;
     private static ControllerBase controllerBase;
 
     private static final List<Team> testData = new ArrayList<>();
@@ -33,6 +32,7 @@ public class TeamFitnessMetricsTest {
 
         StudentService studentService = new StudentService();
         students = studentService.readAllStudentsFromFile();
+        preferences = studentService.readAllStudentPreferencesFromFile();
     }
 
     @Before
@@ -108,7 +108,7 @@ public class TeamFitnessMetricsTest {
 
         for (int i = 3; i < testData.size(); i++) {
             Team testTeam = testData.get(i);
-            TeamFitness fitnessMetrics = controllerBase.executeFitnessMetricCalculationForTest(testTeam, projects);
+            TeamFitness fitnessMetrics = LogicalAssistant.calculateTeamFitnessMetricsFor(testTeam, projects, preferences);
 
             //Asserting average competency of team
             TestCase.assertEquals(
@@ -139,7 +139,7 @@ public class TeamFitnessMetricsTest {
 
         for (int i = 3; i < testData.size(); i++) {
             Team testTeam = testData.get(i);
-            TeamFitness fitnessMetrics = controllerBase.executeFitnessMetricCalculationForTest(testTeam, projects);
+            TeamFitness fitnessMetrics = LogicalAssistant.calculateTeamFitnessMetricsFor(testTeam, projects, preferences);
 
             //Asserting average Team's satisfaction
             TestCase.assertEquals(
@@ -166,7 +166,7 @@ public class TeamFitnessMetricsTest {
 
         for (int i = 3; i < testData.size(); i++) {
             Team testTeam = testData.get(i);
-            TeamFitness fitnessMetrics = controllerBase.executeFitnessMetricCalculationForTest(testTeam, projects);
+            TeamFitness fitnessMetrics = LogicalAssistant.calculateTeamFitnessMetricsFor(testTeam, projects, preferences);
 
             if (i == 5) TestCase.assertEquals(334, fitnessMetrics.getId());
 

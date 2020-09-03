@@ -1,10 +1,9 @@
+package tests;
+
 import cosc1295.providers.services.ProjectService;
 import cosc1295.providers.services.StudentService;
 import cosc1295.src.controllers.ControllerBase;
-import cosc1295.src.models.Project;
-import cosc1295.src.models.Student;
-import cosc1295.src.models.Team;
-import cosc1295.src.models.TeamFitness;
+import cosc1295.src.models.*;
 import junit.framework.TestCase;
 import org.junit.*;
 
@@ -17,6 +16,7 @@ public class StandardDeviationTest {
 
     private static List<Student> students;
     private static List<Project> projects;
+    private static List<Preference> preferences;
     private static ControllerBase controllerBase;
 
     private static final List<Team> testData1 = new ArrayList<>();
@@ -29,6 +29,7 @@ public class StandardDeviationTest {
 
         StudentService studentService = new StudentService();
         students = studentService.readAllStudentsFromFile();
+        preferences = studentService.readAllStudentPreferencesFromFile();
     }
 
     @Before
@@ -100,8 +101,8 @@ public class StandardDeviationTest {
     public void skillCompetencyStandardDeviationShouldBeCorrect() {
         controllerBase = new ControllerBase();
         //Calculate skill competency SD for each Team set
-        double set1CompetencySD = controllerBase.executeStandardDeviationCalculationForTest(testData1, projects).get(0);
-        double set2CompetencySD = controllerBase.executeStandardDeviationCalculationForTest(testData2, projects).get(0);
+        double set1CompetencySD = controllerBase.executeStandardDeviationCalculationForTest(testData1, projects, preferences).get(0);
+        double set2CompetencySD = controllerBase.executeStandardDeviationCalculationForTest(testData2, projects, preferences).get(0);
 
         //Assert correct skill competency SD for each Teams set
         TestCase.assertEquals(0.057, set1CompetencySD);
@@ -112,8 +113,8 @@ public class StandardDeviationTest {
     public void preferenceSatisfactionStandardDeviationShouldBeCorrect() {
         controllerBase = new ControllerBase();
         //Calculate preference satisfaction SD for each Team set
-        double set1SatisfactionSD = controllerBase.executeStandardDeviationCalculationForTest(testData1, projects).get(1);
-        double set2SatisfactionSD = controllerBase.executeStandardDeviationCalculationForTest(testData2, projects).get(1);
+        double set1SatisfactionSD = controllerBase.executeStandardDeviationCalculationForTest(testData1, projects, preferences).get(1);
+        double set2SatisfactionSD = controllerBase.executeStandardDeviationCalculationForTest(testData2, projects, preferences).get(1);
 
         //Assert correct preference satisfaction SD for each Teams set
         TestCase.assertEquals(31.18, set1SatisfactionSD);
@@ -124,8 +125,8 @@ public class StandardDeviationTest {
     public void skillShortfallsStandardDeviationShouldBeCorrect() {
         controllerBase = new ControllerBase();
         //Calculate skill shortfall SD for each Team set
-        double set1ShortfallSD = controllerBase.executeStandardDeviationCalculationForTest(testData1, projects).get(2);
-        double set2ShortfallSD = controllerBase.executeStandardDeviationCalculationForTest(testData2, projects).get(2);
+        double set1ShortfallSD = controllerBase.executeStandardDeviationCalculationForTest(testData1, projects, preferences).get(2);
+        double set2ShortfallSD = controllerBase.executeStandardDeviationCalculationForTest(testData2, projects, preferences).get(2);
 
         //Assert correct skill shortfall SD for each Teams set
         TestCase.assertEquals(0.329, set1ShortfallSD);

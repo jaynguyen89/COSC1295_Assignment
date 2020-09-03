@@ -2,13 +2,18 @@ package helpers.utilities;
 
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
-import cosc1295.src.models.Student;
-import cosc1295.src.models.Team;
+import cosc1295.src.models.*;
+import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 
 import javafx.util.Pair;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static java.lang.Math.abs;
 
 public final class LogicalAssistant {
 
@@ -85,7 +90,7 @@ public final class LogicalAssistant {
         boolean leaderTypeRequired = true; //Key of the Pair to be returned
         List<String> refusedStudents = new ArrayList<>(); //Value of the Pair to be returned
 
-        //Temporarily add the pending Students to Team to check the resulting Team
+        //Temporarily faking add the pending Students to Team to check the resulting Team
         List<Student> teamMembers = new ArrayList<>();
         teamMembers.addAll(members);
         teamMembers.addAll(selectedStudents);
@@ -209,7 +214,7 @@ public final class LogicalAssistant {
     }
 
     /**
-     * The selection param holds Team being the Team to get the assigned Student.
+     * The selection param holds the Team to get the assigned Student.
      * Checks for Personality Imbalance if the Team actually gets the offered Student.
      * Returns a Pair with Key indicating if Team's Personality is imbalance,
      * and Value indicating the Personalities that the Team needs, so user know what
@@ -220,12 +225,7 @@ public final class LogicalAssistant {
     //Key indicates if Personality is imbalance, when Key==true,
     // Value indicates the Personalities it requires for the next added member (not the current one)
     public static Pair<Boolean, List<SharedEnums.PERSONALITIES>> checkImbalancePersonalityOnAssign(Pair<Team, Student> selection) {
-        List<SharedEnums.PERSONALITIES> allPersonalities = new ArrayList<SharedEnums.PERSONALITIES>() {/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1429894234507507258L;
-
-		{
+        List<SharedEnums.PERSONALITIES> allPersonalities = new ArrayList<SharedEnums.PERSONALITIES>() {{
             add(SharedEnums.PERSONALITIES.A);
             add(SharedEnums.PERSONALITIES.B);
             add(SharedEnums.PERSONALITIES.C);
@@ -293,5 +293,127 @@ public final class LogicalAssistant {
             return new Pair<>(firstTeamImbalanceCheck, secondTeamImbalanceCheck);
 
         return null;
+    }
+
+    /**
+     * Calculates the Fitness Metrics for a Team, including Skill Competency (average and categorized x4),
+     * Preference Satisfaction (team overall and 1st-2nd Projects), and Skill Shortfall (average and per-project).
+     * @param team Team
+     * @param projects List<Project>
+     * @return TeamFitness
+     */
+    public static TeamFitness calculateTeamFitnessMetricsFor(Team team, List<Project> projects, List<Preference> preferences) {
+        //Create FitnessMetrics for Team that never has, otherwise update Team's FitnessMetrics
+        TeamFitness teamFitness = team.getFitnessMetrics() == null
+                ? new TeamFitness()
+                : team.getFitnessMetrics();
+
+        /* At first, all competency and satisfaction ratings/preferences are summed up into these 2 containers,
+         * then use these 2 containers to calculate average competency and satisfaction metrics. */
+        HashMap<SharedEnums.SKILLS, Double> skillCompetencies = new HashMap<>();
+        Pair<Double, Double> satisfactions = new Pair<>(0.0, 0.0);
+
+        for (Student member : team.getMembers()) { //Perform the sums
+            HashMap<SharedEnums.SKILLS, SharedEnums.RANKINGS> memberSkillRanking = member.getSkillRanking();
+
+            for (Map.Entry<SharedEnums.SKILLS, SharedEnums.RANKINGS> entry : memberSkillRanking.entrySet())
+                if (skillCompetencies.containsKey(entry.getKey()))
+                    skillCompetencies.put(
+                        entry.getKey(),
+                        skillCompetencies.get(entry.getKey()) + entry.getValue().getValue() //sum up competency ratings
+                    );
+                else
+                    skillCompetencies.put(entry.getKey(), (double) entry.getValue().getValue());
+
+            AtomicReference<Preference> memberPreferences = new AtomicReference<>();
+            preferences.forEach(p -> {
+                if (p.getStudentUniqueId().equalsIgnoreCase(member.getUniqueId()))
+                    memberPreferences.set(p);
+            });
+
+            //Sum up satisfaction preferences
+            for (Map.Entry<String, Integer> entry : memberPreferences.get().getPreference().entrySet()) {
+                if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 4)
+                    satisfactions = new Pair<>(satisfactions.getKey() + 1, satisfactions.getValue());
+
+                if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 3)
+                    satisfactions = new Pair<>(satisfactions.getKey(), satisfactions.getValue() + 1);
+            }
+        }
+
+        //Compute metrics for competency
+        Pair<Double, HashMap<SharedEnums.SKILLS, Double>> computedCompetencies = computeAverageCompetencies(skillCompetencies);
+        teamFitness.setAverageTeamSkillCompetency(computedCompetencies.getKey());
+
+        HashMap<SharedEnums.SKILLS, Double> teamCompetencyBySkills = computedCompetencies.getValue();
+        teamFitness.setTeamCompetency(teamCompetencyBySkills);
+
+        //Compute metrics for satisfaction
+        teamFitness.setPreferenceSatisfaction(computeAverageSatisfactions(satisfactions));
+
+        //Calculate the Skill Shortfall: average of all Projects, and per Project.
+        //At first, all shortfall differences are summed up into a container, then use the container to calculate the averages
+        HashMap<String, Double> skillShortFalls = new HashMap<>();
+        for (Project project : projects) {
+            double shortfall = 0;
+
+            for (Map.Entry<SharedEnums.SKILLS, SharedEnums.RANKINGS> ranking : project.getSkillRanking().entrySet()) {
+                double requestedSkillRanking = ranking.getValue().getValue();
+                double teamSkillRanking = teamCompetencyBySkills.get(ranking.getKey());
+
+                if (requestedSkillRanking > teamSkillRanking)
+                    shortfall += abs(requestedSkillRanking - teamSkillRanking); //sum up the differences
+            }
+
+            skillShortFalls.put(project.getUniqueId(), shortfall);
+        }
+
+        teamFitness.setSkillShortFall(skillShortFalls); //Per-Project Shortfalls
+        teamFitness.setAverageSkillShortfall(computeAverageTeamSkillShortFall(skillShortFalls)); //Average of all Projects
+
+        return teamFitness;
+    }
+
+    private static double computeAverageTeamSkillShortFall(HashMap<String, Double> skillShortfall) {
+        double totalShortfall = 0;
+        for (Map.Entry<String, Double> entry : skillShortfall.entrySet())
+            totalShortfall += entry.getValue();
+
+        return Helpers.round(totalShortfall / skillShortfall.size(), SharedConstants.DECIMAL_PRECISION);
+    }
+
+    private static Pair<Double, Pair<Double, Double>> computeAverageSatisfactions(Pair<Double, Double> satisfactions) {
+        return new Pair<>(
+                Helpers.round(
+                        (satisfactions.getKey() + satisfactions.getValue()) * 100 / SharedConstants.GROUP_LIMIT,
+                        SharedConstants.DECIMAL_PRECISION
+                ),
+                new Pair<>(
+                        Helpers.round(satisfactions.getKey() * 100 / SharedConstants.GROUP_LIMIT, SharedConstants.DECIMAL_PRECISION),
+                        Helpers.round(satisfactions.getValue() * 100 / SharedConstants.GROUP_LIMIT, SharedConstants.DECIMAL_PRECISION)
+                )
+        );
+    }
+
+    private static Pair<Double, HashMap<SharedEnums.SKILLS, Double>> computeAverageCompetencies(HashMap<SharedEnums.SKILLS, Double> competencies) {
+        HashMap<SharedEnums.SKILLS, Double> averageCompetencies = new HashMap<>();
+
+        for (Map.Entry<SharedEnums.SKILLS, Double> competency : competencies.entrySet())
+            averageCompetencies.put(
+                    competency.getKey(),
+                    Helpers.round(competency.getValue() / SharedConstants.GROUP_LIMIT, SharedConstants.DECIMAL_PRECISION)
+            );
+
+        double totalCompetency = 0;
+        for (Map.Entry<SharedEnums.SKILLS, Double> entry : averageCompetencies.entrySet())
+            totalCompetency += entry.getValue();
+
+        return new Pair<>(
+                Helpers.round(
+                        totalCompetency / SharedConstants.GROUP_LIMIT * SharedEnums.getAllEnumAttributesAsList(SharedEnums.SKILLS.class).size(),
+                        SharedConstants.DECIMAL_PRECISION
+                ),
+                averageCompetencies
+        );
     }
 }

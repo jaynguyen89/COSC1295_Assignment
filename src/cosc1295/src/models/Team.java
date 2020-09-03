@@ -7,12 +7,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Team implements IThing, Serializable {
+public class Team implements IThing, Serializable, Cloneable {
 
 	private static final long serialVersionUID = -35799684266491980L;
 
 	private int id;
-    private transient String uniqueId;
+    private transient String uniqueId; //unused attribute
     private TeamFitness fitnessMetrics;
     private List<Student> members = new ArrayList<>();
     private Project project;
@@ -130,5 +130,9 @@ public class Team implements IThing, Serializable {
 
     public String display() {
         return "Team #" + id + ": " + project.getUniqueId() + "\t" + project.getProjectTitle();
+    }
+
+    public Team clone() throws CloneNotSupportedException {
+        return (Team) super.clone();
     }
 }

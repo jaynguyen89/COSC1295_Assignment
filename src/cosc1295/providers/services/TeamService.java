@@ -150,11 +150,13 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
 
     @Override
     public boolean updateTeam(@NotNull Team newTeam) {
-        if (updateEntryToFileById(
-            newTeam.getFitnessMetrics().stringify(),
-            newTeam.getFitnessMetrics().getId(),
-            DATA_TYPES.FITNESS_METRICS)
-        )
+        boolean fitnessMetricsSaved = true;
+        if (newTeam.getFitnessMetrics() != null)
+            fitnessMetricsSaved = updateEntryToFileById(
+                    newTeam.getFitnessMetrics().stringify(), newTeam.getFitnessMetrics().getId(), DATA_TYPES.FITNESS_METRICS
+            );
+
+        if (fitnessMetricsSaved)
             return updateEntryToFileById(newTeam.stringify(), newTeam.getId(), DATA_TYPES.PROJECT_TEAM);
 
         return false;

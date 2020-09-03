@@ -24,7 +24,6 @@ import java.util.NoSuchElementException;
 public class TeamAssignSwapTest {
 
     private static ProjectService projectService;
-    private static TeamFormationController teamController;
     private static TeamView teamView;
 
     private static List<Student> students;
@@ -43,8 +42,6 @@ public class TeamAssignSwapTest {
     public static void setUpBeforeClass() {
         projectService = new ProjectService();
         projects = projectService.readAllProjectsFromFile();
-
-        teamController = new TeamFormationController();
         teamView = new TeamView();
 
         StudentService studentService = new StudentService();
@@ -334,8 +331,6 @@ public class TeamAssignSwapTest {
 
         System.setOut(originalOut);
         System.setIn(originalIn);
-
-        teamController = new TeamFormationController();
         teamView = new TeamView();
     }
 
@@ -348,8 +343,6 @@ public class TeamAssignSwapTest {
         testTeam1 = null;
         testTeam2 = null;
         testTeam3 = null;
-
-        teamController = null;
         teamView = null;
     }
 }

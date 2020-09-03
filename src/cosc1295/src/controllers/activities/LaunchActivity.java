@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("unchecked")
 public class LaunchActivity extends AnchorPane implements IActivity {
 
     private Consumer<GUI_ACTION_CONTEXT> intent;
@@ -22,16 +23,14 @@ public class LaunchActivity extends AnchorPane implements IActivity {
         this.prefWidthProperty().bind(container.widthProperty());
         this.prefHeightProperty().bind(container.heightProperty());
 
-        Label title = new Label();
-        title.setText("Team Management UI");
+        Label title = new Label("Team Management UI");
         this.getChildren().add(title);
 
         title.getStyleClass().add("title");
         title.prefWidthProperty().bind(container.widthProperty());
         title.setLayoutY(MARGIN * 2);
 
-        Label subtitle = new Label();
-        subtitle.setText("Please select your task");
+        Label subtitle = new Label("Please select your task");
         this.getChildren().add(subtitle);
 
         subtitle.getStyleClass().add("subtitle");
@@ -53,28 +52,17 @@ public class LaunchActivity extends AnchorPane implements IActivity {
         taskDropdown.setLayoutY(MARGIN * 9.5);
 
         AnchorPane.setLeftAnchor(taskDropdown, (this.getPrefWidth() - taskDropdown.getPrefWidth())/2);
-        container.widthProperty().addListener(((observable, oldValue, newValue) -> {
+        container.widthProperty().addListener((observable, oldValue, newValue) ->
             AnchorPane.setLeftAnchor(
                 taskDropdown, (
                 AnchorPane.getLeftAnchor(taskDropdown) + ((Double) newValue - (Double) oldValue) / 2
-            ));
-        }));
+            )
+        ));
 
-        Button goButton = new Button();
+        Button goButton = new Button("Go");
         goButton.getStyleClass().add("go-button");
+        IActivity.constraintButton(goButton, this);
         this.getChildren().add(goButton);
-
-        goButton.setText("Go");
-        goButton.setPrefWidth(MARGIN * 5);
-        AnchorPane.setBottomAnchor(goButton, MARGIN * 1.5);
-        AnchorPane.setLeftAnchor(goButton, (this.getPrefWidth() - goButton.getPrefWidth())/2);
-
-        container.widthProperty().addListener(((observable, oldValue, newValue) -> {
-            AnchorPane.setLeftAnchor(
-                goButton, (
-                AnchorPane.getLeftAnchor(goButton) + ((Double) newValue - (Double) oldValue) / 2
-            ));
-        }));
 
         Label message = new Label();
         message.setVisible(false);
@@ -82,17 +70,17 @@ public class LaunchActivity extends AnchorPane implements IActivity {
         AnchorPane.setBottomAnchor(message, MARGIN * 4.25);
 
         AnchorPane.setLeftAnchor(message, (this.getPrefWidth() - message.getPrefWidth())/2);
-        container.widthProperty().addListener(((observable, oldValue, newValue) -> {
+        container.widthProperty().addListener((observable, oldValue, newValue) ->
             AnchorPane.setLeftAnchor(
                 message, (
                 AnchorPane.getLeftAnchor(message) + ((Double) newValue - (Double) oldValue) / 2
-            ));
-        }));
+            )
+        ));
 
         message.getStyleClass().add("message");
         this.getChildren().add(message);
 
-        taskDropdown.setOnAction(event -> { message.setVisible(false); });
+        taskDropdown.setOnAction(event -> message.setVisible(false));
 
         goButton.setOnAction(event -> {
             String selectedOption = taskDropdown.getSelectionModel().getSelectedItem();

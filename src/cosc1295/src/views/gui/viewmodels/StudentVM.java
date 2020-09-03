@@ -5,6 +5,8 @@ import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.SKILLS;
 import javafx.beans.property.SimpleStringProperty;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class StudentVM {
 
     private SimpleStringProperty uniqueId;
@@ -57,5 +59,9 @@ public class StudentVM {
         ));
 
         return s;
+    }
+
+    public AtomicReference<Student> backCast() {
+        return new AtomicReference<>(new Student());
     }
 }

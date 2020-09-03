@@ -32,8 +32,9 @@ public class TeamFormationController extends ControllerBase {
         List<Student> students = studentService.readAllStudentsFromFile();
         List<Project> projects = projectService.readAllProjectsFromFile();
         List<Team> teams = teamService.readAllTeamsFromFile();
+        List<Preference> preferences = studentService.readAllStudentPreferencesFromFile();
 
-        if (students == null || projects == null || teams == null)
+        if (students == null || projects == null || teams == null || preferences == null)
             return null;
 
         if (students.size() < 3) { //The number of Students is not enough to form Teams
@@ -76,7 +77,7 @@ public class TeamFormationController extends ControllerBase {
             for (Team newTeam : newTeams) {
                 //Calculate Fitness Metrics only if a Team has enough 4 Students
                 if (newTeam.getMembers().size() == SharedConstants.GROUP_LIMIT) {
-                    TeamFitness teamFitness = calculateTeamFitnessMetricsFor(newTeam, projects);
+                    TeamFitness teamFitness = LogicalAssistant.calculateTeamFitnessMetricsFor(newTeam, projects, preferences);
                     newTeam.setFitnessMetrics(teamFitness);
                 }
 
@@ -288,8 +289,9 @@ public class TeamFormationController extends ControllerBase {
     public Boolean executeTeamProjectSelectionTask() {
         List<Team> teams = teamService.readAllTeamsFromFile();
         List<Project> projects = projectService.readAllProjectsFromFile();
+        List<Preference> preferences = studentService.readAllStudentPreferencesFromFile();
 
-        if (projects == null || teams == null) return null;
+        if (projects == null || teams == null || preferences == null) return null;
 
         if (projects.size() == 0) {
             teamView.displayInsufficientSelectionFor(Project.class);
@@ -314,7 +316,7 @@ public class TeamFormationController extends ControllerBase {
         //Then set new Project, and recalculate Fitness Metrics if Team has enough 4 Students
         selectedTeam.setProject(selectedProject);
         if (selectedTeam.getMembers().size() == SharedConstants.GROUP_LIMIT) {
-            TeamFitness teamFitness = calculateTeamFitnessMetricsFor(selectedTeam, projects);
+            TeamFitness teamFitness = LogicalAssistant.calculateTeamFitnessMetricsFor(selectedTeam, projects, preferences);
             selectedTeam.setFitnessMetrics(teamFitness);
         }
 
