@@ -37,4 +37,12 @@ public class Role implements Serializable {
     public String stringify() {
         return id + SharedConstants.TEXT_DELIMITER + role;
     }
+
+    public Role clone() {
+        Role clone = new Role();
+        clone.setId(id);
+        clone.setRole(role);
+
+        return clone;
+    }
 }

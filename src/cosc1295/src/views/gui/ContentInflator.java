@@ -78,10 +78,10 @@ public class ContentInflator {
                 ((LaunchActivity) activity).drawLaunchingContents(container);
                 break;
             case ASSIGN:
-                ((AssignActivity) activity).drawAssigningTaskContents(container);
+                ((AssignActivity) activity).drawAssigningTaskContents(container, null);
                 break;
             case SWAP:
-                ((SwapActivity) activity).drawSwappingTaskContents(container);
+                ((SwapActivity) activity).drawSwappingTaskContents(container, null);
                 break;
             case REMOVE:
                 ((RemoveActivity) activity).drawRemovalTaskContents(container);

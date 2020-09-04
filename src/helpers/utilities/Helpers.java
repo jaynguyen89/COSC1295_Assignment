@@ -234,4 +234,10 @@ public final class Helpers {
         );
         return Double.parseDouble(format.format(any));
     }
+
+    public static String getIdFromCompact(String compact) {
+        return compact.split(SharedConstants.SPACE)[1]
+            .replace("#", SharedConstants.EMPTY_STRING)
+            .replace(":", SharedConstants.EMPTY_STRING);
+    }
 }

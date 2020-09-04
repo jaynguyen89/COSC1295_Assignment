@@ -53,4 +53,12 @@ public class Preference implements Serializable {
 
         return stringPref.toString();
     }
+
+    public Preference clone() {
+        Preference clone = new Preference();
+        clone.setStudentUniqueId(studentUniqueId);
+        clone.setPreference(preference == null ? null : new HashMap<>(preference));
+
+        return clone;
+    }
 }

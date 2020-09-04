@@ -178,4 +178,25 @@ public class TeamFitness implements Serializable {
 
         return fitnessString.toString();
     }
+
+    public TeamFitness clone() {
+        TeamFitness clone = new TeamFitness();
+        clone.setId(id);
+        clone.setAverageTeamSkillCompetency(averageTeamSkillCompetency);
+        clone.setTeamCompetency(teamCompetencyBySkills == null ? null : new HashMap<>(teamCompetencyBySkills));
+        clone.setPreferenceSatisfaction(
+            preferenceSatisfaction == null ? null :
+            new Pair<>(
+                preferenceSatisfaction.getKey(),
+                new Pair<>(
+                    preferenceSatisfaction.getValue().getKey(),
+                    preferenceSatisfaction.getValue().getValue()
+                )
+            )
+        );
+        clone.setAverageSkillShortfall(averageSkillShortfall);
+        clone.setSkillShortFall(skillShortFall == null ? null : new HashMap<>(skillShortFall));
+
+        return clone;
+    }
 }

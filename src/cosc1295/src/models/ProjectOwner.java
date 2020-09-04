@@ -53,4 +53,13 @@ public class ProjectOwner extends People implements IThing, Serializable {
             company.getId();
 
     }
+
+    public ProjectOwner clone() {
+        ProjectOwner clone = new ProjectOwner();
+        clone.setId(getId());
+        clone.setUniqueId(uniqueId);
+        clone.setCompany(company == null ? null : company.clone());
+
+        return clone;
+    }
 }

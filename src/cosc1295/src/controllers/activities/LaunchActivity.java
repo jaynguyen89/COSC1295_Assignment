@@ -55,7 +55,7 @@ public class LaunchActivity extends AnchorPane implements IActivity {
         container.widthProperty().addListener((observable, oldValue, newValue) ->
             AnchorPane.setLeftAnchor(
                 taskDropdown, (
-                AnchorPane.getLeftAnchor(taskDropdown) + ((Double) newValue - (Double) oldValue) / 2
+                AnchorPane.getLeftAnchor(taskDropdown) + IActivity.offset(oldValue, newValue)
             )
         ));
 
@@ -73,7 +73,7 @@ public class LaunchActivity extends AnchorPane implements IActivity {
         container.widthProperty().addListener((observable, oldValue, newValue) ->
             AnchorPane.setLeftAnchor(
                 message, (
-                AnchorPane.getLeftAnchor(message) + ((Double) newValue - (Double) oldValue) / 2
+                AnchorPane.getLeftAnchor(message) + IActivity.offset(oldValue, newValue)
             )
         ));
 

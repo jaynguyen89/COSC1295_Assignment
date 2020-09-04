@@ -35,14 +35,15 @@ import java.util.function.Consumer;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class AssignActivity extends AnchorPane implements IActivity {
 
+    private Consumer<SharedEnums.GUI_ACTION_CONTEXT> intent;
     private static final String SET_PROJECT = "SET_PROJECT";
 
     private final StudentService studentService;
     private final TeamService teamService;
 
-    private SimpleObjectProperty<Student> studentToAssign;
-    private SimpleObjectProperty<Team> teamToReceiveMember;
-    private SimpleObjectProperty<Student> studentInTeamToBeReplaced;
+    private final SimpleObjectProperty<Student> studentToAssign;
+    private final SimpleObjectProperty<Team> teamToReceiveMember;
+    private final SimpleObjectProperty<Student> studentInTeamToBeReplaced;
 
     public AssignActivity() {
         studentService = new StudentService();
@@ -55,39 +56,25 @@ public class AssignActivity extends AnchorPane implements IActivity {
         eraseTeamDetailsTable();
     }
 
-    private Consumer<SharedEnums.GUI_ACTION_CONTEXT> intent;
-
     private void setTeamToReceiveMember(@Nullable Team team) {
         teamToReceiveMember.set(team);
     }
 
-    public void drawAssigningTaskContents(Scene container) {
-        this.getStyleClass().add("panel-wrapper");
-        this.prefWidthProperty().bind(container.widthProperty());
-        this.prefHeightProperty().bind(container.heightProperty());
+    public void drawAssigningTaskContents(Scene container, @Nullable String postMessage) {
+        IActivity.drawActivityTitle(container, this, "Assign Students To Teams");
 
         List<Student> students = studentService.readAllStudentsFromFile();
         List<Team> teams = teamService.readAllTeamsFromFile();
 
-        Label title = new Label("Assign Students To Teams");
-        this.getChildren().add(title);
+        boolean error = students == null || teams == null;
+        if (error) drawActivityFailMessage(container, "An error occurred while retrieving data from files.\nPlease try again.");
 
-        title.getStyleClass().add("title");
-        title.prefWidthProperty().bind(container.widthProperty());
-        title.setLayoutY(MARGIN / 2);
-
-        boolean error = false;
-        if (students == null || teams == null) {
-            drawActivityFailMessage(container, "An error occurred while retrieving data from files.\nPlease try again.");
-            error = true;
-        }
-
-        if (!error && students.size() < SharedConstants.GROUP_LIMIT && teams.size() == 0) {
-            drawActivityFailMessage(container, "The number of Students is insufficient to form new Team.\nPlease add more Students then come back.");
-            error = true;
-        }
+        error = !error && (students.size() < SharedConstants.GROUP_LIMIT && teams.size() == 0);
+        if (error) drawActivityFailMessage(container, "The number of Students is insufficient to form new Team.\nPlease add more Students then come back.");
 
         if (!error) {
+            if (postMessage != null) IActivity.drawSuccessMessage(postMessage, this);
+
             attachListenersToObservables(container);
             drawButtonBasedOnContext(container, false);
 
@@ -103,27 +90,24 @@ public class AssignActivity extends AnchorPane implements IActivity {
         SimpleBooleanProperty shouldEnableAssignButton = new SimpleBooleanProperty(false);
         AtomicReference<String> message = new AtomicReference<>(SharedConstants.EMPTY_STRING);
 
-        studentToAssign.addListener((observable, oldValue, newValue) -> {
+        studentToAssign.addListener(observable -> {
             message.set(SharedConstants.EMPTY_STRING);
             manageStatusMessageAndAssignButtonBasedOnRequirements(container, message, shouldEnableAssignButton);
         });
 
-        teamToReceiveMember.addListener(((observable, oldValue, newValue) -> {
+        teamToReceiveMember.addListener((observable -> {
             message.set(SharedConstants.EMPTY_STRING);
             manageStatusMessageAndAssignButtonBasedOnRequirements(container, message, shouldEnableAssignButton);
         }));
 
-        studentInTeamToBeReplaced.addListener(((observable, oldValue, newValue) -> {
+        studentInTeamToBeReplaced.addListener(observable -> {
             message.set(SharedConstants.EMPTY_STRING);
             manageStatusMessageAndAssignButtonBasedOnRequirements(container, message, shouldEnableAssignButton);
-        }));
+        });
 
-        shouldEnableAssignButton.addListener((observable, oldBool, newBool) -> {
-            Button assignButton = (Button) this.lookup("#assign-button");
-
-            assignButton.setDisable(!newBool);
-            assignButton.getStyleClass().remove(newBool ? "button-disabled" : "done-button");
-            assignButton.getStyleClass().add(newBool ? "done-button" : "button-disabled");
+        shouldEnableAssignButton.addListener(observable -> {
+            Button assignButton = (Button) this.lookup("#main-button");
+            assignButton.setDisable(!shouldEnableAssignButton.get());
         });
     }
 
@@ -178,7 +162,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         AnchorPane.setLeftAnchor(requirementMessage, initialWidth + MARGIN * 2);
 
         this.prefWidthProperty().addListener(((observable, oldValue, newValue) -> {
-            double offset = ((Double) newValue - (Double) oldValue) / 2;
+            double offset = IActivity.offset(oldValue, newValue);
 
             AnchorPane.setLeftAnchor(requirementMessage, AnchorPane.getLeftAnchor(requirementMessage) + offset);
             requirementMessage.setPrefWidth(initialWidth + offset);
@@ -186,22 +170,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
     }
 
     private void drawActivityFailMessage(Scene container, String message) {
-        Label warning = new Label(message);
-        this.getChildren().add(warning);
-
-        warning.getStyleClass().add("warning");
-        warning.setPrefWidth(MARGIN * 25);
-
-        AnchorPane.setTopAnchor(warning, MARGIN * 5);
-        AnchorPane.setLeftAnchor(warning, (this.getPrefWidth() - warning.getPrefWidth())/2);
-
-        container.widthProperty().addListener((observable, oldValue, newValue) ->
-            AnchorPane.setLeftAnchor(
-                warning, (
-                    AnchorPane.getLeftAnchor(warning) + ((Double) newValue - (Double) oldValue) / 2
-                )
-        ));
-
+        IActivity.drawActivityMessageOnException(container, this, message);
         drawButtonBasedOnContext(container, true);
     }
 
@@ -227,7 +196,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         container.widthProperty().addListener((observable, oldValue, newValue) ->
             AnchorPane.setLeftAnchor(
                 selectTeamTitle, (
-                AnchorPane.getLeftAnchor(selectTeamTitle) + ((Double) newValue - (Double) oldValue) / 2
+                AnchorPane.getLeftAnchor(selectTeamTitle) + IActivity.offset(oldValue, newValue)
             )
         ));
 
@@ -248,7 +217,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
 
         this.prefWidthProperty().addListener(((observable, oldValue, newValue) ->
             studentsTable.setPrefWidth(
-                studentsTable.getPrefWidth() + ((Double) newValue - (Double) oldValue) / 2
+                studentsTable.getPrefWidth() + IActivity.offset(oldValue, newValue)
             )
         ));
 
@@ -336,15 +305,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         this.getChildren().add(teamDropdown);
 
         List<String> dropdownItems = new ArrayList<String>() {{ add("Select team"); }};
-
-        for (Team team : teams)
-            dropdownItems.add(
-                    "Team #" + team.getId() + ": " + SharedConstants.SPACE +
-                    team.getMembers().size() + SharedConstants.SPACE + (
-                    team.getMembers().size() == 1 ? "member" : "members"
-                ) + " - " +
-                team.getProject().getUniqueId()
-            );
+        teams.forEach(t -> dropdownItems.add(t.compact()));
 
         //To get the newly created Team if user have created one, otherwise, to get a selected Team from dropdown later
         Team selectedTeam = null;
@@ -358,7 +319,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         AnchorPane.setLeftAnchor(teamDropdown, initialWidth + MARGIN * 2);
 
         this.prefWidthProperty().addListener(((observable, oldValue, newValue) -> {
-            double offset = ((Double) newValue - (Double) oldValue) / 2;
+            double offset = IActivity.offset(oldValue, newValue);
 
             AnchorPane.setLeftAnchor(teamDropdown, AnchorPane.getLeftAnchor(teamDropdown) + offset);
             teamDropdown.setPrefWidth(teamDropdown.getPrefWidth() + offset);
@@ -419,7 +380,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         AnchorPane.setLeftAnchor(createButton, initialWidth + MARGIN * 2);
 
         this.prefWidthProperty().addListener((observable, oldValue, newValue) -> {
-            double offset = ((Double) newValue - (Double) oldValue) / 2;
+            double offset = IActivity.offset(oldValue, newValue);
 
             AnchorPane.setLeftAnchor(createButton, AnchorPane.getLeftAnchor(createButton) + offset);
             if (!isCreatingFirstTeam)
@@ -444,12 +405,11 @@ public class AssignActivity extends AnchorPane implements IActivity {
         teams.forEach(team -> { if (team.isNewlyAdded()) teamIndexToSetProject.set(teams.indexOf(team)); });
 
         ComboBox<String> projectDropdown = new ComboBox<>();
+        projects.forEach(p -> projectDropdown.getItems().add(p.compact()));
+
         projectDropdown.setId("project-selection-dropdown");
         projectDropdown.getStyleClass().add("dropdown-select");
         this.getChildren().add(projectDropdown);
-
-        for (Project project : projects)
-            projectDropdown.getItems().add(project.getUniqueId() + " - " + project.getProjectTitle());
 
         projectDropdown.setPrefWidth(initialWidth);
         AnchorPane.setTopAnchor(projectDropdown, MARGIN * 5.25);
@@ -473,7 +433,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         AnchorPane.setLeftAnchor(projectError, initialWidth + MARGIN * 2);
 
         this.prefWidthProperty().addListener(((observable, oldValue, newValue) -> {
-            double offset = ((Double) newValue - (Double) oldValue) / 2;
+            double offset = IActivity.offset(oldValue, newValue);
 
             AnchorPane.setLeftAnchor(projectDropdown, AnchorPane.getLeftAnchor(projectDropdown) + offset);
             AnchorPane.setLeftAnchor(setProjectButton, AnchorPane.getLeftAnchor(setProjectButton) + offset);
@@ -516,7 +476,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         backButton.setOnAction(event -> intent.accept(SharedEnums.GUI_ACTION_CONTEXT.LAUNCH));
 
         this.prefWidthProperty().addListener((observable, oldValue, newValue) -> {
-            double offset = ((Double) newValue - (Double) oldValue) / 2;
+            double offset = IActivity.offset(oldValue, newValue);
 
             AnchorPane.setLeftAnchor(backButton, ( AnchorPane.getLeftAnchor(backButton) + offset));
             AnchorPane.setLeftAnchor(errorLabel, ( AnchorPane.getLeftAnchor(errorLabel) + offset));
@@ -532,7 +492,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         this.prefWidthProperty().addListener((observable, oldValue, newValue) ->
             AnchorPane.setLeftAnchor(
                 errorLabel,
-                AnchorPane.getLeftAnchor(errorLabel) + ((Double) newValue - (Double) oldValue) / 2
+                AnchorPane.getLeftAnchor(errorLabel) + IActivity.offset(oldValue, newValue)
             )
         );
     }
@@ -648,7 +608,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         });
 
         this.prefWidthProperty().addListener((observable, oldValue, newValue) -> {
-            double offset = ((Double) newValue - (Double) oldValue) / 2;
+            double offset = IActivity.offset(oldValue, newValue);
 
             membersDropdown.setPrefWidth(membersDropdown.getPrefWidth() + offset);
             AnchorPane.setLeftAnchor(membersDropdown, AnchorPane.getLeftAnchor(membersDropdown) + offset);
@@ -798,34 +758,10 @@ public class AssignActivity extends AnchorPane implements IActivity {
 
     private void drawButtonBasedOnContext(Scene container, boolean isErrorOccurred) {
         Button backButton = new Button(isErrorOccurred ? "Okay" : "Back");
-        backButton.getStyleClass().add(isErrorOccurred ? "done-button" : "back-button");
-        this.getChildren().add(backButton);
+        Button assignButton = new Button("Assign");
 
-        if (!isErrorOccurred) {
-            backButton.setLayoutY(MARGIN / 2);
-            backButton.setLayoutX(MARGIN / 2);
-
-            Button assignButton = new Button("Assign");
-            assignButton.setId("assign-button");
-            assignButton.setDisable(true);
-            assignButton.getStyleClass().add("button-disabled");
-            assignButton.setPrefWidth(MARGIN * 5);
-
-            setActionListenerFor(container, assignButton);
-            this.getChildren().add(assignButton);
-
-            AnchorPane.setBottomAnchor(assignButton, MARGIN / 1.75);
-            AnchorPane.setLeftAnchor(assignButton, (this.getPrefWidth() - assignButton.getPrefWidth()) / 2);
-
-            container.widthProperty().addListener((observable, oldValue, newValue) ->
-                AnchorPane.setLeftAnchor(
-                    assignButton,
-                    AnchorPane.getLeftAnchor(assignButton) + ((Double) newValue - (Double) oldValue) / 2
-                )
-            );
-        }
-        else
-            IActivity.constraintButton(backButton, this);
+        IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, assignButton);
+        setActionListenerFor(container, assignButton);
 
         backButton.setOnAction(event -> intent.accept(SharedEnums.GUI_ACTION_CONTEXT.LAUNCH));
     }
@@ -848,12 +784,11 @@ public class AssignActivity extends AnchorPane implements IActivity {
                     LogicalAssistant.calculateTeamFitnessMetricsFor(teamToReceiveMember.get(), projects, preferences)
                 );
 
-            boolean result = false;
+            boolean result;
             if (teamToReceiveMember.get().isNewlyAdded()) result = teamService.SaveNewTeam(teamToReceiveMember.get());
             else result = teamService.updateTeam(teamToReceiveMember.get());
 
-            result = false;
-            if (result) drawAssigningTaskContents(container);
+            if (result) drawAssigningTaskContents(container, "The selected Student has been assigned to team successfully.");
             else drawActivityFailMessage(container, "An error occurred while updating/saving data into files.\nPlease retry your task.");
         });
     }

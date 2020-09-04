@@ -130,4 +130,15 @@ public class Student implements IThing, Serializable {
 
         return stringStudent.toString();
     }
+
+    public Student clone() {
+        Student clone = new Student();
+        clone.setId(id);
+        clone.setConflicters(conflicters == null ? null : new ArrayList<>(conflicters));
+        clone.setPersonality(personality);
+        clone.setSkillRanking(skillRanking == null ? null : new HashMap<>(skillRanking));
+        clone.setUniqueId(uniqueId);
+
+        return clone;
+    }
 }

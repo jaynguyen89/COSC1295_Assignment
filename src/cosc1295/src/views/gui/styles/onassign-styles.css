@@ -154,7 +154,7 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 10, 0, 0, 0);
 }
 
-.message-danger {
+.message-success {
     -fx-font-size: 0.7em;
     -fx-font-weight: lighter;
     -fx-text-fill: #186900;
@@ -162,9 +162,10 @@
     -fx-background-radius: 0.2em;
     -fx-padding: 0.25em 0.5em;
     -fx-wrap-text: true;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 10, 0, 0, 0);
 }
 
-.message-success {
+.message-danger {
     -fx-font-size: 0.7em;
     -fx-font-weight: lighter;
     -fx-text-fill: #ff3f21;
@@ -172,4 +173,5 @@
     -fx-background-radius: 0.2em;
     -fx-padding: 0.25em 0.5em;
     -fx-wrap-text: true;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 10, 0, 0, 0);
 }

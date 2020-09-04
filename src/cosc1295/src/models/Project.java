@@ -117,4 +117,20 @@ public class Project implements IThing, Serializable {
     public String display() {
         return id + ". " + uniqueId + "\t\t" + projectTitle;
     }
+
+    public String compact() {
+        return "#" + id + ". " + uniqueId + " - " + projectTitle;
+    }
+
+    public Project clone() {
+        Project clone = new Project();
+        clone.setId(id);
+        clone.setUniqueId(uniqueId);
+        clone.setProjectTitle(projectTitle);
+        clone.setBriefDescription(briefDescription);
+        clone.setProjectOwner(projectOwner == null ? null : projectOwner.clone());
+        clone.setSkillRanking(skillRanking == null ? null : new HashMap<>(skillRanking));
+
+        return clone;
+    }
 }

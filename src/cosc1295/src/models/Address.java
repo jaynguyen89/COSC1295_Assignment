@@ -122,4 +122,17 @@ public class Address implements Serializable {
         return sBuilding + street.concat(", ") + suburb.concat(", ") +
                state.concat(" ") + postCode.concat(", ") + country;
     }
+
+    public Address clone() {
+        Address clone = new Address();
+        clone.setId(id);
+        clone.setBuilding(building);
+        clone.setStreet(street);
+        clone.setSuburb(suburb);
+        clone.setState(state);
+        clone.setPostCode(postCode);
+        clone.setCountry(country);
+
+        return clone;
+    }
 }

@@ -115,4 +115,15 @@ public class Company implements IThing, Serializable {
             websiteUrl + SharedConstants.TEXT_DELIMITER +
             address.getId();
     }
+
+    public Company clone() {
+        Company clone = new Company();
+        clone.setId(id);
+        clone.setUniqueId(uniqueId);
+        clone.setCompanyName(companyName);
+        clone.setAbnNumber(abnNumber);
+        clone.setAddress(address == null ? null : address.clone());
+
+        return clone;
+    }
 }

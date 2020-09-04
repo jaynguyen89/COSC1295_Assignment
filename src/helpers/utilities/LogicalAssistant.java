@@ -222,9 +222,9 @@ public final class LogicalAssistant {
      * @param selection Pair<Team, Student>
      * @return Pair<Boolean, List<SharedEnums.PERSONALITIES>>
      */
-    //Key indicates if Personality is imbalance, when Key==true,
-    // Value indicates the Personalities it requires for the next added member (not the current one)
-    public static Pair<Boolean, List<SharedEnums.PERSONALITIES>> checkImbalancePersonalityOnAssign(Pair<Team, Student> selection) {
+    // Key indicates if Personality is imbalance when Key==true,
+    // Value indicates the Personalities it enforces or needs
+    private static Pair<Boolean, List<SharedEnums.PERSONALITIES>> checkImbalancePersonalityOnAssign(Pair<Team, Student> selection) {
         List<SharedEnums.PERSONALITIES> allPersonalities = new ArrayList<SharedEnums.PERSONALITIES>() {{
             add(SharedEnums.PERSONALITIES.A);
             add(SharedEnums.PERSONALITIES.B);
@@ -235,7 +235,7 @@ public final class LogicalAssistant {
 
         //Team has no member, no PERSONALITIES enforcement is required yet.
         if (teamMembers.size() < 1) return null;
-        teamMembers.add(selection.getValue()); //Add the student to Team, so we have a prospective Team to inspect
+        teamMembers.add(selection.getValue()); //Faking add the student to Team, so we have a prospective Team to inspect
 
         List<SharedEnums.PERSONALITIES> teamPersonalities = new ArrayList<>();
         for (Student member : teamMembers)
@@ -274,8 +274,8 @@ public final class LogicalAssistant {
         Pair<Boolean, List<SharedEnums.PERSONALITIES>>,
         Pair<Boolean, List<SharedEnums.PERSONALITIES>>
     > isImbalancePersonalityOnSwap(Pair<Team, Student> first, Pair<Team, Student> second) {
-        Team firstTeam = first.getKey();
-        Team secondTeam = second.getKey();
+        Team firstTeam = first.getKey().clone();
+        Team secondTeam = second.getKey().clone();
 
         //Fake removing the Student that each Team offers for swap,
         // and add the offered Student from the other Team to have the prospective Teams
@@ -325,20 +325,22 @@ public final class LogicalAssistant {
                 else
                     skillCompetencies.put(entry.getKey(), (double) entry.getValue().getValue());
 
-            AtomicReference<Preference> memberPreferences = new AtomicReference<>();
-            preferences.forEach(p -> {
-                if (p.getStudentUniqueId().equalsIgnoreCase(member.getUniqueId()))
-                    memberPreferences.set(p);
-            });
+            Preference memberPreferences = null;
+            for (int i = preferences.size() - 1; i >= 0; i--)
+                if (preferences.get(i).getStudentUniqueId().equalsIgnoreCase(member.getUniqueId()))
+                    memberPreferences = preferences.get(i);
 
             //Sum up satisfaction preferences
-            for (Map.Entry<String, Integer> entry : memberPreferences.get().getPreference().entrySet()) {
-                if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 4)
-                    satisfactions = new Pair<>(satisfactions.getKey() + 1, satisfactions.getValue());
+            if (memberPreferences != null)
+                for (Map.Entry<String, Integer> entry : memberPreferences.getPreference().entrySet()) {
+                    if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 4)
+                        satisfactions = new Pair<>(satisfactions.getKey() + 1, satisfactions.getValue());
 
-                if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 3)
-                    satisfactions = new Pair<>(satisfactions.getKey(), satisfactions.getValue() + 1);
-            }
+                    if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 3)
+                        satisfactions = new Pair<>(satisfactions.getKey(), satisfactions.getValue() + 1);
+                }
+            else
+                satisfactions = null;
         }
 
         //Compute metrics for competency
@@ -349,7 +351,7 @@ public final class LogicalAssistant {
         teamFitness.setTeamCompetency(teamCompetencyBySkills);
 
         //Compute metrics for satisfaction
-        teamFitness.setPreferenceSatisfaction(computeAverageSatisfactions(satisfactions));
+        teamFitness.setPreferenceSatisfaction(satisfactions == null ? null : computeAverageSatisfactions(satisfactions));
 
         //Calculate the Skill Shortfall: average of all Projects, and per Project.
         //At first, all shortfall differences are summed up into a container, then use the container to calculate the averages
@@ -415,5 +417,10 @@ public final class LogicalAssistant {
                 ),
                 averageCompetencies
         );
+    }
+
+    public static Pair<Boolean, List<SharedEnums.PERSONALITIES>>
+    runCheckImbalancePersonalityOnAssignForTest(Pair<Team, Student> assignment) {
+        return checkImbalancePersonalityOnAssign(assignment);
     }
 }
