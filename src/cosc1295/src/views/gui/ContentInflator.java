@@ -84,10 +84,10 @@ public class ContentInflator {
                 ((SwapActivity) activity).drawSwappingTaskContents(container, null);
                 break;
             case REMOVE:
-                ((RemoveActivity) activity).drawRemovalTaskContents(container);
+                ((RemoveActivity) activity).drawRemovalTaskContents(container, null);
                 break;
             case PROJECT:
-                ((ProjectActivity) activity).drawProjectSettingTaskContents(container);
+                ((ProjectActivity) activity).drawProjectSettingTaskContents(container, null);
                 break;
             default: //STATS
                 ((StatisticsActivity) activity).drawStatisticsContents(container);

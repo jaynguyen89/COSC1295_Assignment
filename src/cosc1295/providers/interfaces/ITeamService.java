@@ -11,4 +11,8 @@ public interface ITeamService {
     int SaveNewTeam(Team newTeam);
 
     boolean updateTeam(Team newTeam);
+
+    boolean removeTeamFitness(int id);
+
+    boolean deleteTeam(Team team);
 }
