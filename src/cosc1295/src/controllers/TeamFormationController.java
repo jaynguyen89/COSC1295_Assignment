@@ -72,20 +72,22 @@ public class TeamFormationController extends ControllerBase {
 
         if (newTeams == null) return false; //user have changed their mind, no change was made, so go back to Main menu
         if (newTeams.size() != 0) { //Changes were made to teams, now save changes
-            boolean success;
+            int newTeamId = -1;
+            boolean updateSuccess = false;
 
             for (Team newTeam : newTeams) {
                 //Calculate Fitness Metrics only if a Team has enough 4 Students
                 if (newTeam.getMembers().size() == SharedConstants.GROUP_LIMIT) {
-                    TeamFitness teamFitness = LogicalAssistant.calculateTeamFitnessMetricsFor(newTeam, projects, preferences);
+                    TeamFitness teamFitness = calculateTeamFitnessMetricsFor(newTeam, projects, preferences);
                     newTeam.setFitnessMetrics(teamFitness);
                 }
 
                 //A brand new Team has created just now, so save it into file
-                if (newTeam.isNewlyAdded()) success = teamService.SaveNewTeam(newTeam);
-                else success = teamService.updateTeam(newTeam); //otherwise, just update it
+                if (newTeam.isNewlyAdded()) newTeamId = teamService.SaveNewTeam(newTeam);
+                else updateSuccess = teamService.updateTeam(newTeam); //otherwise, just update it
 
-                if (!success) { //File processing was failed (some exception)
+                if ((!newTeam.isNewlyAdded() && !updateSuccess) ||
+                    (newTeam.isNewlyAdded() && newTeamId < 0)) { //File processing was failed (some exception)
                     teamView.displayUrgentFailedMessage();
                     return false;
                 }
@@ -316,7 +318,7 @@ public class TeamFormationController extends ControllerBase {
         //Then set new Project, and recalculate Fitness Metrics if Team has enough 4 Students
         selectedTeam.setProject(selectedProject);
         if (selectedTeam.getMembers().size() == SharedConstants.GROUP_LIMIT) {
-            TeamFitness teamFitness = LogicalAssistant.calculateTeamFitnessMetricsFor(selectedTeam, projects, preferences);
+            TeamFitness teamFitness = calculateTeamFitnessMetricsFor(selectedTeam, projects, preferences);
             selectedTeam.setFitnessMetrics(teamFitness);
         }
 

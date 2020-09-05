@@ -2,7 +2,6 @@ package cosc1295.src.controllers.activities;
 
 import com.sun.istack.internal.NotNull;
 import helpers.commons.SharedConstants;
-import helpers.commons.SharedEnums;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
@@ -13,7 +12,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
-import javax.swing.event.ChangeListener;
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -141,9 +139,6 @@ public interface IActivity {
         backButton.getStyleClass().add(isErrorOccurred ? "done-button" : "back-button");
         activity.getChildren().add(backButton);
 
-        backButton.getStyleClass().add(isErrorOccurred ? "done-button" : "back-button");
-
-
         if (!isErrorOccurred) {
             backButton.setLayoutY(MARGIN / 2);
             backButton.setLayoutX(MARGIN / 2);
@@ -172,19 +167,31 @@ public interface IActivity {
     }
 
     static void drawSuccessMessage(String message, Pane activity) {
-        Label success = new Label(message + "          ");
+        Label success = new Label(message + "           ");
+        success.getStyleClass().add("message-success");
         activity.getChildren().add(success);
 
-        success.getStyleClass().add("message-success");
-        success.setPrefWidth(activity.getPrefWidth() / SharedConstants.GUI_ASPECT_RATIO);
-
-        AnchorPane.setBottomAnchor(success, MARGIN * 4);
         AnchorPane.setLeftAnchor(success, (activity.getPrefWidth() - success.getPrefWidth()) / 2);
+        if (activity.getId().toLowerCase().contains(AssignActivity.class.getSimpleName().toLowerCase())) {
+            AnchorPane.setBottomAnchor(success, MARGIN * 3.25);
+            AnchorPane.setRightAnchor(success, MARGIN);
 
-        activity.prefWidthProperty().addListener(((observable, oldValue, newValue) -> {
-            success.setPrefWidth(success.getPrefWidth() + offset(oldValue, newValue));
-            AnchorPane.setLeftAnchor(success, AnchorPane.getLeftAnchor(success) + offset(oldValue, newValue));
-        }));
+            success.setPrefWidth(activity.getPrefWidth() / 2 - MARGIN);
+            success.setStyle("-fx-wrap-text: true;");
+
+            activity.prefWidthProperty().addListener((observable, oldValue, newValue) ->
+                success.setPrefWidth(success.getPrefWidth() + offset(oldValue, newValue) / 2)
+            );
+        }
+        else {
+            AnchorPane.setBottomAnchor(success, MARGIN * 4);
+            success.setPrefWidth(activity.getPrefWidth() / SharedConstants.GUI_ASPECT_RATIO);
+
+            activity.prefWidthProperty().addListener(((observable, oldValue, newValue) -> {
+                success.setPrefWidth(success.getPrefWidth() + offset(oldValue, newValue));
+                AnchorPane.setLeftAnchor(success, AnchorPane.getLeftAnchor(success) + offset(oldValue, newValue));
+            }));
+        }
 
         Button hider = new Button("Close");
         hider.getStyleClass().add("mini-button");

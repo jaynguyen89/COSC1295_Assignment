@@ -8,7 +8,7 @@ public interface ITeamService {
 
     List<Team> readAllTeamsFromFile();
 
-    boolean SaveNewTeam(Team newTeam);
+    int SaveNewTeam(Team newTeam);
 
     boolean updateTeam(Team newTeam);
 }

@@ -5,6 +5,7 @@ import com.sun.istack.internal.Nullable;
 import cosc1295.providers.services.ProjectService;
 import cosc1295.providers.services.StudentService;
 import cosc1295.providers.services.TeamService;
+import cosc1295.src.controllers.ControllerBase;
 import cosc1295.src.models.*;
 import cosc1295.src.views.gui.viewmodels.StudentVM;
 import helpers.commons.SharedConstants;
@@ -40,6 +41,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
 
     private final StudentService studentService;
     private final TeamService teamService;
+    private final ControllerBase controllerBase;
 
     private final SimpleObjectProperty<Student> studentToAssign;
     private final SimpleObjectProperty<Team> teamToReceiveMember;
@@ -48,6 +50,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
     public AssignActivity() {
         studentService = new StudentService();
         teamService = new TeamService();
+        controllerBase = new ControllerBase();
 
         studentToAssign = new SimpleObjectProperty<>(null);
         teamToReceiveMember = new SimpleObjectProperty<>(null);
@@ -61,6 +64,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
     }
 
     public void drawAssigningTaskContents(Scene container, @Nullable String postMessage) {
+        this.setId(this.getClass().getSimpleName());
         IActivity.drawActivityTitle(container, this, "Assign Students To Teams");
 
         List<Student> students = studentService.readAllStudentsFromFile();
@@ -73,6 +77,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         if (error) drawActivityFailMessage(container, "The number of Students is insufficient to form new Team.\nPlease add more Students then come back.");
 
         if (!error) {
+            eraseTeamDetailsTable();
             if (postMessage != null) IActivity.drawSuccessMessage(postMessage, this);
 
             attachListenersToObservables(container);
@@ -270,8 +275,11 @@ public class AssignActivity extends AnchorPane implements IActivity {
     }
 
     private void drawTeamsSelectionArea(List<Team> teams, double initialWidth, String action) {
-        if (action == null && teams.size() == 0)
+        List<Team> assignableTeams = LogicalAssistant.filterAssignableTeams(teams);
+        if (action == null && (teams.size() == 0 || assignableTeams.size() == 0)) {
+            eraseTeamDetailsTable();
             drawTeamCreatingFragment(teams, initialWidth, true);
+        }
 
         if (action != null && action.equals(SET_PROJECT)) {
             IActivity.changeElementText(
@@ -305,14 +313,15 @@ public class AssignActivity extends AnchorPane implements IActivity {
         this.getChildren().add(teamDropdown);
 
         List<String> dropdownItems = new ArrayList<String>() {{ add("Select team"); }};
-        teams.forEach(t -> dropdownItems.add(t.compact()));
+        List<Team> assignableTeams = LogicalAssistant.filterAssignableTeams(teams);
+        assignableTeams.forEach(t -> dropdownItems.add(t.compact()));
 
         //To get the newly created Team if user have created one, otherwise, to get a selected Team from dropdown later
         Team selectedTeam = null;
         if (teamToReceive != null && teamToReceive.getValue() != null) selectedTeam = (Team) teamToReceive.getValue();
 
         teamDropdown.getItems().addAll(dropdownItems);
-        teamDropdown.setValue(selectedTeam == null ? dropdownItems.get(0) : dropdownItems.get(teams.indexOf(selectedTeam) + 1));
+        teamDropdown.setValue(selectedTeam == null ? dropdownItems.get(0) : dropdownItems.get(assignableTeams.indexOf(selectedTeam) + 1));
 
         teamDropdown.setPrefWidth(initialWidth);
         AnchorPane.setTopAnchor(teamDropdown, MARGIN * 5.25);
@@ -335,7 +344,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
             }
             else {
                 IActivity.removeElementIfExists("create-team-button", this);
-                setTeamToReceiveMember(teams.get(newValue.intValue() - 1));
+                setTeamToReceiveMember(assignableTeams.get(newValue.intValue() - 1));
                 teamDropdown.setValue(dropdownItems.get(newValue.intValue()));
 
                 drawTeamSelectionFragment(teams, initialWidth, teamToReceiveMember);
@@ -353,13 +362,13 @@ public class AssignActivity extends AnchorPane implements IActivity {
         IActivity.changeElementText(
             Label.class,
             isCreatingFirstTeam ?
-                "No Team has ever been created yet. Please create a Team to receive Student.\n\n" +
+                "No Team is assignable or has ever been created yet. Please create a Team to receive Student.\n\n" +
                 "Click \"Create\" button if you wish to proceed with creating the first Team. Otherwise, navigate back to Launch menu."
                 : "Select 1 Team to receive Student",
             "select-team-title", this
         );
 
-        Label optional = new Label("Or you can create a new Team to take the assign Student.");
+        Label optional = new Label("Or you can create a new Team to take the assigned Student.");
         optional.setId("optional-message");
         if (!isCreatingFirstTeam) {
             optional.getStyleClass().add("data-table");
@@ -763,7 +772,12 @@ public class AssignActivity extends AnchorPane implements IActivity {
         IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, assignButton);
         setActionListenerFor(container, assignButton);
 
-        backButton.setOnAction(event -> intent.accept(SharedEnums.GUI_ACTION_CONTEXT.LAUNCH));
+        backButton.setOnAction(event -> {
+            teamToReceiveMember.set(null);
+            studentInTeamToBeReplaced.set(null);
+            studentToAssign.set(null);
+            intent.accept(SharedEnums.GUI_ACTION_CONTEXT.LAUNCH);
+        });
     }
 
     private void setActionListenerFor(Scene container, Button assignButton) {
@@ -781,15 +795,26 @@ public class AssignActivity extends AnchorPane implements IActivity {
 
             if (teamToReceiveMember.get().getMembers().size() == SharedConstants.GROUP_LIMIT)
                 teamToReceiveMember.get().setFitnessMetrics(
-                    LogicalAssistant.calculateTeamFitnessMetricsFor(teamToReceiveMember.get(), projects, preferences)
+                    controllerBase.calculateTeamFitnessMetricsFor(teamToReceiveMember.get(), projects, preferences)
                 );
 
-            boolean result;
-            if (teamToReceiveMember.get().isNewlyAdded()) result = teamService.SaveNewTeam(teamToReceiveMember.get());
-            else result = teamService.updateTeam(teamToReceiveMember.get());
+            boolean updateSuccess = false;
+            int newTeamId = -1;
+            if (teamToReceiveMember.get().isNewlyAdded()) newTeamId = teamService.SaveNewTeam(teamToReceiveMember.get());
+            else updateSuccess = teamService.updateTeam(teamToReceiveMember.get());
 
-            if (result) drawAssigningTaskContents(container, "The selected Student has been assigned to team successfully.");
-            else drawActivityFailMessage(container, "An error occurred while updating/saving data into files.\nPlease retry your task.");
+            if ((!teamToReceiveMember.get().isNewlyAdded() && !updateSuccess) ||
+                (teamToReceiveMember.get().isNewlyAdded() && newTeamId < 0)
+            ) drawActivityFailMessage(container, "An error occurred while updating/saving data into files.\nPlease retry your task.");
+
+            if (teamToReceiveMember.get().isNewlyAdded() && newTeamId != -1) {
+                teamToReceiveMember.get().setId(newTeamId);
+                teamToReceiveMember.get().setNewlyAdded(false);
+                eraseTeamDetailsTable();
+                drawAssigningTaskContents(container, "The selected Student has been assigned to team successfully.");
+            }
+
+            if (updateSuccess) drawAssigningTaskContents(container, "The selected Student has been assigned to team successfully.");
         });
     }
 

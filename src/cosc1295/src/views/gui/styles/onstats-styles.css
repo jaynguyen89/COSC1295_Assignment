@@ -1,0 +1,108 @@
+.tab {
+    -fx-pref-width: 274;
+}
+
+.panel-wrapper {
+    -fx-font-family: Tahoma;
+    -fx-font-size: 20;
+}
+
+.title {
+    -fx-text-alignment: center;
+    -fx-font-weight: bold;
+    -fx-font-size: 1.75em;
+    -fx-alignment: center;
+}
+
+.subtitle {
+    -fx-font-size: 0.75em;
+    -fx-pref-width: 35em;
+}
+
+.warning {
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-pref-height: 15em;
+    -fx-padding: 3em 2em;
+    -fx-background-color: #fffae6;
+    -fx-text-fill: #d9b100;
+    -fx-font-size: 1em;
+    -fx-background-radius: 0.2em;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 10, 0, 0, 0);
+}
+
+.back-button {
+    -fx-background-color: #6e6e6e;
+    -fx-text-fill: white;
+    -fx-font-size: 0.6em;
+    -fx-pref-width: 4em;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 0);
+}
+
+.back-button:hover {
+    -fx-background-color: #636363;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 10, 0, 0, 0);
+}
+
+.chart-pane {
+    -fx-alignment: center-left;
+    -fx-background-color: #ededed;
+    -fx-background-radius: 0 0 0.2em 0.2em;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 0);
+}
+
+.chart-plot-background {
+    -fx-background-color: #e2ecfe;
+}
+.chart-vertical-grid-lines {
+    -fx-stroke: transparent;
+}
+.chart-horizontal-grid-lines {
+    -fx-stroke: #4da3ff;
+}
+
+.axis {
+    -fx-font-size: 1.4em;
+    -fx-tick-label-fill: #0078e8;
+    -fx-font-family: Tahoma;
+    -fx-tick-length: 10;
+    -fx-minor-tick-length: 5;
+}
+
+.axis-label {
+    -fx-text-fill: #0078e8;
+}
+
+.axis-tick-mark {
+    -fx-stroke: #4da3ff;
+    -fx-stroke-width: 2;
+}
+.axis-minor-tick-mark {
+    -fx-stroke: #4da3ff;
+}
+
+.sd-title {
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-font-weight: bold;
+    -fx-font-size: 0.6em;
+    -fx-wrap-text: true;
+}
+
+.sd-text {
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-font-size: 1.7em;
+    -fx-text-fill: #0078e8;
+    -fx-font-weight: bolder;
+}
+
+.sd-tray {
+    -fx-alignment: center;
+    -fx-padding: 0.25em;
+    -fx-text-alignment: center;
+    -fx-background-color: #ebebeb;
+    -fx-background-radius: 0.2em;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 0);
+}

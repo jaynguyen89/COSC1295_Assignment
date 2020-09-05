@@ -161,8 +161,20 @@ public class TextFileServiceBase {
         String filePath = generateFilePathByDataType(type);
         File fileToUpdate = new File(filePath);
 
-        if (!fileToUpdate.exists() || !fileToUpdate.canRead()) {
-            flasher.flash(new Flash("File not found or Insufficient WRITE permission.\n", SharedEnums.FLASH_TYPES.ERROR));
+        if (!fileToUpdate.exists())
+            try {
+                fileToUpdate.createNewFile();
+            } catch (IOException ex) {
+                flasher.flash(new Flash(
+                        ex.getMessage(),
+                        SharedEnums.FLASH_TYPES.ERROR
+                ));
+
+                return false;
+            }
+
+        if (!fileToUpdate.canRead()) {
+            flasher.flash(new Flash("Insufficient WRITE permission.\n", SharedEnums.FLASH_TYPES.ERROR));
             return false;
         }
 

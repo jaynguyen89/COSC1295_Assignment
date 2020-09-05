@@ -5,7 +5,6 @@ import cosc1295.providers.services.StudentService;
 import cosc1295.src.controllers.ControllerBase;
 import cosc1295.src.models.*;
 import helpers.commons.SharedEnums.SKILLS;
-import helpers.utilities.LogicalAssistant;
 import junit.framework.TestCase;
 import org.junit.*;
 
@@ -27,6 +26,7 @@ public class TeamFitnessMetricsTest {
 
     @BeforeClass
     public static void setUpBeforeClass() {
+        controllerBase = new ControllerBase();
         projectService = new ProjectService();
         projects = projectService.readAllProjectsFromFile();
 
@@ -108,7 +108,7 @@ public class TeamFitnessMetricsTest {
 
         for (int i = 3; i < testData.size(); i++) {
             Team testTeam = testData.get(i);
-            TeamFitness fitnessMetrics = LogicalAssistant.calculateTeamFitnessMetricsFor(testTeam, projects, preferences);
+            TeamFitness fitnessMetrics = controllerBase.calculateTeamFitnessMetricsFor(testTeam, projects, preferences);
 
             //Asserting average competency of team
             TestCase.assertEquals(
@@ -139,7 +139,7 @@ public class TeamFitnessMetricsTest {
 
         for (int i = 3; i < testData.size(); i++) {
             Team testTeam = testData.get(i);
-            TeamFitness fitnessMetrics = LogicalAssistant.calculateTeamFitnessMetricsFor(testTeam, projects, preferences);
+            TeamFitness fitnessMetrics = controllerBase.calculateTeamFitnessMetricsFor(testTeam, projects, preferences);
 
             //Asserting average Team's satisfaction
             TestCase.assertEquals(
@@ -166,7 +166,7 @@ public class TeamFitnessMetricsTest {
 
         for (int i = 3; i < testData.size(); i++) {
             Team testTeam = testData.get(i);
-            TeamFitness fitnessMetrics = LogicalAssistant.calculateTeamFitnessMetricsFor(testTeam, projects, preferences);
+            TeamFitness fitnessMetrics = controllerBase.calculateTeamFitnessMetricsFor(testTeam, projects, preferences);
 
             if (i == 5) TestCase.assertEquals(334, fitnessMetrics.getId());
 

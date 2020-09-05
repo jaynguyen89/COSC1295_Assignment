@@ -124,9 +124,9 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
     }
 
     @Override
-    public boolean SaveNewTeam(@NotNull Team newTeam) {
+    public int SaveNewTeam(@NotNull Team newTeam) {
         int newFitnessInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.FITNESS_METRICS);
-        if (newFitnessInstanceId == -1) return false;
+        if (newFitnessInstanceId == -1) return -1;
 
         boolean fitnessSaved;
         if (newTeam.getFitnessMetrics() != null) {
@@ -137,24 +137,33 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
 
         if (fitnessSaved) {
             int newTeamInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.PROJECT_TEAM);
-            if (newTeamInstanceId == -1) return false;
+            if (newTeamInstanceId == -1) return -1;
 
             newTeam.setId(newTeamInstanceId);
             String normalizedTeam = newTeam.stringify();
 
-            return saveEntryToFile(normalizedTeam, DATA_TYPES.PROJECT_TEAM);
+            if (saveEntryToFile(normalizedTeam, DATA_TYPES.PROJECT_TEAM))
+                return newTeamInstanceId;
         }
 
-        return false;
+        return -1;
     }
 
     @Override
     public boolean updateTeam(@NotNull Team newTeam) {
         boolean fitnessMetricsSaved = true;
-        if (newTeam.getFitnessMetrics() != null)
-            fitnessMetricsSaved = updateEntryToFileById(
-                    newTeam.getFitnessMetrics().stringify(), newTeam.getFitnessMetrics().getId(), DATA_TYPES.FITNESS_METRICS
-            );
+        if (newTeam.getFitnessMetrics() != null) {
+            if (newTeam.getFitnessMetrics().getId() == 0) {
+                int newMetricsId = getNextEntryIdForNewEntry(DATA_TYPES.FITNESS_METRICS);
+                newTeam.getFitnessMetrics().setId(newMetricsId);
+
+                fitnessMetricsSaved = saveEntryToFile(newTeam.getFitnessMetrics().stringify(), DATA_TYPES.FITNESS_METRICS);
+            } else {
+                fitnessMetricsSaved = updateEntryToFileById(
+                        newTeam.getFitnessMetrics().stringify(), newTeam.getFitnessMetrics().getId(), DATA_TYPES.FITNESS_METRICS
+                );
+            }
+        }
 
         if (fitnessMetricsSaved)
             return updateEntryToFileById(newTeam.stringify(), newTeam.getId(), DATA_TYPES.PROJECT_TEAM);

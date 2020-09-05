@@ -2,6 +2,7 @@ package cosc1295.src.controllers.activities;
 
 import com.sun.istack.internal.Nullable;
 import cosc1295.providers.services.ProjectService;
+import cosc1295.src.controllers.ControllerBase;
 import cosc1295.src.models.Preference;
 import cosc1295.src.models.Project;
 import helpers.commons.SharedEnums.PERSONALITIES;
@@ -36,6 +37,7 @@ public class SwapActivity extends AnchorPane implements IActivity {
 
     private final StudentService studentService;
     private final TeamService teamService;
+    private final ControllerBase controllerBase;
 
     private final SimpleObjectProperty<ArrayList<Team>> observableTeams;
     private final SimpleObjectProperty<Team> firstTeamInSwap;
@@ -46,6 +48,7 @@ public class SwapActivity extends AnchorPane implements IActivity {
     public SwapActivity() {
         studentService = new StudentService();
         teamService = new TeamService();
+        controllerBase = new ControllerBase();
 
         observableTeams = new SimpleObjectProperty<>(null);
         firstTeamInSwap = new SimpleObjectProperty<>(null);
@@ -55,6 +58,7 @@ public class SwapActivity extends AnchorPane implements IActivity {
     }
 
     public void drawSwappingTaskContents(Scene container, @Nullable String postMessage) {
+        this.setId(this.getClass().getSimpleName());
         IActivity.drawActivityTitle(container, this, "Swap Students Between Teams");
 
         List<Team> teams = teamService.readAllTeamsFromFile();
@@ -233,7 +237,7 @@ public class SwapActivity extends AnchorPane implements IActivity {
 
         membersDropdown.getItems().add("Select member");
         members.forEach(m -> membersDropdown.getItems().add(m.display()));
-        membersDropdown.setVisibleRowCount(SharedConstants.GROUP_LIMIT);
+        membersDropdown.setVisibleRowCount(members.size() + 1);
         membersDropdown.setPrefWidth(initialWidth);
 
         AnchorPane.setTopAnchor(membersDropdown, MARGIN * 8);
@@ -271,6 +275,7 @@ public class SwapActivity extends AnchorPane implements IActivity {
     private void manageRequirementMessagesAndSwapButton(
         SimpleBooleanProperty shouldEnableSwapButton
     ) {
+        IActivity.removeElementIfExists("requirement-label", this);
         Label requirementLabel = new Label();
         requirementLabel.setId("requirement-label");
         this.getChildren().add(requirementLabel);
@@ -308,13 +313,17 @@ public class SwapActivity extends AnchorPane implements IActivity {
 
                 if (firstTeamRequirements != null) {
                     message += firstTeamRequirements.getKey() ? "The left Team needs a Leader type member.\n" : SharedConstants.EMPTY_STRING;
+
+                    if (firstTeamRequirements.getValue() != null)
                     message += firstTeamRequirements.getValue().contains(secondTeamMember.get().getUniqueId())
                             ? "The left Team has conflict with the selected member from the right Team.\n" : SharedConstants.EMPTY_STRING;
                 }
 
                 if (secondTeamRequirements != null) {
                     message += secondTeamRequirements.getKey() ? "The right Team needs a Leader type member.\n" : SharedConstants.EMPTY_STRING;
-                    message += secondTeamRequirements.getValue().contains(firstTeamMember.get().getUniqueId())
+
+                    if (secondTeamRequirements.getValue() != null)
+                        message += secondTeamRequirements.getValue().contains(firstTeamMember.get().getUniqueId())
                             ? "The right Team has conflict with the selected member from the left Team.\n" : SharedConstants.EMPTY_STRING;
                 }
             }
@@ -327,18 +336,20 @@ public class SwapActivity extends AnchorPane implements IActivity {
                 if (firstTeamCheck != null)
                     message += firstTeamCheck.getKey()
                             ? "The left Team must have the following Personality: " + firstTeamCheck.getValue().toString() + ".\n"
-                            : (firstTeamCheck.getValue().size() != 0
+                            : (firstTeamCheck.getValue() != null && firstTeamCheck.getValue().size() != 0
                             ? swappable + "The left Team has rooms for the following Personalities: " + firstTeamCheck.getValue().toString() + ".\n"
                             : SharedConstants.EMPTY_STRING);
 
                 if (secondTeamCheck != null)
                     message += secondTeamCheck.getKey()
                             ? "The right Team must have the following Personality: " + secondTeamCheck.getValue().toString() + ".\n"
-                            : (secondTeamCheck.getValue().size() != 0
+                            : (secondTeamCheck.getValue() != null && secondTeamCheck.getValue().size() != 0
                             ? "The right Team has rooms for the following Personalities: " + secondTeamCheck.getValue().toString() + ".\n"
                             : SharedConstants.EMPTY_STRING);
 
-                isSwappable = isSwappable && !firstTeamCheck.getKey() && !secondTeamCheck.getKey();
+                isSwappable = isSwappable &&
+                    (firstTeamCheck == null || firstTeamCheck.getKey() == null || !firstTeamCheck.getKey()) &&
+                    (secondTeamCheck == null || secondTeamCheck.getKey() == null || !secondTeamCheck.getKey());
             }
 
             requirementLabel.setText(message);
@@ -357,7 +368,13 @@ public class SwapActivity extends AnchorPane implements IActivity {
         IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, swapButton);
         setActionListenerFor(container, swapButton);
 
-        backButton.setOnAction(event -> intent.accept(SharedEnums.GUI_ACTION_CONTEXT.LAUNCH));
+        backButton.setOnAction(event -> {
+            observableTeams.set(null);
+            firstTeamInSwap.set(null);
+            secondTeamInSwap.set(null);
+
+            intent.accept(SharedEnums.GUI_ACTION_CONTEXT.LAUNCH);
+        });
     }
 
     private void setActionListenerFor(Scene container, Button swapButton) {
@@ -378,10 +395,10 @@ public class SwapActivity extends AnchorPane implements IActivity {
                 secondTeam.replaceMemberByUniqueId(secondMember.getUniqueId(), firstMember);
 
                 if (firstTeam.getMembers().size() == SharedConstants.GROUP_LIMIT)
-                    firstTeam.setFitnessMetrics(LogicalAssistant.calculateTeamFitnessMetricsFor(firstTeam, projects, preferences));
+                    firstTeam.setFitnessMetrics(controllerBase.calculateTeamFitnessMetricsFor(firstTeam, projects, preferences));
 
                 if (secondTeam.getMembers().size() == SharedConstants.GROUP_LIMIT)
-                    secondTeam.setFitnessMetrics(LogicalAssistant.calculateTeamFitnessMetricsFor(secondTeam, projects, preferences));
+                    secondTeam.setFitnessMetrics(controllerBase.calculateTeamFitnessMetricsFor(secondTeam, projects, preferences));
 
                 boolean result = teamService.updateTeam(firstTeam);
                 if (result && teamService.updateTeam(secondTeam)) {

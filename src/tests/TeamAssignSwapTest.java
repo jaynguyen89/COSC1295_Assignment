@@ -2,7 +2,6 @@ package tests;
 
 import cosc1295.providers.services.ProjectService;
 import cosc1295.providers.services.StudentService;
-import cosc1295.src.controllers.TeamFormationController;
 import cosc1295.src.models.Project;
 import cosc1295.src.models.Student;
 import cosc1295.src.models.Team;
