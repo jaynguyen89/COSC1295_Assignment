@@ -12,7 +12,7 @@ public interface ITeamService {
 
     boolean updateTeam(Team newTeam);
 
-    boolean removeTeamFitness(int id);
+    Boolean removeTeamFitness(int id);
 
-    boolean deleteTeam(Team team);
+    Boolean deleteTeam(Team team);
 }

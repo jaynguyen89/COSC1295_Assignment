@@ -172,14 +172,12 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
     }
 
     @Override
-    public boolean removeTeamFitness(int id) {
-        //TODO
-        return false;
+    public Boolean removeTeamFitness(int id) {
+        return removeEntryFromFileById(id + "", DATA_TYPES.FITNESS_METRICS);
     }
 
     @Override
-    public boolean deleteTeam(Team team) {
-        //TODO
-        return false;
+    public Boolean deleteTeam(Team team) {
+        return removeEntryFromFileById(team.getId() + "", DATA_TYPES.PROJECT_TEAM);
     }
 }

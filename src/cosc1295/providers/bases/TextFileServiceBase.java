@@ -280,6 +280,40 @@ public class TextFileServiceBase {
         return ++currentEntryId;
     }
 
+    public Boolean removeEntryFromFileById(String id, DATA_TYPES type) {
+        String filePath = generateFilePathByDataType(type);
+        File fileToRead = new File(filePath);
+
+        if (!fileToRead.exists()) return false;
+        if (!fileToRead.canRead()) return null;
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileToRead));
+
+            File tempFile = new File(ASSET_PATH + "temp.txt");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+            PrintWriter printer = new PrintWriter(writer);
+
+            String currentEntry;
+            while ((currentEntry = reader.readLine()) != null) {
+                String[] tokens = currentEntry.split(SharedConstants.TEXT_DELIMITER);
+                if (tokens[0].trim().equalsIgnoreCase(id)) continue;
+
+                printer.println(currentEntry);
+            }
+
+            printer.close();
+            writer.close();
+            reader.close();
+
+            if (fileToRead.delete()) return tempFile.renameTo(fileToRead);
+        } catch (IOException ex) {
+            return null;
+        }
+
+        return false;
+    }
+
     /**
      * Creates the file path for reading a file according to DATA_TYPES.
      * @param type DATA_TYPES
