@@ -29,16 +29,25 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unchecked")
+/**
+ * This activity allows user to swap Students between 2 selected Teams.
+ * When user select both Teams and Students, the requirements will be produced for each Team,
+ * and displayed to inform if the Students are good to swap, or any requirements that are
+ * not satisfied, so user is informed and can adjust their selection.
+ * After swapping, if a team has 4 members, recalculate its Fitness Metrics.
+ */
 public class SwapActivity extends AnchorPane implements IActivity {
 
     private Consumer<SharedEnums.GUI_ACTION_CONTEXT> intent;
     private static final String FIRST_TEAM = "FIRST_TEAM";
     private static final String SECOND_TEAM = "SECOND_TEAM";
 
+    //Dependency injections to access data processing services
     private final StudentService studentService;
     private final TeamService teamService;
     private final ControllerBase controllerBase;
 
+    //The observable objects to keep track of the changes made to data
     private final SimpleObjectProperty<ArrayList<Team>> observableTeams;
     private final SimpleObjectProperty<Team> firstTeamInSwap;
     private final SimpleObjectProperty<Student> firstTeamMember;

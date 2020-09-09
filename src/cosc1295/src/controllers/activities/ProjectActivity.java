@@ -23,13 +23,20 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * This Activity allows user to replace Team Project.
+ * When the Team's Project is changed, recalculate the Fitness Metrics.
+ * Observable Design Pattern is used to control the flow of this Activity.
+ */
 public class ProjectActivity extends AnchorPane implements IActivity {
 
     private Consumer<SharedEnums.GUI_ACTION_CONTEXT> intent;
 
+    //Dependency injections to access data processing services
     private final TeamService teamService;
     private final ProjectService projectService;
 
+    //The observable objects to keep track of the changes made to data
     private final SimpleObjectProperty<Team> selectedTeam;
     private final SimpleObjectProperty<Project> selectedProject;
 
@@ -145,6 +152,8 @@ public class ProjectActivity extends AnchorPane implements IActivity {
     }
 
     private void eraseProjectSelectionFragment() {
+        IActivity.removeElementIfExists("select-project-label", this);
+        IActivity.removeElementIfExists("select-project-dropdown", this);
     }
 
     private void constraintElements(double initialWidth, Region... elements) {

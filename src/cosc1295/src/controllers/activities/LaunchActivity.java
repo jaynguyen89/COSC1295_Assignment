@@ -14,6 +14,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
+/**
+ * This Activity shows a ComboBox for user to navigate between features.
+ */
 public class LaunchActivity extends AnchorPane implements IActivity {
 
     private Consumer<GUI_ACTION_CONTEXT> intent;
@@ -37,6 +40,7 @@ public class LaunchActivity extends AnchorPane implements IActivity {
         subtitle.prefWidthProperty().bind(container.widthProperty());
         subtitle.setLayoutY(MARGIN * 4.5);
 
+        //Draw the ComboBox dropdown with the features that user want to use
         ComboBox<String> taskDropdown = new ComboBox<>();
         this.getChildren().add(taskDropdown);
 
@@ -59,6 +63,7 @@ public class LaunchActivity extends AnchorPane implements IActivity {
             )
         ));
 
+        //After selecting a feature, clicking Go button will navigate user to the selected feature
         Button goButton = new Button("Go");
         goButton.getStyleClass().add("go-button");
         IActivity.constraintButton(goButton, this);

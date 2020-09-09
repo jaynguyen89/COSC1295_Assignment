@@ -7,6 +7,9 @@ import javafx.beans.property.SimpleStringProperty;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This ViewModel is used to display Students in a TableView widget.
+ */
 public class StudentVM {
 
     private SimpleStringProperty uniqueId;

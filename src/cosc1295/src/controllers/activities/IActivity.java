@@ -16,12 +16,21 @@ import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * The Activity Interface
+ */
 public interface IActivity {
 
-    double MARGIN = 20.0;
+    double MARGIN = 20.0; //All constraints in the views are calculated with this value
 
-    <T> void setIntent(Consumer<T> callback);
+    <T> void setIntent(Consumer<T> callback); //The Intent passed to an Activity
 
+    /**
+     * Calculates the offset to slide the widgets (up/down, left/right), and
+     * resize the widgets when the GUI window is resized.
+     * @param values Number[]
+     * @return double
+     */
     static double offset(Number... values) {
         double offset = ((Double) values[1] - (Double) values[0]) / 2;
 
@@ -31,6 +40,14 @@ public interface IActivity {
         return offset;
     }
 
+    /**
+     * Checks an observable object if it has any listener attached to it,
+     * by checking both of `listener` and `changeListeners` fields of the observable.
+     * Returns true if the observable has any attached listener, otherwise false.
+     * @param observable SimpleObjectProperty<T>
+     * @param <T> Type
+     * @return boolean
+     */
     static <T> boolean hasListener(@NotNull SimpleObjectProperty<T> observable) {
         Object listener;
 
@@ -52,12 +69,21 @@ public interface IActivity {
             listener = observableField.get(value);
             if (listener != null) return true;
         } catch (NullPointerException | NoSuchFieldException | IllegalAccessException e) {
-            return false;
+            return false; //No listener attached
         }
 
         return false;
     }
 
+    /**
+     * Replaces the texts in a Label or Button element. The element is searched by ID.
+     * Param `type` is the type of element.
+     * @param type Class<T>
+     * @param newText String
+     * @param elementId String
+     * @param activity Pane
+     * @param <T> Type
+     */
     static <T> void changeElementText(Class<T> type, String newText, String elementId, Pane activity) {
         for (Node element : activity.getChildren())
             if (element.getId() != null && element.getId().equals(elementId)) {
@@ -70,12 +96,22 @@ public interface IActivity {
             }
     }
 
+    /**
+     * Removes an element from the Activity. The element is searched by ID.
+     * @param elementId String
+     * @param activity Pane
+     */
     static void removeElementIfExists(String elementId, Pane activity) {
         activity.getChildren().removeIf(
             element -> element.getId() != null && element.getId().equals(elementId)
         );
     }
 
+    /**
+     * Toggles (show/hide) an element in the Activity. The element is searched by ID.
+     * @param elementId String
+     * @param activity Pane
+     */
     static void toggleElement(String elementId, Pane activity) {
         AtomicReference<Node> elementToToggle = new AtomicReference<>();
         activity.getChildren().forEach(
@@ -87,6 +123,11 @@ public interface IActivity {
         elementToToggle.get().setVisible(!elementToToggle.get().isVisible());
     }
 
+    /**
+     * Constraints the position XY of an element in the Activity.
+     * @param button Button
+     * @param activity Pane
+     */
     static void constraintButton(Button button, Pane activity) {
         button.setPrefWidth(MARGIN * 5);
         AnchorPane.setBottomAnchor(button, MARGIN * 2);
@@ -101,6 +142,12 @@ public interface IActivity {
         );
     }
 
+    /**
+     * Draws the title on an Activity, also constraints the size and position of title in the Activity.
+     * @param container Scene
+     * @param activity Pane
+     * @param title String
+     */
     static void drawActivityTitle(Scene container, Pane activity, String title) {
         activity.getStyleClass().add("panel-wrapper");
         activity.prefWidthProperty().bind(container.widthProperty());
@@ -114,6 +161,14 @@ public interface IActivity {
         titleLabel.setLayoutY(MARGIN / 2);
     }
 
+    /**
+     * Draws a status message on an Activity when an exception occurs.
+     * Also constraints the position and size of the message in the Activity.
+     * This exception is usually the file reading/writing exceptions.
+     * @param container Scene
+     * @param activity Pane
+     * @param message String
+     */
     static void drawActivityMessageOnException(Scene container, Pane activity, String message) {
         Label warning = new Label(message);
         activity.getChildren().add(warning);
@@ -132,6 +187,16 @@ public interface IActivity {
             ));
     }
 
+    /**
+     * Draws 2 fixed buttons on an Activity: the `Back` button and the main button.
+     * The main button is a button used to commit changes made to data.
+     * If isErrorOccurred==true, `Back` button is drawn, otherwise the main button.
+     * Also constrains the position of the buttons in the Activity.
+     * @param container Scene
+     * @param activity Pane
+     * @param isErrorOccurred boolean
+     * @param buttons Button[]
+     */
     static void drawActivityFixedButtons(
         Scene container, Pane activity, boolean isErrorOccurred, Button... buttons
     ) {
@@ -166,6 +231,12 @@ public interface IActivity {
             constraintButton(backButton, activity);
     }
 
+    /**
+     * Draws a `success` status message on an Activity after user successfully commit changes made to data.
+     * Also constraints the size and position of the message in the Activity.
+     * @param message String
+     * @param activity Pane
+     */
     static void drawSuccessMessage(String message, Pane activity) {
         Label success = new Label(message + "           ");
         success.getStyleClass().add("message-success");

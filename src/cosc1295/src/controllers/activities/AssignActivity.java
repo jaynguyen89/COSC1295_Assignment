@@ -34,15 +34,31 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
+/**
+ * This Activity allows for assigning a Student to a Team.
+ * While assigning, user can choose to create a new Team to receive the assignee.
+ * Also, user can select a Student in the Team to be replaced by the assignee.
+ * Teams having 4 Students can not receive more Student, and if a Student in a Team is replaced
+ * by an assignee, the replaced Student goes back to the assignable Student list.
+ * When user select a Student and a Team, and optionally the Student in the Team to be replaced,
+ * a message will display to suggest the requirements of the Team on the assignee.
+ * If the assignee meets all requirements (Leader or personality balancing, and conflicters),
+ * the `Assign` button will be enabled (clickable), otherwise disabled.
+ * The design of this feature utilizes recursive calls to reduce the amount of codes and eliminate redundant codes.
+ * To simplify this feature, the assignable Teams are ones that have 0-3 members despite members can be replaced.
+ * I have created another activity to remove Team member.
+ */
 public class AssignActivity extends AnchorPane implements IActivity {
 
-    private Consumer<SharedEnums.GUI_ACTION_CONTEXT> intent;
+    private Consumer<SharedEnums.GUI_ACTION_CONTEXT> intent; //The Intent object for navigation
     private static final String SET_PROJECT = "SET_PROJECT";
 
+    //Dependency injections to access data processing services
     private final StudentService studentService;
     private final TeamService teamService;
     private final ControllerBase controllerBase;
 
+    //The observable objects to keep track of the changes made to data
     private final SimpleObjectProperty<Student> studentToAssign;
     private final SimpleObjectProperty<Team> teamToReceiveMember;
     private final SimpleObjectProperty<Student> studentInTeamToBeReplaced;
@@ -63,6 +79,13 @@ public class AssignActivity extends AnchorPane implements IActivity {
         teamToReceiveMember.set(team);
     }
 
+    /**
+     * Entry point to this Activity.
+     * Data are read and errors are checked in preparation for the features.
+     * Only on no error, the widgets are shown and the listeners are attached to the observables.
+     * @param container Scene
+     * @param postMessage String
+     */
     public void drawAssigningTaskContents(Scene container, @Nullable String postMessage) {
         this.setId(this.getClass().getSimpleName());
         IActivity.drawActivityTitle(container, this, "Assign Students To Teams");
@@ -93,6 +116,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
 
     private void attachListenersToObservables(Scene container) {
         SimpleBooleanProperty shouldEnableAssignButton = new SimpleBooleanProperty(false);
+        //The Team's requirements on the assignee will be stringified into this variable, then displayed.
         AtomicReference<String> message = new AtomicReference<>(SharedConstants.EMPTY_STRING);
 
         studentToAssign.addListener(observable -> {
@@ -122,22 +146,28 @@ public class AssignActivity extends AnchorPane implements IActivity {
         IActivity.removeElementIfExists("requirement-message", this);
         message.set(SharedConstants.EMPTY_STRING);
 
-        Student selectedStudent = studentToAssign.get();
+        Student selectedStudent = studentToAssign.get(); //The assignee selected by user from assignable Student list
         if (selectedStudent == null) shouldEnableAssignButton.set(false);
 
+        //Only check Team's requirements if both assignee and the Team to receive assignee are selected
         if (selectedStudent != null && teamToReceiveMember.get() != null) {
+            //Get the members currently in the Team
             List<Student> receivingTeamMembers = new ArrayList<>(teamToReceiveMember.get().getMembers());
 
+            //Check if user want to replace a member in Team, then produce the Team's requirements
             if (studentInTeamToBeReplaced.get() != null) receivingTeamMembers.remove(studentInTeamToBeReplaced.get());
             Pair<Boolean, List<String>> teamRequirements = LogicalAssistant.produceTeamRequirementsOnNewMember(
-                    receivingTeamMembers, new ArrayList<Student>() {{ add(studentToAssign.get()); }}
+                receivingTeamMembers, new ArrayList<Student>() {{ add(studentToAssign.get()); }}
             );
 
+            //Null requirements means the assignee is good to join the Team
             if (teamRequirements == null) shouldEnableAssignButton.set(true);
             else {
-                if (teamRequirements.getKey() && teamRequirements.getValue() == null)
+                //Otherwise, check the requirements for the unaccepted conditions
+                if (teamRequirements.getKey() && teamRequirements.getValue() == null) //Team needs Leader but still has rooms for other members
                     shouldEnableAssignButton.set(true);
                 else {
+                    //Unsafe to assign: either Leader required, or conflicts, or imbalance personality.
                     shouldEnableAssignButton.set(false);
 
                     if (teamRequirements.getKey()) message.set(message.get() + "This Team needs Leader.");
@@ -147,12 +177,21 @@ public class AssignActivity extends AnchorPane implements IActivity {
                 }
             }
 
+            //Done checking the requirements, display a message to inform user so they can adjust their selection
             if (!message.get().equals(SharedConstants.EMPTY_STRING))
                 drawTeamRequirementMessage(container, message.get());
             else shouldEnableAssignButton.set(true);
         }
     }
 
+    /**
+     * Draws the Team's requirements in the Activity so user is informed whether
+     * the assignee is good to assign, or what goes wrong so they can adjust accordingly.
+     * The new message replaces the old one.
+     * Also constraints the message for its size and position on the Activity.
+     * @param container Scene
+     * @param message String
+     */
     private void drawTeamRequirementMessage(Scene container, String message) {
         IActivity.removeElementIfExists("requirement-message", this);
         double initialWidth = (container.getWidth() - MARGIN * 3) / 2;
@@ -174,11 +213,13 @@ public class AssignActivity extends AnchorPane implements IActivity {
         }));
     }
 
-    private void drawActivityFailMessage(Scene container, String message) {
-        IActivity.drawActivityMessageOnException(container, this, message);
-        drawButtonBasedOnContext(container, true);
-    }
-
+    /**
+     * Draws the titles on Activity to let user know where to select what.
+     * Draws 2 areas for assignee selection and for team selection by calling 2 other methods.
+     * @param container Scene
+     * @param students List<Student>
+     * @param teams List<Team>
+     */
     private void drawWidgetsForAssigningStudentsTask(Scene container, List<Student> students, List<Team> teams) {
         Label selectStudentTitle = new Label("Select at least 1 Student to assign");
         this.getChildren().add(selectStudentTitle);
@@ -209,6 +250,12 @@ public class AssignActivity extends AnchorPane implements IActivity {
         drawTeamsSelectionArea(teams, tablePrefWidth, null);
     }
 
+    /**
+     * Draws a TableView widget to display the assignable Students and allow for
+     * selecting an assignee. The selected assignee will be set to the observable studentToAssign.
+     * @param students List<Student>
+     * @param initialWidth double
+     */
     private void drawStudentsSelectionArea(List<Student> students, double initialWidth) {
         TableView studentsTable = new TableView();
         studentsTable.getStyleClass().add("data-table");
@@ -274,13 +321,27 @@ public class AssignActivity extends AnchorPane implements IActivity {
         );
     }
 
+    /**
+     * Control the application flow when selecting a Team to receive member, or creating a new Team.
+     * This method is recursively called after every change that is made to the parameters' data.
+     * The exit point of recursion is when a Team is selected, optionally a Team's member to be replaced.
+     * Param `action` == null when this method is reached from method `drawWidgetsForAssigningStudentsTask`,
+     * or when there is at least 1 Team to be selected while user modify data.
+     * @param teams List<Team>
+     * @param initialWidth double
+     * @param action String
+     */
     private void drawTeamsSelectionArea(List<Team> teams, double initialWidth, String action) {
         List<Team> assignableTeams = LogicalAssistant.filterAssignableTeams(teams);
+        //When no Team is ever created, or no assignable Teams, user have to create a new Team
         if (action == null && (teams.size() == 0 || assignableTeams.size() == 0)) {
             eraseTeamDetailsTable();
             drawTeamCreatingFragment(teams, initialWidth, true);
         }
 
+        //This condition works in accordance with the above condition because action != null
+        //This time, this method is called in a recursion.
+        //After user create a new Team, they have to set a project for that newly created Team.
         if (action != null && action.equals(SET_PROJECT)) {
             IActivity.changeElementText(
                 Label.class, "Set a Project for newly created Team", "select-team-title", this
@@ -295,10 +356,23 @@ public class AssignActivity extends AnchorPane implements IActivity {
             else drawProjectSelectionFragment(teams, projects, initialWidth);
         }
 
+        //This condition can onl be reached if both of the above conditions are false.
+        //This condition can be reached in the first method call or in a recursion.
         if (action == null && teams.size() != 0)
             drawTeamSelectionFragment(teams, initialWidth, teamToReceiveMember);
     }
 
+    /**
+     * Draws a ComboBox widget allowing for selecting a Team to receive member.
+     * The selected Team will be set to observable teamToReceiveStudent.
+     * When a Team is selected, another fragment is drawn to allow for selecting a member to be replaced.
+     * If a member is selected, it is set to observable studentToBeReplaced.
+     * Param teamToReceive is to counter the situation when user has created a new Team,
+     * and this method is reached (not called) afterwards.
+     * @param teams List<Team>
+     * @param initialWidth double
+     * @param teamToReceive ObservableValue
+     */
     private void drawTeamSelectionFragment(List<Team> teams, double initialWidth, ObservableValue teamToReceive) {
         IActivity.removeElementIfExists("team-dropdown-select", this);
         IActivity.changeElementText(
@@ -307,6 +381,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         IActivity.removeElementIfExists("set-project-button", this);
         IActivity.removeElementIfExists("project-selection-dropdown", this);
 
+        //The ComboBox for selecting a Team
         ComboBox<String> teamDropdown = new ComboBox<>();
         teamDropdown.setId("team-dropdown-select");
         teamDropdown.getStyleClass().add("dropdown-select");
@@ -335,22 +410,25 @@ public class AssignActivity extends AnchorPane implements IActivity {
         }));
 
         teamDropdown.getSelectionModel().selectedIndexProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue.intValue() == 0) {
-                setTeamToReceiveMember(null);
-                studentInTeamToBeReplaced.set(null);
+            if (newValue.intValue() == 0) { //No team is selected, then...
+                setTeamToReceiveMember(null); //Remove the selected Team in observable
+                studentInTeamToBeReplaced.set(null); //Remove the replaced member no matter it is selected or not
 
-                eraseTeamDetailsTable();
-                drawTeamCreatingFragment(teams, initialWidth, false);
+                eraseTeamDetailsTable(); //No Team to display this fragment any longer
+                drawTeamCreatingFragment(teams, initialWidth, false); //Re-allow user to create new Team
             }
-            else {
+            else { //A Team has been selected
                 IActivity.removeElementIfExists("create-team-button", this);
                 setTeamToReceiveMember(assignableTeams.get(newValue.intValue() - 1));
                 teamDropdown.setValue(dropdownItems.get(newValue.intValue()));
 
+                //Recursive call to this method, so it will reach the below codes on line 432
                 drawTeamSelectionFragment(teams, initialWidth, teamToReceiveMember);
             }
         }));
 
+        //Reached in a recursion: if a Team is selected or created, display the details of Team
+        //If no Team is selected, recursively call drawTeamCreatingFragment to redraw the whole area.
         if (selectedTeam == null) drawTeamCreatingFragment(teams, initialWidth, false);
         if (selectedTeam != null) {
             if (selectedTeam.isNewlyAdded()) teamDropdown.setDisable(true);
@@ -358,6 +436,13 @@ public class AssignActivity extends AnchorPane implements IActivity {
         }
     }
 
+    /**
+     * Draws the widgets for creating new Team. After creating the Team, set it to observable teamToReceiveMember,
+     * then recursively call to drawTeamsSelectionArea with action==SET_PROJECT to set a Team Project.
+     * @param teams List<Team>
+     * @param initialWidth double
+     * @param isCreatingFirstTeam boolean
+     */
     private void drawTeamCreatingFragment(List<Team> teams, double initialWidth, boolean isCreatingFirstTeam) {
         IActivity.changeElementText(
             Label.class,
@@ -379,6 +464,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
             AnchorPane.setLeftAnchor(optional, initialWidth + MARGIN * 2);
         }
 
+        //On clicking this button, an event will fire to create new Team
         Button createButton = new Button("Create");
         createButton.setId("create-team-button");
         createButton.setPrefWidth(MARGIN * 5);
@@ -406,6 +492,13 @@ public class AssignActivity extends AnchorPane implements IActivity {
         });
     }
 
+    /**
+     * Draws a ComboBox widget to allow for setting a Project to the newly created Team.
+     * Then recursively call to drawTeamsSelectionArea with action==null to redraw the Team selection widgets.
+     * @param teams List<Team>
+     * @param projects List<Project>
+     * @param initialWidth double
+     */
     private void drawProjectSelectionFragment(List<Team> teams, List<Project> projects, double initialWidth) {
         IActivity.removeElementIfExists("create-team-button", this);
         IActivity.removeElementIfExists("optional-message", this);
@@ -463,6 +556,12 @@ public class AssignActivity extends AnchorPane implements IActivity {
         });
     }
 
+    /**
+     * Called by the above drawProjectSelectionFragment method to display error message
+     * when an exception occurred while retrieving projects from files.
+     * @param errorMessage String
+     * @param initialWidth double
+     */
     private void drawProjectErrorFragment(String errorMessage, double initialWidth) {
         IActivity.toggleElement("assign-button", this);
 
@@ -506,10 +605,17 @@ public class AssignActivity extends AnchorPane implements IActivity {
         );
     }
 
+    /**
+     * After a Team is selected, this method is called to draw the team details,
+     * and a ComboBox allowing for selecting a Team member to be replaced.
+     * @param team Team
+     * @param initialWidth double
+     */
     private void drawSelectedTeamDetailsTable(@NotNull Team team, double initialWidth) {
         IActivity.removeElementIfExists("optional-message", this);
         eraseTeamDetailsTable();
 
+        //Drawing the Team details
         Label selectedTeamLabel = new Label("Your selected Team:");
         selectedTeamLabel.setId("selected-team-label");
         selectedTeamLabel.getStyleClass().add("subtitle");
@@ -545,6 +651,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
             teamBasicInfo.add(infoLabels.get(i), i, 0);
         }
 
+        //This is a link when user clicks, a popup will display showing the fitness metrics of the Team
         Label linkText = new Label("Click here to see Fitness Metrics.");
         linkText.setId("metrics-link-text");
         if (team.getFitnessMetrics() != null) {
@@ -557,6 +664,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
             linkText.setOnMouseClicked(event -> launchFitnessMetricsPopup(team.getFitnessMetrics()));
         }
 
+        //Drawing the widgets for selecting a member to replace
         Label memberSelectLabel = new Label("Members:");
         memberSelectLabel.setId("members-select-label");
         memberSelectLabel.getStyleClass().add("grid-label-h");
@@ -600,12 +708,12 @@ public class AssignActivity extends AnchorPane implements IActivity {
         AnchorPane.setLeftAnchor(selectedMemberLabel, initialWidth + MARGIN * 2);
 
         membersDropdown.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.intValue() == 0) {
+            if (newValue.intValue() == 0) { //No member selected, set null to observable studentInTeamToBeReplaced
                 guidance.setVisible(true);
                 selectedMemberLabel.setVisible(false);
                 studentInTeamToBeReplaced.set(null);
             }
-            else {
+            else { //A member selected, inform the details of the member to be replaced
                 guidance.setVisible(false);
 
                 Student selectedMember = team.getMembers().get(newValue.intValue() - 1);
@@ -641,6 +749,10 @@ public class AssignActivity extends AnchorPane implements IActivity {
         IActivity.removeElementIfExists("selected-member-label", this);
     }
 
+    /**
+     * The popup that will open when user click on the link to view Team Fitness Metrics.
+     * @param metrics TeamFitness
+     */
     private void launchFitnessMetricsPopup(@NotNull TeamFitness metrics) {
         final Stage popup = new Stage();
         popup.initModality(Modality.APPLICATION_MODAL);
@@ -765,6 +877,11 @@ public class AssignActivity extends AnchorPane implements IActivity {
         popup.show();
     }
 
+    /**
+     * Draws the `Back` button and/or Assign button
+     * @param container Scene
+     * @param isErrorOccurred boolean
+     */
     private void drawButtonBasedOnContext(Scene container, boolean isErrorOccurred) {
         Button backButton = new Button(isErrorOccurred ? "Okay" : "Back");
         Button assignButton = new Button("Assign");
@@ -780,6 +897,11 @@ public class AssignActivity extends AnchorPane implements IActivity {
         });
     }
 
+    /**
+     * Sets the listener to the Assign button. On clicking, user commit to save their changes to data into files.
+     * @param container Scene
+     * @param assignButton Button
+     */
     private void setActionListenerFor(Scene container, Button assignButton) {
         final List<Project> projects = (new ProjectService()).readAllProjectsFromFile();
         final List<Preference> preferences = studentService.readAllStudentPreferencesFromFile();
@@ -788,21 +910,26 @@ public class AssignActivity extends AnchorPane implements IActivity {
             drawActivityFailMessage(container, "An error occurred while retrieving data from files.\nPlease try again.");
 
         assignButton.setOnAction(event -> {
+            //If user want to replace a member in Team, remove that member first
             if (studentInTeamToBeReplaced.get() != null)
                 teamToReceiveMember.get().getMembers().remove(studentInTeamToBeReplaced.get());
 
+            //Add the assignee into Team
             teamToReceiveMember.get().getMembers().add(studentToAssign.get());
 
+            //If after assigning, Team has 4 members, calculate the Fitness Metrics
             if (teamToReceiveMember.get().getMembers().size() == SharedConstants.GROUP_LIMIT)
                 teamToReceiveMember.get().setFitnessMetrics(
                     controllerBase.calculateTeamFitnessMetricsFor(teamToReceiveMember.get(), projects, preferences)
                 );
 
+            //Finally save or update data to files
             boolean updateSuccess = false;
             int newTeamId = -1;
             if (teamToReceiveMember.get().isNewlyAdded()) newTeamId = teamService.SaveNewTeam(teamToReceiveMember.get());
             else updateSuccess = teamService.updateTeam(teamToReceiveMember.get());
 
+            //Check the save/update file results
             if ((!teamToReceiveMember.get().isNewlyAdded() && !updateSuccess) ||
                 (teamToReceiveMember.get().isNewlyAdded() && newTeamId < 0)
             ) drawActivityFailMessage(container, "An error occurred while updating/saving data into files.\nPlease retry your task.");
@@ -816,6 +943,11 @@ public class AssignActivity extends AnchorPane implements IActivity {
 
             if (updateSuccess) drawAssigningTaskContents(container, "The selected Student has been assigned to team successfully.");
         });
+    }
+
+    private void drawActivityFailMessage(Scene container, String message) {
+        IActivity.drawActivityMessageOnException(container, this, message);
+        drawButtonBasedOnContext(container, true);
     }
 
     @Override

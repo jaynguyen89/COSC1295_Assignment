@@ -4,6 +4,9 @@ import cosc1295.src.models.Student;
 import helpers.commons.SharedConstants;
 import javafx.beans.property.SimpleStringProperty;
 
+/**
+ * This ViewModel is used to display members of a Team in a TableView widget.
+ */
 public class TeamMemberVM {
 
     public SimpleStringProperty firstMem;

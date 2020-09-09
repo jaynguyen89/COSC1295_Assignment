@@ -8,8 +8,13 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
+/**
+ * This class is the entry point to GUI features.
+ * The design of GUI part follows the structure of an Android application.
+ */
 public class TeamGuiView extends Application {
 
+	//The inflator is to inflate an Activity into the Scene
 	private final ContentInflator inflator = ContentInflator.getInstance();
 
 	public void launchGuiWindow() {
@@ -23,30 +28,34 @@ public class TeamGuiView extends Application {
 			if (newValue) applicationWindow.setMaximized(false);
 		}));
 
-		applicationWindow.setWidth(SharedConstants.DIMENSIONS.get("WIDTH"));
-		applicationWindow.setHeight(SharedConstants.DIMENSIONS.get("HEIGHT"));
+		applicationWindow.setWidth(SharedConstants.DIMENSIONS.get("WIDTH")); //896px
+		applicationWindow.setHeight(SharedConstants.DIMENSIONS.get("HEIGHT")); //504px
 
-		applicationWindow.setMaxWidth(SharedConstants.DIMENSIONS.get("MAX_WIDTH"));
-		applicationWindow.setMaxHeight(SharedConstants.DIMENSIONS.get("MAX_HEIGHT"));
+		applicationWindow.setMaxWidth(SharedConstants.DIMENSIONS.get("MAX_WIDTH")); //1024px
+		applicationWindow.setMaxHeight(SharedConstants.DIMENSIONS.get("MAX_HEIGHT")); //576px
 
-		applicationWindow.setMinWidth(SharedConstants.DIMENSIONS.get("WIDTH"));
-		applicationWindow.setMinHeight(SharedConstants.DIMENSIONS.get("HEIGHT"));
+		applicationWindow.setMinWidth(SharedConstants.DIMENSIONS.get("WIDTH")); //896px
+		applicationWindow.setMinHeight(SharedConstants.DIMENSIONS.get("HEIGHT")); //504px
 
 		Scene appScene = new Scene(
 				new Pane(),
-				SharedConstants.DIMENSIONS.get("WIDTH"),
-				SharedConstants.DIMENSIONS.get("HEIGHT")
+				SharedConstants.DIMENSIONS.get("WIDTH"), //896px
+				SharedConstants.DIMENSIONS.get("HEIGHT") //504px
 		);
 
 		applicationWindow.minWidthProperty().bind(appScene.heightProperty().multiply(SharedConstants.GUI_ASPECT_RATIO));
 		applicationWindow.minHeightProperty().bind(appScene.widthProperty().divide(SharedConstants.GUI_ASPECT_RATIO));
 
+		//On launching the GUI, the LaunchActivity is inflated to Scene by default...
 		appScene = inflator.inflate(GUI_ACTION_CONTEXT.LAUNCH, appScene);
 
+		//...then, basing on the navigation option selected by user, an appropriate Activity is inflated
+		//The newly inflated Activity replaces the current one in the Scene.
 		Scene finalAppScene = appScene;
 		((IActivity) appScene.getRoot()).setIntent(context -> {
-			inflator.inflate((GUI_ACTION_CONTEXT) context, finalAppScene);
+			inflator.inflate((GUI_ACTION_CONTEXT) context, finalAppScene); //Inflate the Activity
 
+			//Then set an Intent on that Activity to control the navigations from it
 			((IActivity) finalAppScene.getRoot()).setIntent(secondaryContext -> {
 				inflator.inflate((GUI_ACTION_CONTEXT) secondaryContext, finalAppScene);
 				applicationWindow.setScene(finalAppScene);

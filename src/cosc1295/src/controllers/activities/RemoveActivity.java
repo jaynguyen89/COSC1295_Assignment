@@ -19,13 +19,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * This Activity allows user to remove a member from a Team.
+ * When removing a member, if Team has a Fitness Metrics, delete it; if Team has no member left, delete team.
+ * Observable Design Pattern is used to control the flow of this Activity.
+ */
 public class RemoveActivity extends AnchorPane implements IActivity {
 
     private Consumer<SharedEnums.GUI_ACTION_CONTEXT> intent;
 
+    //Dependency injections to access data processing services
     private final TeamService teamService;
     private final StudentService studentService;
 
+    //The observable objects to keep track of the changes made to data
     private final SimpleObjectProperty<Team> selectedTeam;
     private final SimpleObjectProperty<Student> selectedStudent;
 

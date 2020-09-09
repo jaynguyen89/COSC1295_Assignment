@@ -10,14 +10,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Singleton object class
+ * Singleton object class.
+ * This class provides an instance of Inflator, which will
+ * inflate an appropriate content into the Scene basing on a navigation option.
  */
 public class ContentInflator {
 
     private final String STYLES_DIR = System.getProperty("user.dir").replace("\\", "/") +
                                       "/src/cosc1295/src/views/gui/styles/";
 
-    private static final HashMap<GUI_ACTION_CONTEXT, Pane> sceneCollection = new HashMap<>();
+    //When the GUI launches, before inflating any Activity into Scene,
+    // all Activities are prepared and stored into this HashMap
+    private static final HashMap<GUI_ACTION_CONTEXT, Pane> activityCollection = new HashMap<>();
     private static ContentInflator inflator;
 
     private ContentInflator() { }
@@ -31,12 +35,15 @@ public class ContentInflator {
             }
         }
 
-        if (sceneCollection.isEmpty())
+        if (activityCollection.isEmpty())
             inflator.gatherResources();
 
         return inflator;
     }
 
+    /**
+     * Prepare all Activities and store them into a collection for later use
+     */
     private void gatherResources() {
         for (Map.Entry<GUI_ACTION_CONTEXT, String> entry : SharedConstants.RESOURCES.entrySet()) {
             Pane activity;
@@ -62,16 +69,23 @@ public class ContentInflator {
                     break;
             }
 
-            sceneCollection.put(entry.getKey(), activity);
+            activityCollection.put(entry.getKey(), activity);
         }
     }
 
+    /**
+     * Inflate an Activity into the Scene when user make a navigation.
+     * While inflating an Activity, the stylesheet CSS of that Activity will be added to the Scene accordingly.
+     * @param context GUI_ACTION_CONTEXT
+     * @param container Scene
+     * @return Scene
+     */
     public Scene inflate(GUI_ACTION_CONTEXT context, Scene container) {
 
         container.getStylesheets().clear();
         container.getStylesheets().add("file:///" + STYLES_DIR + SharedConstants.RESOURCES.get(context));
 
-        Pane activity = sceneCollection.get(context);
+        Pane activity = activityCollection.get(context);
         activity.getChildren().clear();
         switch (context) {
             case LAUNCH:
