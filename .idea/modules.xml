@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/COSC1295.iml" filepath="$PROJECT_DIR$/COSC1295.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../JFXLibraries/javafx-sdk-14.0.2.1-x64/javafx-sdk-14.0.2.1-x64.iml" filepath="$PROJECT_DIR$/../JFXLibraries/javafx-sdk-14.0.2.1-x64/javafx-sdk-14.0.2.1-x64.iml" />
     </modules>
   </component>
 </project>
