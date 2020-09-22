@@ -5,6 +5,8 @@ import helpers.commons.SharedEnums.SKILLS;
 
 import javafx.util.Pair;
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +14,7 @@ public class TeamFitness implements Serializable {
 
 	private static final long serialVersionUID = 9102396648922501096L;
 
-	private int id;
+	private int id; //the id of the Team
     private double averageTeamSkillCompetency;
     private HashMap<SKILLS, Double> teamCompetencyBySkills;
     private Pair<Double, Pair<Double, Double>> preferenceSatisfaction;
@@ -177,6 +179,15 @@ public class TeamFitness implements Serializable {
         }
 
         return fitnessString.toString();
+    }
+
+    public String composeRaw(ResultSet rs) throws SQLException {
+        return rs.getInt("team_id") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("avg_skill_competency") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("competency_by_skill") +
+                rs.getString("avg_preference_satisfaction") +
+                rs.getString("avg_skill_shortfall") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("shortfall_by_project");
     }
 
     public TeamFitness clone() {

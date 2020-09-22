@@ -4,7 +4,11 @@ import helpers.commons.SharedConstants;
 
 import javafx.util.Pair;
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Preference implements Serializable {
@@ -52,6 +56,30 @@ public class Preference implements Serializable {
                     .append(SharedConstants.TEXT_DELIMITER);
 
         return stringPref.toString();
+    }
+
+    public List<String> composeRaw(ResultSet rs) throws SQLException {
+        List<String> data = new ArrayList<>();
+
+        String studentIdTracker = SharedConstants.EMPTY_STRING;
+        StringBuilder rawData = new StringBuilder(SharedConstants.EMPTY_STRING);
+        while (rs.next()) {
+            if (!studentIdTracker.equals(rs.getString("student_id"))) {
+                if (rawData.length() != 0) data.add(rawData.toString());
+
+                rawData = new StringBuilder(rs.getString("student_id") + SharedConstants.TEXT_DELIMITER);
+                studentIdTracker = rs.getString("student_id");
+            }
+
+            rawData.append(rs.getString("project_id"))
+                    .append(SharedConstants.TEXT_DELIMITER)
+                    .append(rs.getString("rating"))
+                    .append(SharedConstants.TEXT_DELIMITER);
+
+            if (rs.isLast()) data.add(rawData.toString());
+        }
+
+        return data;
     }
 
     public Preference clone() {

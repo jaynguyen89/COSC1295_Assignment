@@ -6,6 +6,8 @@ import helpers.utilities.Helpers;
 
 import javafx.util.Pair;
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -114,6 +116,15 @@ public class Company implements IThing, Serializable {
             abnNumber + SharedConstants.TEXT_DELIMITER +
             websiteUrl + SharedConstants.TEXT_DELIMITER +
             address.getId();
+    }
+
+    public String composeRaw(ResultSet rs) throws SQLException {
+        return rs.getInt("id") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("unique_id") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("company_name") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("abn_number") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("website_url") + SharedConstants.TEXT_DELIMITER +
+                rs.getInt("address_id");
     }
 
     public Company clone() {

@@ -3,13 +3,16 @@ package entry;
 import com.sun.istack.internal.NotNull;
 import cosc1295.designs.ApplicationFacade;
 import cosc1295.designs.Flasher;
-import cosc1295.src.models.Flash;
+import cosc1295.providers.bases.DatabaseContext;
+import cosc1295.src.models.*;
 import cosc1295.src.services.TeamFitnessMetricService;
 import helpers.commons.SharedEnums.FLASH_TYPES;
 import helpers.commons.SharedEnums.APPLICATION_MENU;
 import static helpers.commons.SharedEnums.APPLICATION_MENU.*;
 import helpers.utilities.Helpers;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -58,6 +61,9 @@ public final class ProjectTeamFormationApp {
                         "\nApplication closed.",
                         FLASH_TYPES.NONE
                 ));
+
+                DatabaseContext context = DatabaseContext.getInstance();
+                if (context != null) context.close();
 
                 inputScanner.close();
                 break;

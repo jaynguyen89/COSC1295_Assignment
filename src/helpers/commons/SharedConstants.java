@@ -1,5 +1,6 @@
 package helpers.commons;
 
+import cosc1295.providers.bases.TextFileServiceBase;
 import helpers.commons.SharedEnums.GUI_ACTION_CONTEXT;
 
 import java.util.HashMap;
@@ -8,6 +9,9 @@ import java.util.HashMap;
  * All the constants values that will be used in the whole project.
  */
 public final class SharedConstants {
+
+    public static final String DATA_ENV = "local"; //"server" or "local"
+    public static final String DATA_SOURCE = TextFileServiceBase.class.getSimpleName();
 
     public static final String EMPTY_STRING = "";
 

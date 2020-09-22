@@ -8,7 +8,11 @@ import helpers.utilities.Helpers;
 
 import javafx.util.Pair;
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Project implements IThing, Serializable {
@@ -120,6 +124,36 @@ public class Project implements IThing, Serializable {
 
     public String compact() {
         return "#" + id + ". " + uniqueId + " - " + projectTitle;
+    }
+
+    public List<String> composeRaw(ResultSet rs) throws SQLException {
+        List<String> data = new ArrayList<>();
+
+        int projectIdTracker = -1;
+        StringBuilder rawData = new StringBuilder(SharedConstants.EMPTY_STRING);
+        while (rs.next()) {
+            if (projectIdTracker != rs.getInt("id")) {
+                if (rawData.length() != 0) data.add(rawData.toString());
+
+                rawData = new StringBuilder(
+                    rs.getInt("id") + SharedConstants.TEXT_DELIMITER +
+                    rs.getString("unique_id") + SharedConstants.TEXT_DELIMITER +
+                    rs.getString("project_title") + SharedConstants.TEXT_DELIMITER +
+                    rs.getString("brief_description") + SharedConstants.TEXT_DELIMITER +
+                    rs.getInt("project_owner_id") + SharedConstants.TEXT_DELIMITER
+                );
+
+                projectIdTracker = rs.getInt("id");
+            }
+
+            rawData.append(rs.getString("skill"))
+                    .append(rs.getInt("ranking"))
+                    .append(SharedConstants.TEXT_DELIMITER);
+
+            if (rs.isLast()) data.add(rawData.toString());
+        }
+
+        return data;
     }
 
     public Project clone() {

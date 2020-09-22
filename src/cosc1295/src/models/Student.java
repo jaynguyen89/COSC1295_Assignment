@@ -8,6 +8,8 @@ import helpers.commons.SharedEnums.PERSONALITIES;
 import helpers.utilities.Helpers;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -129,6 +131,47 @@ public class Student implements IThing, Serializable {
                 .append(SharedConstants.TEXT_DELIMITER);
 
         return stringStudent.toString();
+    }
+
+    public List<String> composeRaw(ResultSet rs) throws SQLException {
+        List<String> data = new ArrayList<>();
+
+        int studentIdTracker = -1;
+        StringBuilder rawData = new StringBuilder(SharedConstants.EMPTY_STRING);
+        String moreData = SharedConstants.EMPTY_STRING;
+        while (rs.next()) {
+            if (studentIdTracker != rs.getInt("id")) {
+                if (rawData.length() != 0) {
+                    rawData.append(moreData);
+                    data.add(rawData.toString());
+                }
+
+                rawData = new StringBuilder(
+                    rs.getInt("id") + SharedConstants.TEXT_DELIMITER +
+                    rs.getString("unique_id") + SharedConstants.TEXT_DELIMITER
+                );
+
+                String conflicter1 = rs.getString("first_conflicter");
+                String conflicter2 = rs.getString("second_conflicter");
+
+                moreData = rs.getString("personality") + SharedConstants.TEXT_DELIMITER +
+                        (conflicter1 == null ? SharedConstants.EMPTY_STRING : conflicter1 + SharedConstants.TEXT_DELIMITER) +
+                        (conflicter2 == null ? SharedConstants.EMPTY_STRING : conflicter2 + SharedConstants.TEXT_DELIMITER);
+
+                studentIdTracker = rs.getInt("id");
+            }
+
+            rawData.append(rs.getString("skill"))
+                    .append(rs.getInt("ranking"))
+                    .append(SharedConstants.TEXT_DELIMITER);
+
+            if (rs.isLast()) {
+                rawData.append(moreData);
+                data.add(rawData.toString());
+            }
+        }
+
+        return data;
     }
 
     public Student clone() {

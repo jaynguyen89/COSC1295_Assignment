@@ -4,9 +4,10 @@ import cosc1295.src.models.generic.IThing;
 import helpers.commons.SharedConstants;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Team implements IThing, Serializable {
 
@@ -121,6 +122,33 @@ public class Team implements IThing, Serializable {
         clone.setNewlyAdded(newlyAdded);
 
         return clone;
+    }
+
+    public List<String> composeRaw(ResultSet rs) throws SQLException {
+        List<String> data = new ArrayList<>();
+
+        int teamIdTracker = -1;
+        StringBuilder rawData = new StringBuilder(SharedConstants.EMPTY_STRING);
+        while (rs.next()) {
+            if (teamIdTracker != rs.getInt("id")) {
+                if (rawData.length() != 0) data.add(rawData.toString());
+
+                String metricId = rs.getString("fitness_metric_id");
+                rawData = new StringBuilder(
+                    rs.getInt("id") + SharedConstants.TEXT_DELIMITER +
+                    rs.getInt("project_id") + SharedConstants.TEXT_DELIMITER +
+                    (metricId == null ? 0 : metricId) + SharedConstants.TEXT_DELIMITER
+                );
+                teamIdTracker = rs.getInt("id");
+            }
+
+            rawData.append(rs.getString("unique_id"))
+                    .append(SharedConstants.TEXT_DELIMITER);
+
+            if (rs.isLast()) data.add(rawData.toString());
+        }
+
+        return data;
     }
 
     public String compact() {

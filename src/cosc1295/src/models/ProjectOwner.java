@@ -7,6 +7,8 @@ import helpers.utilities.Helpers;
 import javafx.util.Pair;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class ProjectOwner extends People implements IThing, Serializable {
 
@@ -52,6 +54,16 @@ public class ProjectOwner extends People implements IThing, Serializable {
             role.getId() + SharedConstants.TEXT_DELIMITER +
             company.getId();
 
+    }
+
+    public String composeRaw(ResultSet rs) throws SQLException {
+        return rs.getInt("id") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("unique_id") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("first_name") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("last_name") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("email_address") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("role_id") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("company_id");
     }
 
     public ProjectOwner clone() {

@@ -3,6 +3,8 @@ package cosc1295.src.models;
 import helpers.commons.SharedConstants;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Role implements Serializable {
 
@@ -36,6 +38,11 @@ public class Role implements Serializable {
      */
     public String stringify() {
         return id + SharedConstants.TEXT_DELIMITER + role;
+    }
+
+    public String composeRaw(ResultSet rs) throws SQLException {
+        return rs.getInt("id") + SharedConstants.TEXT_DELIMITER +
+               rs.getString("role");
     }
 
     public Role clone() {

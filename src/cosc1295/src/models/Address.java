@@ -4,6 +4,8 @@ import helpers.commons.SharedConstants;
 import helpers.utilities.Helpers;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +22,19 @@ public class Address implements Serializable {
     private String country;
 
     public Address() { }
+
+    public Address(
+        int id, String building, String street, String suburb,
+        String state, String post_code, String country
+    ) {
+        this.id = id;
+        this.building = building;
+        this.state = state;
+        this.street = street;
+        this.suburb = suburb;
+        postCode = post_code;
+        this.country = country;
+    }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -121,6 +136,20 @@ public class Address implements Serializable {
 
         return sBuilding + street.concat(", ") + suburb.concat(", ") +
                state.concat(" ") + postCode.concat(", ") + country;
+    }
+
+    public String composeRaw(ResultSet rs) throws SQLException {
+        return rs.getInt("id") + SharedConstants.TEXT_DELIMITER +
+                (
+                    Helpers.isNullOrBlankOrEmpty(rs.getString("building")) ?
+                        SharedConstants.NA :
+                        rs.getString("building")
+                ) + SharedConstants.TEXT_DELIMITER +
+                rs.getString("street") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("suburb") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("state") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("post_code") + SharedConstants.TEXT_DELIMITER +
+                rs.getString("country");
     }
 
     public Address clone() {
