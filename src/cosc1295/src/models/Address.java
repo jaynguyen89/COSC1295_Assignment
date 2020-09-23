@@ -6,6 +6,7 @@ import helpers.utilities.Helpers;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,26 +40,44 @@ public class Address implements Serializable {
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
+    public String getBuilding() {
+        return building;
+    }
     public void setBuilding(String building) {
         this.building = building;
     }
 
+    public String getStreet() {
+        return street;
+    }
     public void setStreet(String street) {
         this.street = street;
     }
 
+    public String getSuburb() {
+        return suburb;
+    }
     public void setSuburb(String suburb) {
         this.suburb = suburb;
     }
 
+    public String getState() {
+        return state;
+    }
     public void setState(String state) {
         this.state = state;
     }
 
+    public String getPostCode() {
+        return postCode;
+    }
     public void setPostCode(String postCode) {
         this.postCode = postCode;
     }
 
+    public String getCountry() {
+        return country;
+    }
     public void setCountry(String country) {
         this.country = country;
     }
@@ -119,7 +138,10 @@ public class Address implements Serializable {
      */
     public String stringify() {
         return id + SharedConstants.TEXT_DELIMITER +
-               ((building.isEmpty() ? SharedConstants.NA : building) + SharedConstants.TEXT_DELIMITER) +
+               ((
+                   Helpers.isNullOrBlankOrEmpty(building) ? SharedConstants.NA : building)
+                   + SharedConstants.TEXT_DELIMITER
+               ) +
                street + SharedConstants.TEXT_DELIMITER +
                suburb + SharedConstants.TEXT_DELIMITER +
                state + SharedConstants.TEXT_DELIMITER +

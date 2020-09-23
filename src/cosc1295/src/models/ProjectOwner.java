@@ -29,6 +29,9 @@ public class ProjectOwner extends People implements IThing, Serializable {
         return Helpers.checkUniqueIdAvailableFor(this.getClass(), uniqueId);
     }
 
+    public Company getCompany() {
+        return company;
+    }
     public void setCompany(Company company) {
         this.company = company;
     }

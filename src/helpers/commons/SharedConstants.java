@@ -1,5 +1,6 @@
 package helpers.commons;
 
+import cosc1295.providers.bases.DatabaseContext;
 import cosc1295.providers.bases.TextFileServiceBase;
 import helpers.commons.SharedEnums.GUI_ACTION_CONTEXT;
 
@@ -11,7 +12,14 @@ import java.util.HashMap;
 public final class SharedConstants {
 
     public static final String DATA_ENV = "local"; //"server" or "local"
-    public static final String DATA_SOURCE = TextFileServiceBase.class.getSimpleName();
+
+    public static final String DATA_SOURCE = DatabaseContext.class.getSimpleName();//TextFileServiceBase.class.getSimpleName();
+
+    public static final String DB_INSERT = "INSERT";
+
+    public static final String DB_UPDATE = "UPDATE";
+
+    public static final String DB_DELETE = "DELETE";
 
     public static final String EMPTY_STRING = "";
 
@@ -56,10 +64,6 @@ public final class SharedConstants {
     public static final String TEAM_FITNESS_METRICS_FILE_NAME = "fitness_metrics.txt";
 
     public static final double GUI_ASPECT_RATIO = 16/9.0;
-
-    public static final int BASE_FONT = 20;
-
-    public static final String FONT_FAMILY = "Tahoma";
 
     public static final HashMap<String, Integer> DIMENSIONS =
             new HashMap<String, Integer>() {{

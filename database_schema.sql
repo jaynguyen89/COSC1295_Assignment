@@ -149,8 +149,8 @@ SELECT `student_unique_id` AS student_id, `project_unique_id` AS `project_id`, `
     ) Q2 ON Q1.`preference_id` = Q2.`id` AND Q1.`student_id` = Q2.`student_id` ORDER BY student_id;
 
 
-SELECT P.*, SR.`skill`, SR.`ranking` FROM `projects` P, `project_owners` PO, `rankings` R, `skill_rankings` SR
-  WHERE P.`project_owner_id` = PO.`id` AND R.`subject_id` = P.`id` AND SR.`ranking_id` = R.`id` AND R.`subject_type` = 'PROJECT';
+SELECT P.*, SR.`skill`, SR.`ranking` FROM `projects` P, `rankings` R, `skill_rankings` SR
+WHERE R.`subject_id` = P.`id` AND SR.`ranking_id` = R.`id` AND R.`subject_type` = 'PROJECT';
 
 
 SELECT S1.`id`, S1.`unique_id`, S1.`personality`, S2.`unique_id` AS first_conflicter, S3.`unique_id` AS second_conflicter

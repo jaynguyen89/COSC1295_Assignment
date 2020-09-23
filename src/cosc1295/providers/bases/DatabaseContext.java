@@ -8,6 +8,7 @@ import java.sql.*;
 import java.util.*;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
+import com.sun.istack.internal.NotNull;
 import cosc1295.src.models.*;
 import helpers.commons.SharedConstants;
 
@@ -84,7 +85,7 @@ public class DatabaseContext {
     }
 
     //This method gets data from 1 single table. Suitable for Address, Company, Role, Project Owner, TeamFitness.
-    public <T> List<String> retrieveSimpleDataForType(Class<T> type) {
+    public <T> List<String> retrieveSimpleDataForType(@NotNull Class<T> type) {
         String table = TABLE_NAMES.get(type.getSimpleName());
         String query = "SELECT * FROM " + table;
 
@@ -110,7 +111,7 @@ public class DatabaseContext {
     }
 
     //This method gets data from multiple tables by joining. Suitable for Preference, Project, Student, Team.
-    public <T> List<String> retrieveCompositeDataForType(Class<T> type) {
+    public <T> List<String> retrieveCompositeDataForType(@NotNull Class<T> type) {
         String query = composeQueryForType(type);
         List<String> data;
 
@@ -126,7 +127,8 @@ public class DatabaseContext {
         return data;
     }
 
-    public List<HashMap<String, String>> executeDataRetrievalQuery(String query) {
+    //This method gets data from multiple tables by joining. Suitable for Preference, Project, Student, Team.
+    public List<HashMap<String, String>> executeDataRetrievalQuery(@NotNull String query) {
         List<HashMap<String, String>> data = new ArrayList<>();
 
         try {
@@ -150,7 +152,8 @@ public class DatabaseContext {
         return data;
     }
 
-    public <T> String getRawEntryForType(Class<T> type, String id, boolean byId) {
+    //This method gets data from 1 single table. Suitable for Address, Company, Role, Project Owner, TeamFitness.
+    public <T> String getRawEntryForType(@NotNull Class<T> type, @NotNull String id, boolean byId) {
         String table = TABLE_NAMES.get(type.getSimpleName());
         String query = "SELECT * FROM `" + table + "` WHERE " + (byId ? "`id`" : "`unique_id`") + " = ?";
 
@@ -168,19 +171,31 @@ public class DatabaseContext {
         return rawData;
     }
 
-    //Used for insert, update, delete querying
-    public Boolean executeDataModifierQuery(String query) {
+    public int executeDataInsertionQuery(PreparedStatement statement) {
         try {
-            PreparedStatement statement = connection.prepareStatement(query);
-            int result = statement.executeUpdate(query);
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) return 0;
 
-            return result != 0;
+            ResultSet resultSet = statement.getGeneratedKeys();
+            if (resultSet.next()) return resultSet.getInt(1);
+
+            return 0;
+        } catch (SQLException ex) {
+            return -1;
+        }
+    }
+
+    //Used for update, delete querying
+    public Boolean executeDataModifierQuery(@NotNull PreparedStatement statement) {
+        try {
+            int affectedRows = statement.executeUpdate();
+            return affectedRows != 0;
         } catch (SQLException ex) {
             return null;
         }
     }
 
-    public <T> Boolean isRedundantUniqueId(Class<T> type, String uniqueId) {
+    public <T> Boolean isRedundantUniqueId(@NotNull Class<T> type, @NotNull String uniqueId) {
         String table = TABLE_NAMES.get(type.getSimpleName());
         String query = "SELECT * FROM `" + table + "` WHERE `unique_id` = ?";
 
@@ -193,6 +208,29 @@ public class DatabaseContext {
         } catch (SQLException ex) {
             return null;
         }
+    }
+
+    public PreparedStatement createStatement(@NotNull String query, @NotNull String action) {
+        try {
+            if (action.equals(SharedConstants.DB_INSERT))
+                return connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+
+            return connection.prepareStatement(query);
+        } catch (SQLException ex) {
+            return null;
+        }
+    }
+
+    public void toggleAutoCommit(boolean auto) throws SQLException {
+        connection.setAutoCommit(auto);
+    }
+
+    public void saveChanges() throws SQLException {
+        connection.commit();
+    }
+
+    public void revertChanges() throws SQLException {
+        connection.rollback();
     }
 
     public void close() {
@@ -253,8 +291,8 @@ public class DatabaseContext {
                         "    ) T2" +
                         "    ON T1.`preference_id` = T2.`id` AND T1.`student_id` = T2.`student_id` ORDER BY student_id;";
             case "Project":
-                return "SELECT P.*, SR.`skill`, SR.`ranking` FROM `projects` P, `project_owners` PO, `rankings` R, `skill_rankings` SR" +
-                        "  WHERE P.`project_owner_id` = PO.`id` AND R.`subject_id` = P.`id` AND SR.`ranking_id` = R.`id` AND R.`subject_type` = 'PROJECT';";
+                return "SELECT P.*, SR.`skill`, SR.`ranking` FROM `projects` P, `rankings` R, `skill_rankings` SR" +
+                        "  WHERE R.`subject_id` = P.`id` AND SR.`ranking_id` = R.`id` AND R.`subject_type` = 'PROJECT';";
             case "Student":
                 return "SELECT T1.*, SR.`skill`, SR.`ranking`" +
                         "  FROM (" +

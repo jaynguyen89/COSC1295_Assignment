@@ -44,14 +44,14 @@ public class StudentController extends ControllerBase {
 
         boolean shouldCaptureConflicters = studentView.promptToCaptureConflicters(student);
         if (!shouldCaptureConflicters && shouldCapturePersonality)
-            return studentService.updateStudentPersonality(student);
+            return studentService.updateStudent(student);
 
         if (shouldCaptureConflicters &&
             student.getConflicters().size() == 0) {
             student = studentView.captureStudentConflicters(student, allStudents);
             if (student == null) return null;
 
-            return studentService.updateStudentPersonality(student);
+            return studentService.updateStudent(student);
         }
 
         if (shouldCaptureConflicters &&
@@ -61,7 +61,7 @@ public class StudentController extends ControllerBase {
         }
 
         if (shouldCapturePersonality || shouldCaptureConflicters)
-            return studentService.updateStudentPersonality(student);
+            return studentService.updateStudent(student);
 
         return null;
     }

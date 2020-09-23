@@ -12,7 +12,7 @@ public interface IStudentService {
     
     List<Student> readAllStudentsFromFile();
 
-    Boolean updateStudentPersonality(Student student);
+    Boolean updateStudent(Student student);
 
     Boolean saveStudentPreferences(Preference preference);
 

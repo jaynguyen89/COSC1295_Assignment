@@ -1,5 +1,6 @@
 package cosc1295.providers.services;
 
+import cosc1295.providers.bases.DatabaseContext;
 import cosc1295.providers.bases.TextFileServiceBase;
 import cosc1295.providers.interfaces.IProjectService;
 import cosc1295.src.models.Project;
@@ -11,6 +12,8 @@ import helpers.commons.SharedEnums.DATA_TYPES;
 import helpers.utilities.LogicalAssistant;
 
 import javafx.util.Pair;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,25 +23,34 @@ import java.util.List;
  */
 public class ProjectService extends TextFileServiceBase implements IProjectService {
 
+    private final DatabaseContext context;
+
+    public ProjectService() {
+        context = DatabaseContext.getInstance();
+    }
+
     @Override
     public boolean saveNewProject(Project newProject) {
-        int newInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.PROJECT);
-        if (newInstanceId == -1) return false;
+        if (SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName()))
+            return saveEntryToTextFile(newProject);
 
-        newProject.setId(newInstanceId);
-        String normalizedProject = newProject.stringify();
-
-        return saveEntryToFile(normalizedProject, DATA_TYPES.PROJECT);
+        return saveEntryToDatabase(newProject);
     }
 
     @Override
     public boolean isUniqueIdDuplicated(String uniqueId) {
-        return isRedundantUniqueId(uniqueId, DATA_TYPES.PROJECT);
+        return SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName())
+                ? isRedundantUniqueId(uniqueId, DATA_TYPES.PROJECT)
+                : context.isRedundantUniqueId(Project.class, uniqueId);
     }
 
     @Override
     public List<Project> readAllProjectsFromFile() {
-        List<String> rawProjectData = readAllDataFromFile(DATA_TYPES.PROJECT);
+        List<String> rawProjectData;
+        if (SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName()))
+            rawProjectData = readAllDataFromFile(DATA_TYPES.PROJECT);
+        else
+            rawProjectData = context.retrieveCompositeDataForType(Project.class);
 
         if (rawProjectData == null) return null;
         if (rawProjectData.isEmpty()) return new ArrayList<>();
@@ -67,7 +79,6 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
                 }
 
                 project.setSkillRanking(skillRanking);
-
                 projects.add(project);
             }
         } catch (IndexOutOfBoundsException | NumberFormatException ex) {
@@ -75,5 +86,34 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
         }
 
         return projects;
+    }
+
+    private boolean saveEntryToTextFile(Project project) {
+        int newInstanceId = getNextEntryIdForNewEntry(DATA_TYPES.PROJECT);
+        if (newInstanceId == -1) return false;
+
+        project.setId(newInstanceId);
+        String normalizedProject = project.stringify();
+
+        return saveEntryToFile(normalizedProject, DATA_TYPES.PROJECT);
+    }
+
+    private boolean saveEntryToDatabase(Project project) {
+        String query = "INSERT INTO `projects` (`project_owner_id`, `unique_id`, `project_title`, `brief_description`) VALUES (?, ?, ?, ?)";
+
+        PreparedStatement statement = context.createStatement(query, SharedConstants.DB_INSERT);
+        if (statement == null) return false;
+
+        try {
+            statement.setInt(1, project.getProjectOwner().getId());
+            statement.setString(2, project.getUniqueId());
+            statement.setString(3, project.getProjectTitle());
+            statement.setString(4, project.getBriefDescription());
+
+            int result = context.executeDataInsertionQuery(statement);
+            return result > 0;
+        } catch (SQLException ex) {
+            return false;
+        }
     }
 }

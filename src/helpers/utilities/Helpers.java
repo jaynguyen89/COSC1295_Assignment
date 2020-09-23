@@ -12,7 +12,12 @@ import helpers.commons.SharedEnums;
 
 import javafx.util.Pair;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -239,5 +244,24 @@ public final class Helpers {
         return compact.split(SharedConstants.SPACE)[1]
             .replace("#", SharedConstants.EMPTY_STRING)
             .replace(":", SharedConstants.EMPTY_STRING);
+    }
+
+    public static String randomDateTimeInRange(String start, String end) {
+        DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        LocalDateTime dtStart = LocalDateTime.parse(start, dtFormat);
+        LocalDateTime dtEnd = LocalDateTime.parse(end, dtFormat);
+
+        LocalDate startDate = LocalDate.from(dtStart);
+        LocalTime startTime = LocalTime.from(dtStart);
+
+        LocalDate endDate = LocalDate.from(dtEnd);
+        LocalTime endTime = LocalTime.from(dtEnd);
+
+        LocalDate randDate = LocalDate.ofEpochDay(ThreadLocalRandom.current().nextLong(startDate.toEpochDay(), endDate.toEpochDay()));
+        LocalTime randTime = LocalTime.ofSecondOfDay(ThreadLocalRandom.current().nextInt(startTime.toSecondOfDay(), endTime.toSecondOfDay()));
+
+        LocalDateTime dtRand = LocalDateTime.of(randDate, randTime);
+        return dtRand.format(dtFormat);
     }
 }

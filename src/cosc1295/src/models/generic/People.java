@@ -45,6 +45,10 @@ public class People implements Serializable {
         return firstName + SharedConstants.SPACE + lastName;
     }
 
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
     public  void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
     }
