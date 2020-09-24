@@ -271,7 +271,7 @@ public class ProjectView {
                 eRanking = RANKINGS.values()[ranking - 1];
                 if (selectedRankings.contains(eRanking)) { //The RANKINGS is prior selected
                     flasher.flash(new Flash(
-                        "Ranking " + eRanking.getValue() + " has been set previously for another skill.",
+                        "Ranking " + (eRanking.getValue() + 1) + " has been set previously for another skill.",
                         FLASH_TYPES.ATTENTION
                     ));
                     flasher.flash(new Flash("Please select another one. Press enter to continue.", FLASH_TYPES.NONE));

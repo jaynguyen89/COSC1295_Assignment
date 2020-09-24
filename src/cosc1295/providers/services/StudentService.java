@@ -21,11 +21,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * For Dependency Injection
  */
 public class StudentService extends TextFileServiceBase implements IStudentService {
+    private static final Logger logger = Logger.getLogger(DatabaseContext.class.getName());
 
     private final DatabaseContext context;
 
@@ -76,6 +79,7 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
                 students.add(student);
             }
         } catch (IndexOutOfBoundsException | NumberFormatException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "StudentService.readAllStudentsFromFile : " + ex.getMessage());
             return null;
         }
 
@@ -126,6 +130,7 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
                 preferences.add(preference);
             }
         } catch (IndexOutOfBoundsException | NumberFormatException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "StudentService.readAllStudentPreferencesFromFile : " + ex.getMessage());
             return null;
         }
 
@@ -161,12 +166,25 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
 
             List<String> conflicters = student.getConflicters();
             if (conflicters.size() != 0) {
-                statement.setString(2, conflicters.get(0));
-                statement.setString(3, conflicters.size() < 2 ? null : conflicters.get(1));
+                query = "SELECT `id` FROM `students` WHERE `unique_id` = '" + conflicters.get(0) + "';";
+                List<HashMap<String, String>> finder = context.executeDataRetrievalQuery(query);
+
+                statement.setInt(2, Integer.parseInt(finder.get(0).get("id")));
+
+                if (conflicters.size() == 2) {
+                    query = "SELECT `id` FROM `students` WHERE `unique_id` = '" + conflicters.get(1) + "';";
+                    finder = context.executeDataRetrievalQuery(query);
+
+                    statement.setInt(3, Integer.parseInt(finder.get(0).get("id")));
+                }
+                else
+                    statement.setString(3, null);
             }
 
-            return context.executeDataModifierQuery(statement);
-        } catch (SQLException ex) {
+            Boolean result = context.executeDataModifierQuery(statement);
+            return result;
+        } catch (SQLException | NumberFormatException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "StudentService.updateStudentToDatabase : " + ex.getMessage());
             return null;
         }
     }
@@ -232,6 +250,7 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
             context.toggleAutoCommit(true);
             return true;
         } catch (NumberFormatException | SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "StudentService.savePreferenceToDatabase : " + ex.getMessage());
             try { context.revertChanges(); } catch (SQLException e) { return null; }
             return null;
         }

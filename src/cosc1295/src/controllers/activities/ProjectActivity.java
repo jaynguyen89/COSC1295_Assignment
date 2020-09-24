@@ -6,6 +6,7 @@ import cosc1295.providers.services.TeamService;
 import cosc1295.src.controllers.ControllerBase;
 import cosc1295.src.models.Preference;
 import cosc1295.src.models.Project;
+import cosc1295.src.models.Student;
 import cosc1295.src.models.Team;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
@@ -35,6 +36,7 @@ public class ProjectActivity extends AnchorPane implements IActivity {
     //Dependency injections to access data processing services
     private final TeamService teamService;
     private final ProjectService projectService;
+    private final StudentService studentService;
 
     //The observable objects to keep track of the changes made to data
     private final SimpleObjectProperty<Team> selectedTeam;
@@ -43,6 +45,7 @@ public class ProjectActivity extends AnchorPane implements IActivity {
     public ProjectActivity() {
         teamService = new TeamService();
         projectService = new ProjectService();
+        studentService = new StudentService();
 
         selectedTeam = new SimpleObjectProperty<>(null);
         selectedProject = new SimpleObjectProperty<>(null);
@@ -53,8 +56,9 @@ public class ProjectActivity extends AnchorPane implements IActivity {
         IActivity.drawActivityTitle(container, this, "Remove Students From Teams");
 
         List<Team> teams = teamService.readAllTeamsFromFile();
+        List<Student> students = studentService.readAllStudentsFromFile();
         List<Project> projects = projectService.readAllProjectsFromFile();
-        List<Preference> preferences = (new StudentService()).readAllStudentPreferencesFromFile();
+        List<Preference> preferences = studentService.readAllStudentPreferencesFromFile();
 
         boolean error = teams == null || projects == null || preferences == null;
         if (error) drawActivityFailMessage(container, "An error occurred while retrieving data from files.\nPlease try again.");
@@ -67,6 +71,7 @@ public class ProjectActivity extends AnchorPane implements IActivity {
 
             double tablePrefWidth = (container.getWidth() - MARGIN * 2) / 2;
             attachListenersToObservables(tablePrefWidth, projects);
+            LogicalAssistant.setStudentDataInTeams(teams, students);
 
             drawButtonBasedOnContext(container, false);
             drawWidgetsForReassigningProject(teams, tablePrefWidth);

@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * For Dependency Injection
@@ -99,7 +100,7 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
     }
 
     private boolean saveEntryToDatabase(Project project) {
-        String query = "INSERT INTO `projects` (`project_owner_id`, `unique_id`, `project_title`, `brief_description`) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO `projects` (`project_owner_id`, `unique_id`, `project_title`, `brief_description`) VALUES (?, ?, ?, ?);";
 
         PreparedStatement statement = context.createStatement(query, SharedConstants.DB_INSERT);
         if (statement == null) return false;
@@ -110,8 +111,48 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
             statement.setString(3, project.getProjectTitle());
             statement.setString(4, project.getBriefDescription());
 
-            int result = context.executeDataInsertionQuery(statement);
-            return result > 0;
+            context.toggleAutoCommit(false);
+            int projectId = context.executeDataInsertionQuery(statement);
+
+            boolean error = projectId <= 0;
+
+            if (!error) {
+                String sql = "INSERT INTO `rankings` (`subject_id`, `subject_type`) VALUES (?, 'PROJECT');";
+
+                statement = context.createStatement(sql, SharedConstants.DB_INSERT);
+                statement.setInt(1, projectId);
+
+                int rankingId = context.executeDataInsertionQuery(statement);
+                error = rankingId <= 0;
+
+                if (!error) for (Map.Entry<SKILLS, RANKINGS> entry : project.getSkillRanking().entrySet()) {
+                    sql = "INSERT INTO `skill_rankings` (`ranking_id`, `skill`, `ranking`) VALUES (?, ?, ?);";
+
+                    statement = context.createStatement(sql, SharedConstants.DB_INSERT);
+                    statement.setInt(1, rankingId);
+                    statement.setString(2, entry.getKey().name());
+                    statement.setInt(3, entry.getValue().getValue() + 1);
+
+                    int result = context.executeDataInsertionQuery(statement);
+                    error = result <= 0;
+
+                    if (error) break;
+                }
+
+                if (error) {
+                    context.revertChanges();
+                    context.toggleAutoCommit(true);
+                    return false;
+                }
+
+                context.saveChanges();
+                context.toggleAutoCommit(true);
+                return true;
+            }
+
+            context.toggleAutoCommit(true);
+            context.revertChanges();
+            return false;
         } catch (SQLException ex) {
             return false;
         }

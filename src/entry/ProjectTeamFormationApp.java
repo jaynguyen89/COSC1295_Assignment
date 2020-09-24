@@ -115,8 +115,6 @@ public final class ProjectTeamFormationApp {
                 appFacade.displayTeamFitnessMetrics();
                 break;
             case I:
-                appFacade.runTeamProjectSetOrChange();
-            case J:
                 appFacade.runTeamManagementGui();
             default:
                 taskDone = true;

@@ -43,7 +43,6 @@ public class FlashView {
             break;
         }
 
-        inputScanner.close();
         return response.equals(SharedEnums.CONFIRMATIONS.Y.getValue()) ||
                response.equals(SharedEnums.CONFIRMATIONS.Y.name());
     }

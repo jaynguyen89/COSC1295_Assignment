@@ -11,6 +11,8 @@ import java.util.HashMap;
  */
 public final class SharedConstants {
 
+    public static final boolean DEV = true; //false for FINAL, to show/hide logger
+
     public static final String DATA_ENV = "local"; //"server" or "local"
 
     public static final String DATA_SOURCE = DatabaseContext.class.getSimpleName();//TextFileServiceBase.class.getSimpleName();

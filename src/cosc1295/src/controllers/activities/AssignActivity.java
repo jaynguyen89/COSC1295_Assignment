@@ -336,11 +336,12 @@ public class AssignActivity extends AnchorPane implements IActivity {
         //When no Team is ever created, or no assignable Teams, user have to create a new Team
         if (action == null && (teams.size() == 0 || assignableTeams.size() == 0)) {
             eraseTeamDetailsTable();
+            IActivity.removeElementIfExists("team-dropdown-select", this);
             drawTeamCreatingFragment(teams, initialWidth, true);
         }
 
         //This condition works in accordance with the above condition because action != null
-        //This time, this method is called in a recursion.
+        //This time, this method is called in a recursion (a team is being created and needed to set a project).
         //After user create a new Team, they have to set a project for that newly created Team.
         if (action != null && action.equals(SET_PROJECT)) {
             IActivity.changeElementText(
@@ -356,9 +357,9 @@ public class AssignActivity extends AnchorPane implements IActivity {
             else drawProjectSelectionFragment(teams, projects, initialWidth);
         }
 
-        //This condition can onl be reached if both of the above conditions are false.
-        //This condition can be reached in the first method call or in a recursion.
-        if (action == null && teams.size() != 0)
+        //This condition can only be reached if both of the above `if` conditions are false.
+        //This condition can be reached in the first method call (there are at least 1 assignable Team) or in a recursion (a team has been created).
+        if (action == null && assignableTeams.size() != 0)
             drawTeamSelectionFragment(teams, initialWidth, teamToReceiveMember);
     }
 
@@ -448,7 +449,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
             Label.class,
             isCreatingFirstTeam ?
                 "No Team is assignable or has ever been created yet. Please create a Team to receive Student.\n\n" +
-                "Click \"Create\" button if you wish to proceed with creating the first Team. Otherwise, navigate back to Launch menu."
+                "Click \"Create\" button if you wish to proceed with creating a Team. Otherwise, navigate back to Launch menu."
                 : "Select 1 Team to receive Student",
             "select-team-title", this
         );
@@ -772,19 +773,19 @@ public class AssignActivity extends AnchorPane implements IActivity {
 
         Label title = new Label("Fitness Metrics");
         title.getStyleClass().add("popup-title");
-        title.setPrefWidth(POPUP_WIDTH);
+        AnchorPane.setLeftAnchor(title, MARGIN);
         AnchorPane.setTopAnchor(title, MARGIN / 2);
 
         Label competencyHeading = new Label("Skill Competencies");
         competencyHeading.getStyleClass().add("popup-heading");
 
-        AnchorPane.setTopAnchor(competencyHeading, MARGIN);
+        AnchorPane.setTopAnchor(competencyHeading, MARGIN * 1.5);
         AnchorPane.setLeftAnchor(competencyHeading, MARGIN);
 
         GridPane competencyVals = new GridPane();
         competencyVals.setPrefWidth(POPUP_WIDTH - MARGIN * 2);
 
-        AnchorPane.setTopAnchor(competencyVals, MARGIN * 1.5);
+        AnchorPane.setTopAnchor(competencyVals, MARGIN * 2.5);
         AnchorPane.setLeftAnchor(competencyVals, MARGIN);
 
         RowConstraints rowConstraints = new RowConstraints();
@@ -812,7 +813,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         Label preferenceHeading = new Label("Preference Satisfactions");
         preferenceHeading.getStyleClass().add("popup-heading");
 
-        AnchorPane.setTopAnchor(preferenceHeading, MARGIN * 2.25);
+        AnchorPane.setTopAnchor(preferenceHeading, MARGIN * 4);
         AnchorPane.setLeftAnchor(preferenceHeading, MARGIN);
 
         GridPane preferenceVals = new GridPane();
@@ -820,13 +821,13 @@ public class AssignActivity extends AnchorPane implements IActivity {
         preferenceVals.setPrefWidth(POPUP_WIDTH - MARGIN * 2);
         preferenceVals.getRowConstraints().add(rowConstraints);
 
-        AnchorPane.setTopAnchor(preferenceVals, MARGIN * 2.75);
+        AnchorPane.setTopAnchor(preferenceVals, MARGIN * 5);
         AnchorPane.setLeftAnchor(preferenceVals, MARGIN);
 
         List<Label> preferenceLabels = new ArrayList<Label>() {{
-            add(new Label("AVG. " + metrics.getPreferenceSatisfaction().getKey()));
-            add(new Label("(1st) " + metrics.getPreferenceSatisfaction().getValue().getKey()));
-            add(new Label("(2nd) " + metrics.getPreferenceSatisfaction().getValue().getValue()));
+            add(new Label("AVG. " + metrics.getPreferenceSatisfaction().getKey() + "%"));
+            add(new Label("(1st) " + metrics.getPreferenceSatisfaction().getValue().getKey() + "%"));
+            add(new Label("(2nd) " + metrics.getPreferenceSatisfaction().getValue().getValue() + "%"));
         }};
 
         for (int i = 0; i < 3; i++) {
@@ -840,7 +841,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         Label shortfallHeading = new Label("Skill Shortfalls");
         shortfallHeading.getStyleClass().add("popup-heading");
 
-        AnchorPane.setTopAnchor(shortfallHeading, MARGIN * 3.5);
+        AnchorPane.setTopAnchor(shortfallHeading, MARGIN * 6.5);
         AnchorPane.setLeftAnchor(shortfallHeading, MARGIN);
 
         GridPane shortfallVals = new GridPane();
@@ -848,7 +849,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         shortfallVals.setPrefWidth(POPUP_WIDTH - MARGIN * 2);
         shortfallVals.getRowConstraints().add(rowConstraints);
 
-        AnchorPane.setTopAnchor(shortfallVals, MARGIN * 4);
+        AnchorPane.setTopAnchor(shortfallVals, MARGIN * 7.5);
         AnchorPane.setLeftAnchor(shortfallVals, MARGIN);
 
         Label avgSfLabel = new Label("AVG. " + metrics.getAverageSkillShortfall());
@@ -932,7 +933,10 @@ public class AssignActivity extends AnchorPane implements IActivity {
             //Check the save/update file results
             if ((!teamToReceiveMember.get().isNewlyAdded() && !updateSuccess) ||
                 (teamToReceiveMember.get().isNewlyAdded() && newTeamId < 0)
-            ) drawActivityFailMessage(container, "An error occurred while updating/saving data into files.\nPlease retry your task.");
+            ) {
+                assignButton.setVisible(false);
+                drawActivityFailMessage(container, "An error occurred while updating/saving data into files.\nPlease retry your task.");
+            }
 
             if (teamToReceiveMember.get().isNewlyAdded() && newTeamId != -1) {
                 teamToReceiveMember.get().setId(newTeamId);

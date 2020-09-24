@@ -90,11 +90,6 @@ public class ApplicationFacade {
         teamController.printTeamFitnessMetricsTable();
     }
 
-    public void runTeamProjectSetOrChange() {
-        Boolean taskResult = teamController.executeTeamProjectSelectionTask();
-        teamController.displayTeamSelectionFinalResult(taskResult);
-    }
-
     public void runTeamManagementGui() {
     	teamGuiController.runGuiTeamManagementFeatures();
     }

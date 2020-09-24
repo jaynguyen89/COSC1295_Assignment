@@ -320,10 +320,8 @@ public class TeamView {
             // this list will be used to check against user input, not the original Student list
             // So that user can't hack selecting an illegal Student (ie. duplicate assignment or Student already in a Team)
             List<Student> selectableStudents = new ArrayList<>();
-            if (teamRequirements != null) {
-                if (teamRequirements.getValue() == null) selectableStudents.addAll(students);
-                else selectableStudents.addAll(removeRefusedStudents(students, teamRequirements.getValue()));
-            }
+            if (teamRequirements == null || teamRequirements.getValue() == null) selectableStudents.addAll(students);
+            else selectableStudents.addAll(removeRefusedStudents(students, teamRequirements.getValue()));
 
             selectableStudents.removeAll(selectedStudents); //Remove Students that have just been selected here
             selectableStudents.removeAll(teamToAssign.getMembers()); //Remove Students already in the Team itself
@@ -388,7 +386,7 @@ public class TeamView {
 
             if (selectedStudent != null) { //Student is found and valid
                 //Now check the Student with Team requirement for whether Leader type is enforced
-                if (teamRequirements.getKey() && (
+                if (teamRequirements != null && teamRequirements.getKey() && (
                     teamToAssign.getMembers().size() + selectedStudents.size() == 3) &&
                     selectedStudent.getPersonality() != SharedEnums.PERSONALITIES.A
                 ) {

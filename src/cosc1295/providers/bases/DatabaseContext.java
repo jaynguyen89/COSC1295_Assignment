@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
 import com.sun.istack.internal.NotNull;
@@ -13,6 +15,7 @@ import cosc1295.src.models.*;
 import helpers.commons.SharedConstants;
 
 public class DatabaseContext {
+    private static final Logger logger = Logger.getLogger(DatabaseContext.class.getName());
 
     private static final String PROPS_PATH = System.getProperty("user.dir") + "\\db.properties";
 
@@ -45,6 +48,7 @@ public class DatabaseContext {
         try {
             prepareConnection();
         } catch (SQLException | IOException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "DatabaseContext.getInstance : " + ex.getMessage());
             return null;
         }
 
@@ -104,6 +108,7 @@ public class DatabaseContext {
             SQLException | IllegalAccessException | InstantiationException |
             InvocationTargetException | NullPointerException ex
         ) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "DatabaseContext.retrieveSimpleDataForType : " + ex.getMessage());
             return null;
         }
 
@@ -121,6 +126,7 @@ public class DatabaseContext {
 
             data = makeListRawEntry(type, resultSet);
         } catch (SQLException | IllegalAccessException | InstantiationException | InvocationTargetException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "DatabaseContext.retrieveCompositeDataForType : " + ex.getMessage());
             return null;
         }
 
@@ -144,8 +150,8 @@ public class DatabaseContext {
 
                 data.add(rowData);
             }
-
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "DatabaseContext.executeDataRetrievalQuery : " + ex.getMessage());
             return null;
         }
 
@@ -164,7 +170,8 @@ public class DatabaseContext {
             ResultSet entry = statement.executeQuery();
 
             while (entry.next()) rawData = makeRawEntry(type, entry);
-        } catch (SQLException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+        } catch (SQLException | IllegalAccessException | InstantiationException | InvocationTargetException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "DatabaseContext.getRawEntryForType : " + ex.getMessage());
             return null;
         }
 
@@ -181,6 +188,7 @@ public class DatabaseContext {
 
             return 0;
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "DatabaseContext.executeDataInsertionQuery : " + ex.getMessage());
             return -1;
         }
     }
@@ -191,6 +199,7 @@ public class DatabaseContext {
             int affectedRows = statement.executeUpdate();
             return affectedRows != 0;
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "DatabaseContext.executeDataModifierQuery : " + ex.getMessage());
             return null;
         }
     }
@@ -206,6 +215,7 @@ public class DatabaseContext {
 
             return resultSet.next();
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "DatabaseContext.isRedundantUniqueId : " + ex.getMessage());
             return null;
         }
     }
@@ -217,6 +227,7 @@ public class DatabaseContext {
 
             return connection.prepareStatement(query);
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "DatabaseContext.createStatement : " + ex.getMessage());
             return null;
         }
     }

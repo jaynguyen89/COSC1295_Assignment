@@ -168,23 +168,25 @@ public class RemoveActivity extends AnchorPane implements IActivity {
 
         removeButton.setOnAction(event -> {
             selectedTeam.get().getMembers().remove(selectedStudent.get());
-            boolean result = false;
+            boolean result;
             if (selectedTeam.get().getFitnessMetrics() != null) {
                 result = teamService.removeTeamFitness(selectedTeam.get().getFitnessMetrics().getId());
                 selectedTeam.get().setFitnessMetrics(null);
+
+                if (!result) {
+                    removeButton.setVisible(false);
+                    drawActivityFailMessage(container, "An error occurred while updating data. Please retry.");
+                }
             }
+
+            if (selectedTeam.get().getMembers().size() == 0) result = teamService.deleteTeam(selectedTeam.get());
+            else result = teamService.updateTeam(selectedTeam.get());
 
             if (!result) drawActivityFailMessage(container, "An error occurred while updating data. Please retry.");
             else {
-                if (selectedTeam.get().getMembers().size() == 0) result = teamService.deleteTeam(selectedTeam.get());
-                else result = teamService.updateTeam(selectedTeam.get());
-
-                if (!result) drawActivityFailMessage(container, "An error occurred while updating data. Please retry.");
-                else {
-                    selectedTeam.set(null);
-                    eraseStudentSelectionFragment();
-                    drawRemovalTaskContents(container, "The Student has been removed from Team successfully.");
-                }
+                selectedTeam.set(null);
+                eraseStudentSelectionFragment();
+                drawRemovalTaskContents(container, "The Student has been removed from Team successfully.");
             }
         });
     }

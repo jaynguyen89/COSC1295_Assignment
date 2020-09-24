@@ -286,51 +286,6 @@ public class TeamFormationController extends ControllerBase {
         else teamView.printFitnessMetricsTable(teams);
     }
 
-    //Additional Menu feature that is not in assignment requirement
-    //Allow for selecting a Project to replace/assign to a Team's Project
-    public Boolean executeTeamProjectSelectionTask() {
-        List<Team> teams = teamService.readAllTeamsFromFile();
-        List<Project> projects = projectService.readAllProjectsFromFile();
-        List<Preference> preferences = studentService.readAllStudentPreferencesFromFile();
-
-        if (projects == null || teams == null || preferences == null) return null;
-
-        if (projects.size() == 0) {
-            teamView.displayInsufficientSelectionFor(Project.class);
-            return false;
-        }
-
-        if (teams.size() == 0) {
-            teamView.displayInsufficientSelectionFor(Team.class);
-            return false;
-        }
-
-        //This method in TeamView can also handle this Team selection
-        Team selectedTeam = teamView.selectTeamsAndStudentsToSwap(
-                teams, SharedConstants.ACTION_ASSIGN, 0
-        ).getKey();
-        if (selectedTeam == null) return false;
-
-        //Let user pick a project
-        Project selectedProject = teamView.selectTeamProject(projects);
-        if (selectedProject == null) return false;
-
-        //Then set new Project, and recalculate Fitness Metrics if Team has enough 4 Students
-        selectedTeam.setProject(selectedProject);
-        if (selectedTeam.getMembers().size() == SharedConstants.GROUP_LIMIT) {
-            TeamFitness teamFitness = calculateTeamFitnessMetricsFor(selectedTeam, projects, preferences);
-            selectedTeam.setFitnessMetrics(teamFitness);
-        }
-
-        //Finally update the Team
-        if (!teamService.updateTeam(selectedTeam)) {
-            teamView.displayUrgentFailedMessage();
-            return false;
-        }
-
-        return true;
-    }
-
     //Used for Unittest
     public List<Team> runFeatureAssignStudentForTest(
         List<Student> students,

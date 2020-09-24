@@ -47,9 +47,11 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
                 Team team = new Team();
                 team.setId(Integer.parseInt(teamTokens[0]));
 
-                TeamFitness teamFitness = retrieveTeamFitnessMetricsFromFile(teamTokens[2]);
-                if (teamFitness == null) return null;
-                if (teamFitness.getId() != 0) team.setFitnessMetrics(teamFitness);
+                if (Integer.parseInt(teamTokens[2].trim()) != 0) {
+                    TeamFitness teamFitness = retrieveTeamFitnessMetricsFromFile(teamTokens[2]);
+                    if (teamFitness == null) return null;
+                    team.setFitnessMetrics(teamFitness);
+                }
 
                 Project teamProject = new Project();
                 teamProject.setId(Integer.parseInt(teamTokens[1]));
@@ -193,7 +195,7 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
         boolean error;
         try {
             context.toggleAutoCommit(false);
-            String query = "INSERT INTO `teams` (`project_id`) VALUES (?);";
+            String query = "INSERT INTO `teams` (`project_id`) VALUES (" + team.getProject().getId() + ");";
 
             PreparedStatement statement = context.createStatement(query, SharedConstants.DB_INSERT);
             if (statement == null) return -1;
@@ -324,7 +326,7 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
         if (SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName()))
             return removeEntryFromFileById(id + "", DATA_TYPES.FITNESS_METRICS);
 
-        String query = "DELETE FROM `fitness_metrics` WHERE id = " + id;
+        String query = "DELETE FROM `fitness_metrics` WHERE `team_id` = " + id;
 
         PreparedStatement statement = context.createStatement(query, SharedConstants.DB_DELETE);
         if (statement == null) return null;

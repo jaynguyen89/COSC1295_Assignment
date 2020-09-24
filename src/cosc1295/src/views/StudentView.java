@@ -373,6 +373,13 @@ public class StudentView {
 
             if (Helpers.isIntegerNumber(selection)) {
                 int pref = Integer.parseInt(selection);
+                if (preference.getPreference().containsValue(pref)) {
+                    flasher.flash(new Flash("You have rated `" +
+                        (pref == 1 ? "Disliked" : (pref == 2 ? "Neutral" : (pref == 3 ? "Preferred" : "Most Preferred"))) +
+                        "` for another project. Please rate again.\nPress enter to continue.", FLASH_TYPES.ATTENTION));
+                    inputScanner.nextLine();
+                    continue;
+                }
 
                 if (pref > 0 && pref < 5) {
                     preference.addPreference(new Pair<>(project.getUniqueId(), pref));
@@ -416,7 +423,7 @@ public class StudentView {
             shouldReplaceConflicter = flasher.promptForConfirmation(new Flash(
                     "Student " + student.getUniqueId() + " has had 1 conflicter.\n" +
                             "Do you want to replace the current one or add 1 more?" +
-                            "Y: Replace\tN: Add",
+                            "\nY: Replace\tN: Add",
                 FLASH_TYPES.ATTENTION
             ));
 

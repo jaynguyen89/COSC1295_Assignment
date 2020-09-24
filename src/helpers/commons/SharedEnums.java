@@ -17,8 +17,7 @@ public final class SharedEnums {
         F("Shortlist Projects"),
         G("Form Teams"),
         H("Display Team Fitness Metrics"),
-        I("Set or Change Team Project"),
-        J("Launch Team Management GUI"),
+        I("Launch Team Management GUI"),
         X("Quit");
 
         private final String value;
