@@ -18,7 +18,7 @@ import java.util.TimerTask;
 
 public class TeamFitnessMetricService extends Thread {
 
-    private static final long INTERVAL = 300000L; //5 minutes
+    private static final long INTERVAL = 900000L; //15 minutes
     private final Timer timer = new Timer();
 
     private final StudentService studentService;

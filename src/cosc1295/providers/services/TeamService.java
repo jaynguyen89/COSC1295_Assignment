@@ -20,8 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TeamService extends TextFileServiceBase implements ITeamService {
+    private static final Logger logger = Logger.getLogger(DatabaseContext.class.getName());
 
     private final DatabaseContext context;
 
@@ -29,6 +32,10 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
         context = DatabaseContext.getInstance();
     }
 
+    /**
+     * Reads all Teams from file or database according to DATA_SOURCE.
+     * @return List<Team>
+     */
     @Override
     public List<Team> readAllTeamsFromFile() {
         List<String> rawTeamData;
@@ -81,12 +88,18 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
                 teams.add(team);
             }
         } catch (IndexOutOfBoundsException | NumberFormatException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "TeamService.readAllTeamsFromFile : " + ex.getMessage());
             return null;
         }
 
         return teams;
     }
 
+    /**
+     * Reads a Fitness Metrics for a Team by Team ID from file or database according to DATA_SOURCE.
+     * @param fitnessMetricsId String
+     * @return TeamFitness
+     */
     private TeamFitness retrieveTeamFitnessMetricsFromFile(String fitnessMetricsId) {
         String rawFitnessMetrics;
         if (SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName()))
@@ -142,12 +155,18 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
 
             fitnessMetrics.setSkillShortFall(skillShortfall);
         } catch (IndexOutOfBoundsException | NumberFormatException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "TeamService.retrieveTeamFitnessMetricsFromFile : " + ex.getMessage());
             return null;
         }
 
         return fitnessMetrics;
     }
 
+    /**
+     * Gets a delimeterized string as a Project for a Team from database.
+     * @param projectId String
+     * @return String
+     */
     private String retrieveRawProjectFromDatabase(String projectId) {
         String query = "SELECT `unique_id`, `project_title` FROM `projects` WHERE id = " + projectId;
 
@@ -160,6 +179,12 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
                projectData.get("project_title");
     }
 
+    /**
+     * Save a Team into file or database according to DATA_SOURCE.
+     * Returns -1 on exception, or the ID of newly created Team.
+     * @param newTeam Team
+     * @return int
+     */
     @Override
     public int SaveNewTeam(@NotNull Team newTeam) {
         return SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName())
@@ -218,11 +243,12 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
             context.toggleAutoCommit(true);
             return teamId;
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "TeamService.saveTeamToDatabase : " + ex.getMessage());
             return -1;
         }
     }
 
-    //true for success
+    //true for success, false for exception
     private boolean saveTeamMembersToDatabase(int teamId, List<Student> members) {
         try {
             for (Student member : members) {
@@ -244,13 +270,14 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
                 if (inserted <= 0) throw new SQLException();
             }
         } catch (SQLException | NumberFormatException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "TeamService.saveTeamMembersToDatabase : " + ex.getMessage());
             return false;
         }
 
         return true;
     }
 
-    //true for success
+    //true for success, false for exception
     private boolean saveFitnessMetricsToDatabase(int teamId, @Nullable TeamFitness metrics) {
         if (metrics == null) return true;
 
@@ -283,10 +310,17 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
 
             return context.executeDataInsertionQuery(statement) > 0;
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "TeamService.saveFitnessMetricsToDatabase : " + ex.getMessage());
             return false;
         }
     }
 
+    /**
+     * Updates a Team to its corresponding instance in file or database according to DATA_SOURCE.
+     * Returns true on update success, otherwise false.
+     * @param newTeam Team
+     * @return boolean
+     */
     @Override
     public boolean updateTeam(@NotNull Team newTeam) {
         return SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName())
@@ -315,12 +349,84 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
     }
 
     private boolean updateTeamToDatabase(Team team) {
-        Boolean deletion = deleteTeam(team);
-        if (deletion == null || !deletion) return false;
+        try {
+            context.toggleAutoCommit(false);
 
-        return saveTeamToDatabase(team) > 0;
+            Boolean updateResult = updateTeamProjectInDatabase(team);
+            if (!updateResult) throw new SQLException();
+
+            updateResult = removeTeamMembersInDatabase(team.getId());
+            if (!updateResult) throw new SQLException();
+
+            updateResult = saveTeamMembersToDatabase(team.getId(), team.getMembers());
+            if (!updateResult) throw new SQLException();
+
+            if (team.getFitnessMetrics() == null || team.getMembers().size() != SharedConstants.GROUP_LIMIT) {
+                updateResult = removeTeamFitness(team.getId());
+                if (updateResult == null) throw new SQLException();
+            }
+            else {
+                updateResult = removeTeamFitness(team.getId());
+                if (updateResult == null) throw new SQLException();
+
+                updateResult = saveFitnessMetricsToDatabase(team.getId(), team.getFitnessMetrics());
+                if (!updateResult) throw new SQLException();
+            }
+
+            context.saveChanges();
+            context.toggleAutoCommit(true);
+            return true;
+        } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "TeamService.updateTeamToDatabase : " + ex.getMessage());
+            try {
+                context.revertChanges();
+                context.toggleAutoCommit(true);
+            } catch (SQLException e) {
+                if (SharedConstants.DEV) logger.log(Level.SEVERE, "TeamService.updateTeamToDatabase.catch : " + ex.getMessage());
+                return false;
+            }
+            return false;
+        }
     }
 
+    private boolean updateTeamProjectInDatabase(Team team) {
+        String query = "UPDATE `teams` SET `project_id` = ? WHERE id = ?;";
+
+        PreparedStatement statement = context.createStatement(query, SharedConstants.DB_UPDATE);
+        if (statement == null) return false;
+
+        try {
+            statement.setInt(1, team.getProject().getId());
+            statement.setInt(2, team.getId());
+
+            Boolean result = context.executeDataModifierQuery(statement);
+            if (result == null) return false;
+        } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "TeamService.updateTeamProjectInDatabase : " + ex.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean removeTeamMembersInDatabase(int teamId) {
+        String query = "DELETE FROM `team_members` WHERE `team_id` = " + teamId;
+
+        PreparedStatement statement = context.createStatement(query, SharedConstants.DB_DELETE);
+        if (statement == null) return false;
+
+        Boolean result = context.executeDataModifierQuery(statement);
+        if (result == null) return false;
+
+        return result;
+    }
+
+    /**
+     * Delete a TeamFitness for a Team from file or database according to DATA_SOURCE.
+     * Returns null on exception, false for update failed, otherwise false for update success.
+     * @param id int
+     * @return Boolean
+     */
     @Override
     public Boolean removeTeamFitness(int id) {
         if (SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName()))
@@ -334,6 +440,12 @@ public class TeamService extends TextFileServiceBase implements ITeamService {
         return context.executeDataModifierQuery(statement);
     }
 
+    /**
+     * Delete a Team from file or database according to DATA_SOURCE.
+     * Returns null on exception, false for update failed, otherwise false for update success.
+     * @param team Team
+     * @return Boolean
+     */
     @Override
     public Boolean deleteTeam(Team team) {
         if (SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName()))

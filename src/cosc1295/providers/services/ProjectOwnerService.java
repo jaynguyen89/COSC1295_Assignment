@@ -13,11 +13,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * For Dependency Injection
  */
 public class ProjectOwnerService extends TextFileServiceBase implements IProjectOwnerService {
+    private static final Logger logger = Logger.getLogger(DatabaseContext.class.getName());
 
     private final DatabaseContext context;
 
@@ -25,6 +28,12 @@ public class ProjectOwnerService extends TextFileServiceBase implements IProject
         context = DatabaseContext.getInstance();
     }
 
+    /**
+     * Saves a new Project Owner to file or database according to DATA_SOURCE.
+     * Returns false for failure, true for success.
+     * @param projectOwner ProjectOwner
+     * @return boolean
+     */
     @Override
     public boolean saveNewProjectOwner(ProjectOwner projectOwner) {
         if (SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName()))
@@ -33,6 +42,10 @@ public class ProjectOwnerService extends TextFileServiceBase implements IProject
         return saveEntryToDatabase(projectOwner);
     }
 
+    /**
+     * Reads all Project Owners from file or database according to DATA_SOURCE.
+     * @return List<ProjectOwner>
+     */
     @Override
     public List<ProjectOwner> readAllProjectOwnersFromFile() {
         List<String> rawProjectOwnerData;
@@ -69,12 +82,19 @@ public class ProjectOwnerService extends TextFileServiceBase implements IProject
                 projectOwners.add(projectOwner);
             }
         } catch (IndexOutOfBoundsException | NumberFormatException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "ProjectOwnerService.readAllProjectOwnersFromFile : " + ex.getMessage());
             return null;
         }
 
         return projectOwners;
     }
 
+    /**
+     * Checks if a Unique ID is available for creating a new Project Owner.
+     * Returns true if it's available, false otherwise.
+     * @param uniqueId
+     * @return
+     */
     @Override
     public boolean isUniqueIdDuplicated(String uniqueId) {
         return SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName())
@@ -110,6 +130,7 @@ public class ProjectOwnerService extends TextFileServiceBase implements IProject
             int result = context.executeDataInsertionQuery(statement);
             return result > 0;
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "ProjectOwnerService.saveEntryToDatabase : " + ex.getMessage());
             return false;
         }
     }

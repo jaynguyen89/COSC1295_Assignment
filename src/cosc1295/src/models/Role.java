@@ -40,11 +40,18 @@ public class Role implements Serializable {
         return id + SharedConstants.TEXT_DELIMITER + role;
     }
 
+    /**
+     * Creates delimeterized string from data retrieved from database as data saved in text file.
+     * @param rs ResultSet
+     * @return String
+     * @throws SQLException
+     */
     public String composeRaw(ResultSet rs) throws SQLException {
         return rs.getInt("id") + SharedConstants.TEXT_DELIMITER +
                rs.getString("role");
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public Role clone() {
         Role clone = new Role();
         clone.setId(id);

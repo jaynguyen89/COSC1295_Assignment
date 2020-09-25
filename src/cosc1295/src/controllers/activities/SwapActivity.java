@@ -66,6 +66,12 @@ public class SwapActivity extends AnchorPane implements IActivity {
         secondTeamMember = new SimpleObjectProperty<>(null);
     }
 
+    /**
+     * This method is invoked by ContentInflator when SwapActivity is inflated into Scene.
+     * This method prepares necessary data and presets that are triggered on user interactions.
+     * @param container Scene
+     * @param postMessage String
+     */
     public void drawSwappingTaskContents(Scene container, @Nullable String postMessage) {
         this.setId(this.getClass().getSimpleName());
         IActivity.drawActivityTitle(container, this, "Swap Students Between Teams");
@@ -90,9 +96,17 @@ public class SwapActivity extends AnchorPane implements IActivity {
 
             observableTeams.set((ArrayList<Team>) teams);
             drawWidgetsForSwappingStudentsTask(tablePrefWidth);
+            IActivity.drawSuccessMessage("This is a success message for a testing.", this);
         }
     }
 
+    /**
+     * When the observables have listeners attached, the Scene's content will be updated automatically
+     * by the observables invoking the appropriate methods. Everytime Team and Student selections change,
+     * the requirements for swapping Team members are produced, so that messages can be displayed to
+     * inform users about errors or mistakes.
+     * @param initialWidth double
+     */
     private void attachListenersToObservables(double initialWidth) {
         SimpleBooleanProperty shouldEnableSwapButton = new SimpleBooleanProperty(false);
 

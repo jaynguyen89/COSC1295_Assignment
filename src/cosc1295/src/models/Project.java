@@ -126,6 +126,12 @@ public class Project implements IThing, Serializable {
         return "#" + id + ". " + uniqueId + " - " + projectTitle;
     }
 
+    /**
+     * Creates delimeterized string from data retrieved from database as data saved in text file.
+     * @param rs ResultSet
+     * @return String
+     * @throws SQLException
+     */
     public List<String> composeRaw(ResultSet rs) throws SQLException {
         List<String> data = new ArrayList<>();
 
@@ -156,6 +162,7 @@ public class Project implements IThing, Serializable {
         return data;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public Project clone() {
         Project clone = new Project();
         clone.setId(id);

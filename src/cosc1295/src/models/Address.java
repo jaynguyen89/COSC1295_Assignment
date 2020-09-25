@@ -160,6 +160,12 @@ public class Address implements Serializable {
                state.concat(" ") + postCode.concat(", ") + country;
     }
 
+    /**
+     * Creates delimeterized string from data retrieved from database as data saved in text file.
+     * @param rs ResultSet
+     * @return String
+     * @throws SQLException
+     */
     public String composeRaw(ResultSet rs) throws SQLException {
         return rs.getInt("id") + SharedConstants.TEXT_DELIMITER +
                 (
@@ -174,6 +180,7 @@ public class Address implements Serializable {
                 rs.getString("country");
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public Address clone() {
         Address clone = new Address();
         clone.setId(id);

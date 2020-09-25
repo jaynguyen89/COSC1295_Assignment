@@ -18,11 +18,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * For Dependency Injection
  */
 public class ProjectService extends TextFileServiceBase implements IProjectService {
+    private static final Logger logger = Logger.getLogger(DatabaseContext.class.getName());
 
     private final DatabaseContext context;
 
@@ -30,6 +33,12 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
         context = DatabaseContext.getInstance();
     }
 
+    /**
+     * Saves a Project into file or database according to DATA_SOURCE.
+     * Returns false on failure, true for success.
+     * @param newProject Project
+     * @return boolean
+     */
     @Override
     public boolean saveNewProject(Project newProject) {
         if (SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName()))
@@ -38,6 +47,12 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
         return saveEntryToDatabase(newProject);
     }
 
+    /**
+     * Checks if a Unique ID is available for creating a new Project.
+     * Returns false if it's not available, true otherwise.
+     * @param uniqueId String
+     * @return boolean
+     */
     @Override
     public boolean isUniqueIdDuplicated(String uniqueId) {
         return SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName())
@@ -45,6 +60,10 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
                 : context.isRedundantUniqueId(Project.class, uniqueId);
     }
 
+    /**
+     * Reads all Projects from file or database according to DATA_SOURCE.
+     * @return List<Project>
+     */
     @Override
     public List<Project> readAllProjectsFromFile() {
         List<String> rawProjectData;
@@ -83,6 +102,7 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
                 projects.add(project);
             }
         } catch (IndexOutOfBoundsException | NumberFormatException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "ProjectService.readAllProjectsFromFile : " + ex.getMessage());
             return null;
         }
 
@@ -154,6 +174,7 @@ public class ProjectService extends TextFileServiceBase implements IProjectServi
             context.revertChanges();
             return false;
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "ProjectService.saveEntryToDatabase : " + ex.getMessage());
             return false;
         }
     }

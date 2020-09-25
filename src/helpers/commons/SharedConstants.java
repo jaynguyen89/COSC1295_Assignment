@@ -1,7 +1,6 @@
 package helpers.commons;
 
 import cosc1295.providers.bases.DatabaseContext;
-import cosc1295.providers.bases.TextFileServiceBase;
 import helpers.commons.SharedEnums.GUI_ACTION_CONTEXT;
 
 import java.util.HashMap;

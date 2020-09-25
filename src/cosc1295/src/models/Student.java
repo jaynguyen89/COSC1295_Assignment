@@ -133,6 +133,12 @@ public class Student implements IThing, Serializable {
         return stringStudent.toString();
     }
 
+    /**
+     * Creates delimeterized string from data retrieved from database as data saved in text file.
+     * @param rs ResultSet
+     * @return String
+     * @throws SQLException
+     */
     public List<String> composeRaw(ResultSet rs) throws SQLException {
         List<String> data = new ArrayList<>();
 
@@ -174,6 +180,7 @@ public class Student implements IThing, Serializable {
         return data;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public Student clone() {
         Student clone = new Student();
         clone.setId(id);

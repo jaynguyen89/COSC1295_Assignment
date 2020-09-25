@@ -23,7 +23,7 @@ public final class ProjectTeamFormationApp {
     private final Flasher flasher = Flasher.getInstance();
 
     public void run() {
-        // TeamMetricsService is a background job that execute once every 5 minutes
+        // TeamMetricsService is a background job that execute once every 15 minutes
         // to calculate fitness metrics for all Teams, view the class for more information
         Thread TeamMetricsService = new TeamFitnessMetricService();
         TeamMetricsService.start();
@@ -62,6 +62,7 @@ public final class ProjectTeamFormationApp {
                         FLASH_TYPES.NONE
                 ));
 
+                //Close database connection
                 DatabaseContext context = DatabaseContext.getInstance();
                 if (context != null) context.close();
 

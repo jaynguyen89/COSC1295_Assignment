@@ -12,11 +12,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * For Dependency Injection
  */
 public class CompanyService extends TextFileServiceBase implements ICompanyService {
+    private static final Logger logger = Logger.getLogger(DatabaseContext.class.getName());
 
     private final DatabaseContext context;
 
@@ -24,6 +27,12 @@ public class CompanyService extends TextFileServiceBase implements ICompanyServi
         context = DatabaseContext.getInstance();
     }
 
+    /**
+     * Saves a new Company to file or database according to DATA_SOURCE.
+     * Return false on failure, true on success.
+     * @param company Company
+     * @return boolean
+     */
     @Override
     public boolean saveNewCompany(Company company) {
         if (SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName()))
@@ -32,6 +41,10 @@ public class CompanyService extends TextFileServiceBase implements ICompanyServi
         return saveEntryToDatabase(company);
     }
 
+    /**
+     * Reads all Companies from file or database according to DATA_SOURCE.
+     * @return List<Company>
+     */
     @Override
     public List<Company> readAllCompaniesFromFile() {
         List<String> rawCompanyData;
@@ -64,12 +77,19 @@ public class CompanyService extends TextFileServiceBase implements ICompanyServi
                 companies.add(company);
             }
         } catch (IndexOutOfBoundsException | NumberFormatException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "CompanyService.readAllCompaniesFromFile : " + ex.getMessage());
             return null;
         }
 
         return companies;
     }
 
+    /**
+     * Checks if a Unique ID is available for creating a new Company.
+     * Returns false if it's unavailable, true otherwise.
+     * @param uniqueId String
+     * @return boolean
+     */
     @Override
     public boolean isUniqueIdDuplicated(String uniqueId) {
         return SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName())
@@ -104,6 +124,7 @@ public class CompanyService extends TextFileServiceBase implements ICompanyServi
             int result = context.executeDataInsertionQuery(statement);
             return result > 0;
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "CompanyService.saveEntryToDatabase : " + ex.getMessage());
             return false;
         }
     }

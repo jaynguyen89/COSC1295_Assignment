@@ -86,6 +86,7 @@
     -fx-text-fill: white;
     -fx-font-size: 0.6em;
     -fx-pref-width: 3em;
+    -fx-end-margin: 0;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 0);
 }
 

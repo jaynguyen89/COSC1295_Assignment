@@ -59,6 +59,12 @@ public class ProjectOwner extends People implements IThing, Serializable {
 
     }
 
+    /**
+     * Creates delimeterized string from data retrieved from database as data saved in text file.
+     * @param rs ResultSet
+     * @return String
+     * @throws SQLException
+     */
     public String composeRaw(ResultSet rs) throws SQLException {
         return rs.getInt("id") + SharedConstants.TEXT_DELIMITER +
                 rs.getString("unique_id") + SharedConstants.TEXT_DELIMITER +
@@ -69,6 +75,7 @@ public class ProjectOwner extends People implements IThing, Serializable {
                 rs.getString("company_id");
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public ProjectOwner clone() {
         ProjectOwner clone = new ProjectOwner();
         clone.setId(getId());

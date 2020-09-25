@@ -4,6 +4,7 @@ import com.sun.istack.internal.NotNull;
 import helpers.commons.SharedConstants;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -238,24 +239,23 @@ public interface IActivity {
      * @param activity Pane
      */
     static void drawSuccessMessage(String message, Pane activity) {
-        Label success = new Label(message + "           ");
+        Label success = new Label(message);
         success.getStyleClass().add("message-success");
         activity.getChildren().add(success);
 
-        AnchorPane.setLeftAnchor(success, (activity.getPrefWidth() - success.getPrefWidth()) / 2);
         if (activity.getId().toLowerCase().contains(AssignActivity.class.getSimpleName().toLowerCase())) {
             AnchorPane.setBottomAnchor(success, MARGIN * 3.25);
             AnchorPane.setRightAnchor(success, MARGIN);
+            AnchorPane.setLeftAnchor(success, (activity.getPrefWidth() - success.getPrefWidth()) / 2);
 
             success.setPrefWidth(activity.getPrefWidth() / 2 - MARGIN);
-            success.setStyle("-fx-wrap-text: true;");
-
             activity.prefWidthProperty().addListener((observable, oldValue, newValue) ->
                 success.setPrefWidth(success.getPrefWidth() + offset(oldValue, newValue) / 2)
             );
         }
         else {
             AnchorPane.setBottomAnchor(success, MARGIN * 4);
+            AnchorPane.setLeftAnchor(success, (activity.getPrefWidth() - success.getPrefWidth()) / 4);
             success.setPrefWidth(activity.getPrefWidth() / SharedConstants.GUI_ASPECT_RATIO);
 
             activity.prefWidthProperty().addListener(((observable, oldValue, newValue) -> {
@@ -268,7 +268,6 @@ public interface IActivity {
         hider.getStyleClass().add("mini-button");
         success.setGraphic(hider);
         success.setContentDisplay(ContentDisplay.RIGHT);
-
 
         hider.setOnAction(event -> success.setVisible(false));
     }

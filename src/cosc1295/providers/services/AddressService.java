@@ -10,11 +10,14 @@ import helpers.utilities.Helpers;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * For Dependency Injection
  */
 public class AddressService extends TextFileServiceBase implements IAddressService {
+    private static final Logger logger = Logger.getLogger(DatabaseContext.class.getName());
 
     private final DatabaseContext context;
 
@@ -22,6 +25,12 @@ public class AddressService extends TextFileServiceBase implements IAddressServi
         context = DatabaseContext.getInstance();
     }
 
+    /**
+     * Saves a new Address into file or database according to DATA_SOURCE.
+     * Returns null on exception, or the newly created Address.
+     * @param address Address
+     * @return Address
+     */
     @Override
     public Address saveNewAddress(Address address) {
         if (SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName()))
@@ -64,6 +73,7 @@ public class AddressService extends TextFileServiceBase implements IAddressServi
             address.setId(result);
             return address;
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "AddressService.saveEntryToDatabase : " + ex.getMessage());
             return null;
         }
     }

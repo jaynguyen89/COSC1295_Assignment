@@ -118,6 +118,12 @@ public class Company implements IThing, Serializable {
             address.getId();
     }
 
+    /**
+     * Creates delimeterized string from data retrieved from database as data saved in text file.
+     * @param rs ResultSet
+     * @return String
+     * @throws SQLException
+     */
     public String composeRaw(ResultSet rs) throws SQLException {
         return rs.getInt("id") + SharedConstants.TEXT_DELIMITER +
                 rs.getString("unique_id") + SharedConstants.TEXT_DELIMITER +
@@ -127,6 +133,7 @@ public class Company implements IThing, Serializable {
                 rs.getInt("address_id");
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public Company clone() {
         Company clone = new Company();
         clone.setId(id);

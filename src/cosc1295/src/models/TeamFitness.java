@@ -181,6 +181,12 @@ public class TeamFitness implements Serializable {
         return fitnessString.toString();
     }
 
+    /**
+     * Creates delimeterized string from data retrieved from database as data saved in text file.
+     * @param rs ResultSet
+     * @return String
+     * @throws SQLException
+     */
     public String composeRaw(ResultSet rs) throws SQLException {
         return rs.getInt("team_id") + SharedConstants.TEXT_DELIMITER +
                 rs.getString("avg_skill_competency") + SharedConstants.TEXT_DELIMITER +
@@ -190,6 +196,7 @@ public class TeamFitness implements Serializable {
                 rs.getString("shortfall_by_project");
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public TeamFitness clone() {
         TeamFitness clone = new TeamFitness();
         clone.setId(id);

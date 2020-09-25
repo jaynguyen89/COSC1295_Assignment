@@ -29,6 +29,7 @@ import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -111,6 +112,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
             drawWidgetsForAssigningStudentsTask(container, assignableStudents, teams);
 
             drawButtonBasedOnContext(container, false);
+            IActivity.drawSuccessMessage("This is a success message for a testing.", this);
         }
     }
 
@@ -164,13 +166,16 @@ public class AssignActivity extends AnchorPane implements IActivity {
             if (teamRequirements == null) shouldEnableAssignButton.set(true);
             else {
                 //Otherwise, check the requirements for the unaccepted conditions
-                if (teamRequirements.getKey() && teamRequirements.getValue() == null) //Team needs Leader but still has rooms for other members
+                if (teamRequirements.getKey() && teamToReceiveMember.get().getMembers().size() < SharedConstants.GROUP_LIMIT - 1) {
+                    //Team needs Leader but still has rooms for other members so Leader can be deferred
+                    message.set("Leader is still missing in this Team.");
                     shouldEnableAssignButton.set(true);
+                }
                 else {
                     //Unsafe to assign: either Leader required, or conflicts, or imbalance personality.
                     shouldEnableAssignButton.set(false);
 
-                    if (teamRequirements.getKey()) message.set(message.get() + "This Team needs Leader.");
+                    if (teamRequirements.getKey()) message.set(message.get() + "Leader must be assigned to this Team.");
                     if (teamRequirements.getValue() != null &&
                             teamRequirements.getValue().contains(selectedStudent.getUniqueId())
                     ) message.set(message.get() + " Member conflicts occur.");
@@ -257,7 +262,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
      * @param initialWidth double
      */
     private void drawStudentsSelectionArea(List<Student> students, double initialWidth) {
-        TableView studentsTable = new TableView();
+        TableView studentsTable = new TableView(); //Create a Table view
         studentsTable.getStyleClass().add("data-table");
         studentsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         this.getChildren().add(studentsTable);
@@ -267,6 +272,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         AnchorPane.setTopAnchor(studentsTable, MARGIN * 5.25);
         AnchorPane.setLeftAnchor(studentsTable, MARGIN);
 
+        //Constraint the Table view in AnchorPane
         this.prefWidthProperty().addListener(((observable, oldValue, newValue) ->
             studentsTable.setPrefWidth(
                 studentsTable.getPrefWidth() + IActivity.offset(oldValue, newValue)
@@ -279,6 +285,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
             )
         ));
 
+        //Add the Table Columns
         TableColumn<String, StudentVM> uniqueIdCol = new TableColumn<>("ID");
         uniqueIdCol.setCellValueFactory(new PropertyValueFactory<>("uniqueId"));
 
@@ -304,6 +311,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         TableColumn<String, StudentVM> conflictCol = new TableColumn<>("Conflicters");
         conflictCol.setCellValueFactory(new PropertyValueFactory<>("conflicters"));
 
+        //Attach observables and selection listener to Table Rows
         ObservableList<StudentVM> studentsData = FXCollections.observableArrayList();
         for (Student student : students) {
             StudentVM studentVm = StudentVM.cast(student);
@@ -396,8 +404,13 @@ public class AssignActivity extends AnchorPane implements IActivity {
         Team selectedTeam = null;
         if (teamToReceive != null && teamToReceive.getValue() != null) selectedTeam = (Team) teamToReceive.getValue();
 
+        //Set dropdown values and default item to teamDropdown ComboBox
         teamDropdown.getItems().addAll(dropdownItems);
-        teamDropdown.setValue(selectedTeam == null ? dropdownItems.get(0) : dropdownItems.get(assignableTeams.indexOf(selectedTeam) + 1));
+        teamDropdown.setValue(
+            selectedTeam == null || !assignableTeams.contains(selectedTeam)
+                ? dropdownItems.get(0)
+                : dropdownItems.get(assignableTeams.indexOf(selectedTeam) + 1)
+        );
 
         teamDropdown.setPrefWidth(initialWidth);
         AnchorPane.setTopAnchor(teamDropdown, MARGIN * 5.25);
@@ -501,12 +514,15 @@ public class AssignActivity extends AnchorPane implements IActivity {
      * @param initialWidth double
      */
     private void drawProjectSelectionFragment(List<Team> teams, List<Project> projects, double initialWidth) {
+        //Remove unnecessary elements
         IActivity.removeElementIfExists("create-team-button", this);
         IActivity.removeElementIfExists("optional-message", this);
 
+        //Get the newly created Team to later set a Project
         AtomicInteger teamIndexToSetProject = new AtomicInteger();
         teams.forEach(team -> { if (team.isNewlyAdded()) teamIndexToSetProject.set(teams.indexOf(team)); });
 
+        //Create a dropdown to let user pick a Project
         ComboBox<String> projectDropdown = new ComboBox<>();
         projects.forEach(p -> projectDropdown.getItems().add(p.compact()));
 
@@ -518,6 +534,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         AnchorPane.setTopAnchor(projectDropdown, MARGIN * 5.25);
         AnchorPane.setLeftAnchor(projectDropdown, initialWidth + MARGIN * 2);
 
+        //The button that when user click, the selected Peoject will be set for the newly created Team
         Button setProjectButton = new Button("Set");
         setProjectButton.setId("set-project-button");
         this.getChildren().add(setProjectButton);
@@ -532,6 +549,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         projectError.getStyleClass().add("message");
         this.getChildren().add(projectError);
 
+        //Constraint the elements in AnchorPane
         AnchorPane.setTopAnchor(projectError, MARGIN * 11);
         AnchorPane.setLeftAnchor(projectError, initialWidth + MARGIN * 2);
 
@@ -543,6 +561,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
             AnchorPane.setLeftAnchor(projectError, AnchorPane.getLeftAnchor(projectError) + offset);
         }));
 
+        //Attach listener to the button
         setProjectButton.setOnAction(event -> {
             int selectedProjectIndex = projectDropdown.getSelectionModel().getSelectedIndex();
             if (selectedProjectIndex < 0)
@@ -616,7 +635,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         IActivity.removeElementIfExists("optional-message", this);
         eraseTeamDetailsTable();
 
-        //Drawing the Team details
+        //Drawing the Team detail labels
         Label selectedTeamLabel = new Label("Your selected Team:");
         selectedTeamLabel.setId("selected-team-label");
         selectedTeamLabel.getStyleClass().add("subtitle");
@@ -636,6 +655,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         teamBasicInfo.setVgap(MARGIN * 0.5);
         teamBasicInfo.setPrefWidth(initialWidth);
 
+        //Draw the Team detail ID, Project
         List<Label> infoLabels = new ArrayList<Label>() {{
             add(new Label("Team ID:"));
             add(new Label(team.getId() == 0 ? "(new)" : team.getId() + ""));
@@ -652,19 +672,6 @@ public class AssignActivity extends AnchorPane implements IActivity {
             teamBasicInfo.add(infoLabels.get(i), i, 0);
         }
 
-        //This is a link when user clicks, a popup will display showing the fitness metrics of the Team
-        Label linkText = new Label("Click here to see Fitness Metrics.");
-        linkText.setId("metrics-link-text");
-        if (team.getFitnessMetrics() != null) {
-            linkText.getStyleClass().add("link-text");
-            this.getChildren().add(linkText);
-
-            AnchorPane.setTopAnchor(linkText, MARGIN * 10);
-            AnchorPane.setLeftAnchor(linkText, initialWidth + MARGIN * 2);
-
-            linkText.setOnMouseClicked(event -> launchFitnessMetricsPopup(team.getFitnessMetrics()));
-        }
-
         //Drawing the widgets for selecting a member to replace
         Label memberSelectLabel = new Label("Members:");
         memberSelectLabel.setId("members-select-label");
@@ -674,7 +681,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         AnchorPane.setTopAnchor(memberSelectLabel, MARGIN * (team.getFitnessMetrics() == null ? 10 : 11.5));
         AnchorPane.setLeftAnchor(memberSelectLabel, initialWidth + MARGIN * 2);
 
-        ComboBox<String> membersDropdown = new ComboBox();
+        ComboBox<String> membersDropdown = new ComboBox(); //Dropdown for Team members
         membersDropdown.setId("members-dropdown");
         membersDropdown.getStyleClass().add("dropdown-select");
         this.getChildren().add(membersDropdown);
@@ -698,6 +705,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         AnchorPane.setTopAnchor(guidance, MARGIN * (team.getFitnessMetrics() == null ? 13.5 : 16));
         AnchorPane.setLeftAnchor(guidance, initialWidth + MARGIN * 2);
 
+        //If a Team member is selected, a section will display the information of the Student
         Label selectedMemberLabel = new Label();
         selectedMemberLabel.setId("selected-member-label");
         selectedMemberLabel.setVisible(false);
@@ -708,6 +716,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
         AnchorPane.setTopAnchor(selectedMemberLabel, MARGIN * (team.getFitnessMetrics() == null ? 13.5 : 16));
         AnchorPane.setLeftAnchor(selectedMemberLabel, initialWidth + MARGIN * 2);
 
+        //Attach listener to the Team members dropdown to collect the selected member that will be replaced
         membersDropdown.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.intValue() == 0) { //No member selected, set null to observable studentInTeamToBeReplaced
                 guidance.setVisible(true);
@@ -735,8 +744,6 @@ public class AssignActivity extends AnchorPane implements IActivity {
             AnchorPane.setLeftAnchor(memberSelectLabel, AnchorPane.getLeftAnchor(memberSelectLabel) + offset);
             selectedMemberLabel.setPrefWidth(selectedMemberLabel.getPrefWidth() + offset);
             AnchorPane.setLeftAnchor(selectedMemberLabel, AnchorPane.getLeftAnchor(selectedMemberLabel) + offset);
-            if (team.getFitnessMetrics() != null)
-                AnchorPane.setLeftAnchor(linkText, AnchorPane.getLeftAnchor(linkText) + offset);
         });
     }
 
@@ -748,134 +755,6 @@ public class AssignActivity extends AnchorPane implements IActivity {
         IActivity.removeElementIfExists("members-dropdown", this);
         IActivity.removeElementIfExists("guidance-label", this);
         IActivity.removeElementIfExists("selected-member-label", this);
-    }
-
-    /**
-     * The popup that will open when user click on the link to view Team Fitness Metrics.
-     * @param metrics TeamFitness
-     */
-    private void launchFitnessMetricsPopup(@NotNull TeamFitness metrics) {
-        final Stage popup = new Stage();
-        popup.initModality(Modality.APPLICATION_MODAL);
-        popup.setResizable(false);
-        popup.setTitle("Fitness Metrics");
-
-        popup.fullScreenProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue) popup.setFullScreen(false);
-        }));
-
-        final double POPUP_WIDTH = SharedConstants.DIMENSIONS.get("WIDTH") * 0.4;
-        final double POPUP_HEIGHT = SharedConstants.DIMENSIONS.get("HEIGHT") * 0.4;
-
-        AnchorPane popActivity = new AnchorPane();
-        Scene popScene = new Scene(popActivity, POPUP_WIDTH, POPUP_HEIGHT);
-        popActivity.setPrefSize(POPUP_WIDTH, POPUP_HEIGHT);
-
-        Label title = new Label("Fitness Metrics");
-        title.getStyleClass().add("popup-title");
-        AnchorPane.setLeftAnchor(title, MARGIN);
-        AnchorPane.setTopAnchor(title, MARGIN / 2);
-
-        Label competencyHeading = new Label("Skill Competencies");
-        competencyHeading.getStyleClass().add("popup-heading");
-
-        AnchorPane.setTopAnchor(competencyHeading, MARGIN * 1.5);
-        AnchorPane.setLeftAnchor(competencyHeading, MARGIN);
-
-        GridPane competencyVals = new GridPane();
-        competencyVals.setPrefWidth(POPUP_WIDTH - MARGIN * 2);
-
-        AnchorPane.setTopAnchor(competencyVals, MARGIN * 2.5);
-        AnchorPane.setLeftAnchor(competencyVals, MARGIN);
-
-        RowConstraints rowConstraints = new RowConstraints();
-        rowConstraints.setPrefHeight(MARGIN * 0.6);
-        competencyVals.getRowConstraints().add(rowConstraints);
-        competencyVals.setVgap(MARGIN / 4);
-
-        List<Label> competencyLabels = new ArrayList<Label>() {{
-            add(new Label("AVG. " + metrics.getAverageTeamSkillCompetency()));
-            add(new Label(SharedEnums.SKILLS.A.name() + "(" + metrics.getTeamCompetency().get(SharedEnums.SKILLS.A) + ")"));
-            add(new Label(SharedEnums.SKILLS.N.name() + "(" + metrics.getTeamCompetency().get(SharedEnums.SKILLS.N) + ")"));
-            add(new Label(SharedEnums.SKILLS.P.name() + "(" + metrics.getTeamCompetency().get(SharedEnums.SKILLS.P) + ")"));
-            add(new Label(SharedEnums.SKILLS.W.name() + "(" + metrics.getTeamCompetency().get(SharedEnums.SKILLS.W) + ")"));
-        }};
-
-        ColumnConstraints colConstraints = new ColumnConstraints();
-        for (int i = 0; i < 5; i++) {
-            colConstraints.setPercentWidth((competencyVals.getPrefWidth() - competencyVals.getVgap() * 4) / 5);
-            competencyVals.getColumnConstraints().add(colConstraints);
-
-            competencyLabels.get(i).getStyleClass().add("popup-text");
-            competencyVals.add(competencyLabels.get(i), i, 0);
-        }
-
-        Label preferenceHeading = new Label("Preference Satisfactions");
-        preferenceHeading.getStyleClass().add("popup-heading");
-
-        AnchorPane.setTopAnchor(preferenceHeading, MARGIN * 4);
-        AnchorPane.setLeftAnchor(preferenceHeading, MARGIN);
-
-        GridPane preferenceVals = new GridPane();
-        preferenceVals.setVgap(MARGIN / 4);
-        preferenceVals.setPrefWidth(POPUP_WIDTH - MARGIN * 2);
-        preferenceVals.getRowConstraints().add(rowConstraints);
-
-        AnchorPane.setTopAnchor(preferenceVals, MARGIN * 5);
-        AnchorPane.setLeftAnchor(preferenceVals, MARGIN);
-
-        List<Label> preferenceLabels = new ArrayList<Label>() {{
-            add(new Label("AVG. " + metrics.getPreferenceSatisfaction().getKey() + "%"));
-            add(new Label("(1st) " + metrics.getPreferenceSatisfaction().getValue().getKey() + "%"));
-            add(new Label("(2nd) " + metrics.getPreferenceSatisfaction().getValue().getValue() + "%"));
-        }};
-
-        for (int i = 0; i < 3; i++) {
-            colConstraints.setPercentWidth((preferenceVals.getPrefWidth() - preferenceVals.getVgap() * 2) / 3);
-            preferenceVals.getColumnConstraints().add(colConstraints);
-
-            preferenceLabels.get(i).getStyleClass().add("popup-text");
-            preferenceVals.add(preferenceLabels.get(i), i, 0);
-        }
-
-        Label shortfallHeading = new Label("Skill Shortfalls");
-        shortfallHeading.getStyleClass().add("popup-heading");
-
-        AnchorPane.setTopAnchor(shortfallHeading, MARGIN * 6.5);
-        AnchorPane.setLeftAnchor(shortfallHeading, MARGIN);
-
-        GridPane shortfallVals = new GridPane();
-        shortfallVals.setVgap(MARGIN / 4);
-        shortfallVals.setPrefWidth(POPUP_WIDTH - MARGIN * 2);
-        shortfallVals.getRowConstraints().add(rowConstraints);
-
-        AnchorPane.setTopAnchor(shortfallVals, MARGIN * 7.5);
-        AnchorPane.setLeftAnchor(shortfallVals, MARGIN);
-
-        Label avgSfLabel = new Label("AVG. " + metrics.getAverageSkillShortfall());
-        avgSfLabel.getStyleClass().add("popup-text");
-        Label projSfLabel = new Label("Team Project: " + metrics.getPreferenceSatisfaction().getValue().getValue());
-        projSfLabel.getStyleClass().add("popup-text");
-
-        colConstraints.setPercentWidth((shortfallVals.getPrefWidth() - shortfallVals.getVgap()) / 2);
-        shortfallVals.getColumnConstraints().addAll(colConstraints, colConstraints);
-
-        shortfallVals.add(avgSfLabel, 0, 0);
-        shortfallVals.add(projSfLabel, 1, 0);
-
-        Button okButton = new Button("Okay");
-        okButton.getStyleClass().add("popup-button");
-        okButton.setPrefWidth(MARGIN * 4);
-
-        AnchorPane.setBottomAnchor(okButton, MARGIN / 2);
-        AnchorPane.setLeftAnchor(okButton, (POPUP_WIDTH - okButton.getPrefWidth()) / 2);
-
-        popActivity.getChildren().addAll(
-            title, competencyHeading, competencyVals, preferenceHeading,
-            preferenceVals, shortfallHeading, shortfallVals, okButton
-        );
-        popup.setScene(popScene);
-        popup.show();
     }
 
     /**
@@ -924,13 +803,13 @@ public class AssignActivity extends AnchorPane implements IActivity {
                     controllerBase.calculateTeamFitnessMetricsFor(teamToReceiveMember.get(), projects, preferences)
                 );
 
-            //Finally save or update data to files
+            //Finally save or update data
             boolean updateSuccess = false;
             int newTeamId = -1;
             if (teamToReceiveMember.get().isNewlyAdded()) newTeamId = teamService.SaveNewTeam(teamToReceiveMember.get());
             else updateSuccess = teamService.updateTeam(teamToReceiveMember.get());
 
-            //Check the save/update file results
+            //Check the save/update results
             if ((!teamToReceiveMember.get().isNewlyAdded() && !updateSuccess) ||
                 (teamToReceiveMember.get().isNewlyAdded() && newTeamId < 0)
             ) {
@@ -941,11 +820,17 @@ public class AssignActivity extends AnchorPane implements IActivity {
             if (teamToReceiveMember.get().isNewlyAdded() && newTeamId != -1) {
                 teamToReceiveMember.get().setId(newTeamId);
                 teamToReceiveMember.get().setNewlyAdded(false);
+                updateSuccess = true;
+            }
+
+            if (updateSuccess) {
+                assignButton.setDisable(true);
+                studentToAssign.set(null);
+                teamToReceiveMember.set(null);
+                studentInTeamToBeReplaced.set(null);
                 eraseTeamDetailsTable();
                 drawAssigningTaskContents(container, "The selected Student has been assigned to team successfully.");
             }
-
-            if (updateSuccess) drawAssigningTaskContents(container, "The selected Student has been assigned to team successfully.");
         });
     }
 

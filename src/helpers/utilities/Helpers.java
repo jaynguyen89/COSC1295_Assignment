@@ -2,6 +2,7 @@ package helpers.utilities;
 
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
+import cosc1295.providers.bases.DatabaseContext;
 import cosc1295.providers.bases.ServiceLocator;
 import cosc1295.providers.services.CompanyService;
 import cosc1295.providers.services.ProjectOwnerService;
@@ -18,6 +19,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -29,6 +32,7 @@ import java.util.stream.Stream;
  * first-step data checking and parsing, collection searching/sorting...
  */
 public final class Helpers {
+    private static final Logger logger = Logger.getLogger(DatabaseContext.class.getName());
 
     /**
      * Validates user inputs for the Main Menu (when application starts).
@@ -197,6 +201,7 @@ public final class Helpers {
             InstantiationException |
             NullPointerException ex
         ) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "Helpers.checkUniqueIdAvailableFor : " + ex.getMessage());
             return null;
         }
 
@@ -240,15 +245,28 @@ public final class Helpers {
         return Double.parseDouble(format.format(any));
     }
 
+    /**
+     * Extracts the ID from a string taken from dropdown.
+     * @param compact String
+     * @return String
+     */
     public static String getIdFromCompact(String compact) {
         return compact.split(SharedConstants.SPACE)[1]
             .replace("#", SharedConstants.EMPTY_STRING)
             .replace(":", SharedConstants.EMPTY_STRING);
     }
 
+    /**
+     * Generates a random date and time string between 2 datetimes.
+     * The format of `start` and `end` must be yyyy-MM-dd HH:mm:ss, same as MySQL format.
+     * @param start String
+     * @param end String
+     * @return String
+     */
     public static String randomDateTimeInRange(String start, String end) {
         DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+        //Parse the date range strings to datetime objects.
         LocalDateTime dtStart = LocalDateTime.parse(start, dtFormat);
         LocalDateTime dtEnd = LocalDateTime.parse(end, dtFormat);
 
@@ -258,6 +276,7 @@ public final class Helpers {
         LocalDate endDate = LocalDate.from(dtEnd);
         LocalTime endTime = LocalTime.from(dtEnd);
 
+        //Get the random date and time
         LocalDate randDate = LocalDate.ofEpochDay(ThreadLocalRandom.current().nextLong(startDate.toEpochDay(), endDate.toEpochDay()));
         LocalTime randTime = LocalTime.ofSecondOfDay(ThreadLocalRandom.current().nextInt(startTime.toSecondOfDay(), endTime.toSecondOfDay()));
 

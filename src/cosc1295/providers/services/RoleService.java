@@ -11,11 +11,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * For Dependency Injection
  */
 public class RoleService extends TextFileServiceBase implements IRoleService {
+    private static final Logger logger = Logger.getLogger(DatabaseContext.class.getName());
 
     private final DatabaseContext context;
 
@@ -23,6 +26,10 @@ public class RoleService extends TextFileServiceBase implements IRoleService {
         context = DatabaseContext.getInstance();
     }
 
+    /**
+     * Reads all Roles from file or database according to DATA_SOURCE.
+     * @return
+     */
     @Override
     public List<Role> readAllRolesFromFile() {
         List<String> rawRoleData;
@@ -47,12 +54,19 @@ public class RoleService extends TextFileServiceBase implements IRoleService {
                 roles.add(role);
             }
         } catch (IndexOutOfBoundsException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "RoleService.readAllRolesFromFile : " + ex.getMessage());
             return null;
         }
 
         return roles;
     }
 
+    /**
+     * Saves a Role into file or database according to DATA_SOURCE.
+     * Return false for failure, true for success.
+     * @param role
+     * @return
+     */
     @Override
     public boolean saveNewRole(Role role) {
         if (SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName()))
@@ -83,6 +97,7 @@ public class RoleService extends TextFileServiceBase implements IRoleService {
 
             return result > 0;
         } catch (SQLException ex) {
+            if (SharedConstants.DEV) logger.log(Level.SEVERE, "RoleService.saveEntryToDatabase : " + ex.getMessage());
             return false;
         }
     }

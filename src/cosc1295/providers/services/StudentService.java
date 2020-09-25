@@ -36,6 +36,10 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
         context = DatabaseContext.getInstance();
     }
 
+    /**
+     * Reads all Students from file or database according to DATA_SOURCE.
+     * @return List<Student>
+     */
     @Override
     public List<Student> readAllStudentsFromFile() {
         List<String> rawStudentData;
@@ -86,18 +90,34 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
         return students;
     }
 
+    /**
+     * Saves a Student to file or database according to DATA_SOURCE.
+     * Returns null on exception, false for failed, true for success.
+     * @param student Student
+     * @return Boolean
+     */
     @Override
     public Boolean updateStudent(Student student) {
         return SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName())
                 ? updateStudentToFile(student) : updateStudentToDatabase(student);
     }
 
+    /**
+     * Saves a Preference for a Student to file or database according to DATA_SOURCE.
+     * Returns null on exception, false for failed, true for success.
+     * @param preference Preference
+     * @return Boolean
+     */
     @Override
     public Boolean saveStudentPreferences(Preference preference) {
         return SharedConstants.DATA_SOURCE.equals(TextFileServiceBase.class.getSimpleName())
                 ? savePreferenceToFile(preference) : savePreferenceToDatabase(preference);
     }
 
+    /**
+     * Reads all Preferences that are saved in file or database according to DATA_SOURCE.
+     * @return
+     */
     @Override
     public List<Preference> readAllStudentPreferencesFromFile() {
         List<String> rawPreferences;
@@ -137,6 +157,11 @@ public class StudentService extends TextFileServiceBase implements IStudentServi
         return preferences;
     }
 
+    /**
+     * Gets a Preference for a Student. Used when data are saved in files.
+     * @param uniqueId String
+     * @return Preference
+     */
     //Reversed traversal is needed because only the last preference entry of the student is effective
     @Override
     public Preference retrievePreferenceForStudent(String uniqueId) {

@@ -305,6 +305,7 @@ public final class LogicalAssistant {
         return null;
     }
 
+    //For unittest only
     public static Pair<Boolean, List<SharedEnums.PERSONALITIES>>
     runCheckImbalancePersonalityOnAssignForTest(Pair<Team, Student> assignment) {
         return checkImbalancePersonalityOnAssign(assignment);

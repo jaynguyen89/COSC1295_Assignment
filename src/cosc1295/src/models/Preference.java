@@ -58,6 +58,12 @@ public class Preference implements Serializable {
         return stringPref.toString();
     }
 
+    /**
+     * Creates delimeterized string from data retrieved from database as data saved in text file.
+     * @param rs ResultSet
+     * @return String
+     * @throws SQLException
+     */
     public List<String> composeRaw(ResultSet rs) throws SQLException {
         List<String> data = new ArrayList<>();
 
@@ -82,6 +88,7 @@ public class Preference implements Serializable {
         return data;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public Preference clone() {
         Preference clone = new Preference();
         clone.setStudentUniqueId(studentUniqueId);
