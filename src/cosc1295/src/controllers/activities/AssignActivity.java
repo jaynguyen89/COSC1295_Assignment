@@ -112,7 +112,6 @@ public class AssignActivity extends AnchorPane implements IActivity {
             drawWidgetsForAssigningStudentsTask(container, assignableStudents, teams);
 
             drawButtonBasedOnContext(container, false);
-            IActivity.drawSuccessMessage("This is a success message for a testing.", this);
         }
     }
 

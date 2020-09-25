@@ -96,7 +96,6 @@ public class SwapActivity extends AnchorPane implements IActivity {
 
             observableTeams.set((ArrayList<Team>) teams);
             drawWidgetsForSwappingStudentsTask(tablePrefWidth);
-            IActivity.drawSuccessMessage("This is a success message for a testing.", this);
         }
     }
 
