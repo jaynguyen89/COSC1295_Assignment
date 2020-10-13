@@ -846,7 +846,10 @@ public class AssignActivity extends AnchorPane implements IActivity {
             }
 
             if (updateSuccess) {
-                //TODO: add history
+                history.add(new Pair<>(
+                    new Pair<>(teamToReceiveMember.get(), null),
+                    new Pair<>(studentToAssign.get(), studentInTeamToBeReplaced.get())
+                ));
 
                 assignButton.setDisable(true);
                 studentToAssign.set(null);

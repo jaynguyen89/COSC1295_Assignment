@@ -459,7 +459,7 @@ public class SwapActivity extends AnchorPane implements IActivity {
 
                 boolean result = teamService.updateTeam(firstTeam);
                 if (result && teamService.updateTeam(secondTeam)) {
-                    //TODO: add history
+                    history.add(new Pair<>(new Pair<>(firstTeam, secondTeam), new Pair<>(secondMember, firstMember)));
 
                     observableTeams.set(null);
                     firstTeamInSwap.set(null);

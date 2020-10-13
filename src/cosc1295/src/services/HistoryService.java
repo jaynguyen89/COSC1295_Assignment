@@ -43,11 +43,11 @@ public final class HistoryService {
         return historyService;
     }
 
-    public void addHistory(Pair<Pair<Team, Team>, Pair<Student, Student>> entry) {
+    public void add(Pair<Pair<Team, Team>, Pair<Student, Student>> entry) {
         history.push(entry);
     }
 
-    public Pair<Pair<Team, Team>, Pair<Student, Student>> getLastChange() {
+    public Pair<Pair<Team, Team>, Pair<Student, Student>> getLastChangeAndRemove() {
         return history.pop();
     }
 

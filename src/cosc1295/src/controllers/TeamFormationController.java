@@ -8,7 +8,6 @@ import cosc1295.providers.services.TeamService;
 import cosc1295.src.models.*;
 import cosc1295.src.services.HistoryService;
 import cosc1295.src.services.SuggestionService;
-import cosc1295.src.services.analyzers.AssignStudentAnalyzer;
 import cosc1295.src.services.analyzers.TeamsSwapAnalyzer;
 import cosc1295.src.views.TeamView;
 import helpers.commons.SharedConstants;
@@ -17,10 +16,6 @@ import helpers.utilities.LogicalAssistant;
 import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class TeamFormationController extends ControllerBase {
 
@@ -92,16 +87,29 @@ public class TeamFormationController extends ControllerBase {
                 }
 
                 //A brand new Team has created just now, so save it into file
-                if (newTeam.isNewlyAdded()) newTeamId = teamService.SaveNewTeam(newTeam);
+                if (newTeam.isNewlyAdded()) {
+                    newTeamId = teamService.SaveNewTeam(newTeam);
+
+                    if (newTeamId > 0) {
+                        Pair<
+                                Pair<Team, Team>,
+                                Pair<Student, Student>
+                            > action = history.getLastChangeAndRemove();
+                        Team savedTeam = action.getKey().getKey();
+                        savedTeam.setId(newTeamId);
+
+                        history.add(new Pair<>(new Pair<>(savedTeam, null), action.getValue()));
+                    }
+                    else history.getLastChangeAndRemove();
+                }
                 else updateSuccess = teamService.updateTeam(newTeam); //otherwise, just update it
 
                 if ((!newTeam.isNewlyAdded() && !updateSuccess) ||
                     (newTeam.isNewlyAdded() && newTeamId < 0)) { //File processing was failed (some exception)
                     teamView.displayUrgentFailedMessage();
+                    if (SharedConstants.ACTION_ASSIGN.equals(featureToRun)) history.getLastChangeAndRemove();
                     return false;
                 }
-
-                //TODO: add history for assign and swap
             }
         }
 
@@ -144,8 +152,12 @@ public class TeamFormationController extends ControllerBase {
         if (selectedStudentsToAssign.size() == 0) return null;
 
         //Add all selected Student into Team
-        for (Student student : selectedStudentsToAssign)
+        for (Student student : selectedStudentsToAssign) {
             selectedTeamToAssign.addMember(student);
+            history.add(new Pair<>(
+                new Pair<>(selectedTeamToAssign, null), new Pair<>(student, null)
+            ));
+        }
 
         return new ArrayList<Team>() {{ add(selectedTeamToAssign); }};
     }
@@ -219,6 +231,11 @@ public class TeamFormationController extends ControllerBase {
             if (requirementChecks.getValue() != null) teamView.displayTeamFailedRequirements(requirementChecks.getValue(), 2);
         }
 
+        history.add(new Pair<>(
+            new Pair<>(teamToRemoveStudent, teamToAssignStudent),
+            new Pair<>(studentToBeReplaced, studentToBeRemoved))
+        );
+
         //User have done picking 2 Teams and Students for swap task, now swap
         boolean assignOrRemoveSuccess;
         if (shouldCreateNewTeam || studentToBeReplaced == null) {
@@ -242,6 +259,7 @@ public class TeamFormationController extends ControllerBase {
 
         Team finalTeamToRemoveStudent = teamToRemoveStudent;
         Team finalTeamToAssignStudent = teamToAssignStudent;
+
         return new ArrayList<Team>() {{ add(finalTeamToRemoveStudent); add(finalTeamToAssignStudent); }};
     }
 
