@@ -6,6 +6,10 @@ import cosc1295.providers.services.ProjectService;
 import cosc1295.providers.services.StudentService;
 import cosc1295.providers.services.TeamService;
 import cosc1295.src.models.*;
+import cosc1295.src.services.HistoryService;
+import cosc1295.src.services.SuggestionService;
+import cosc1295.src.services.analyzers.AssignStudentAnalyzer;
+import cosc1295.src.services.analyzers.TeamsSwapAnalyzer;
 import cosc1295.src.views.TeamView;
 import helpers.commons.SharedConstants;
 import helpers.utilities.LogicalAssistant;
@@ -13,6 +17,10 @@ import helpers.utilities.LogicalAssistant;
 import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TeamFormationController extends ControllerBase {
 
@@ -20,6 +28,7 @@ public class TeamFormationController extends ControllerBase {
     private final StudentService studentService;
     private final TeamService teamService;
     private final ProjectService projectService;
+    private final HistoryService history = HistoryService.getInstance();
 
     public TeamFormationController() {
         teamView = new TeamView();
@@ -91,6 +100,8 @@ public class TeamFormationController extends ControllerBase {
                     teamView.displayUrgentFailedMessage();
                     return false;
                 }
+
+                //TODO: add history for assign and swap
             }
         }
 
@@ -103,11 +114,13 @@ public class TeamFormationController extends ControllerBase {
         List<Team> teams,
         List<Project> projects
     ) {
+        if (teams.size() == 0) teamView.displayNoTeamMessage();
+
         //Ask if user want to create a new Team to take the assigning Student
         //If no Team was ever created, then it's sure to create the first Team, otherwise, ask user
         boolean shouldCreateNewTeam = teams.size() == 0 || teamView.promptForCreateNewTeam();
         Pair<Team, Student> teamSelection = createOrSelectTeam(
-                shouldCreateNewTeam, teams, projects, SharedConstants.ACTION_ASSIGN, 0
+            shouldCreateNewTeam, teams, projects, SharedConstants.ACTION_ASSIGN, 0
         );
         if (teamSelection == null) return null;
         Team selectedTeamToAssign = teamSelection.getKey();
@@ -134,12 +147,7 @@ public class TeamFormationController extends ControllerBase {
         for (Student student : selectedStudentsToAssign)
             selectedTeamToAssign.addMember(student);
 
-        return new ArrayList<Team>() {/**
-			 * 
-			 */
-			private static final long serialVersionUID = -1309752910091385980L;
-
-		{ add(selectedTeamToAssign); }};
+        return new ArrayList<Team>() {{ add(selectedTeamToAssign); }};
     }
 
     //Actually run the Swapping task
@@ -153,9 +161,14 @@ public class TeamFormationController extends ControllerBase {
         //Check Team requirements on the Student it is about to take in, for Leader Type and conflicters
         boolean teamRequirementsMutuallySatisfied = false;
         while (!teamRequirementsMutuallySatisfied) {
+            SuggestionService suggestionService = new SuggestionService();
+            Pair<Pair<Team, Team>, Pair<Student, Student>> suggestion = suggestionService.runForResult(new TeamsSwapAnalyzer<>());
+            teamView.displayTeamSwapSuggestion(suggestion);
+            suggestionService.die();
+
             //The first Team in swap, and the Student it offers for swap
             Pair<Team, Student> firstTeamAndStudentToRemove = teamView.selectTeamsAndStudentsToSwap(
-                    teams, SharedConstants.ACTION_SWAP, 1
+                teams, SharedConstants.ACTION_SWAP, 1
             );
 
             teamToRemoveStudent = firstTeamAndStudentToRemove.getKey();
@@ -179,7 +192,7 @@ public class TeamFormationController extends ControllerBase {
 
             //So call a method to handle both situations: creating or selecting a Team
             Pair<Team, Student> secondTeamAndStudentToBeRemoved = createOrSelectTeam(
-                    shouldCreateNewTeam, selectableTeams, projects, SharedConstants.ACTION_SWAP, 2
+                shouldCreateNewTeam, selectableTeams, projects, SharedConstants.ACTION_SWAP, 2
             );
 
             //Null here means user have changed their mind and want to go back to Main Menu
@@ -227,22 +240,9 @@ public class TeamFormationController extends ControllerBase {
             return null;
         }
 
-        assignOrRemoveSuccess = teamToRemoveStudent.removeMemberByUniqueId(studentToBeRemoved.getUniqueId());
-        teamToRemoveStudent.addMember(studentToBeReplaced);
-
-        if (!assignOrRemoveSuccess) {
-            teamView.displayAssignOrRemoveMemberError();
-            return null;
-        }
-
         Team finalTeamToRemoveStudent = teamToRemoveStudent;
         Team finalTeamToAssignStudent = teamToAssignStudent;
-        return new ArrayList<Team>() {/**
-			 * 
-			 */
-			private static final long serialVersionUID = 3071345686511809968L;
-
-		{ add(finalTeamToRemoveStudent); add(finalTeamToAssignStudent); }};
+        return new ArrayList<Team>() {{ add(finalTeamToRemoveStudent); add(finalTeamToAssignStudent); }};
     }
 
     //Handle the situations create/select Team when swapping Students

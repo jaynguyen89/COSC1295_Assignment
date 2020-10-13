@@ -7,6 +7,9 @@ import cosc1295.providers.services.StudentService;
 import cosc1295.providers.services.TeamService;
 import cosc1295.src.controllers.ControllerBase;
 import cosc1295.src.models.*;
+import cosc1295.src.services.HistoryService;
+import cosc1295.src.services.SuggestionService;
+import cosc1295.src.services.analyzers.AssignStudentAnalyzer;
 import cosc1295.src.views.gui.viewmodels.StudentVM;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
@@ -53,6 +56,8 @@ public class AssignActivity extends AnchorPane implements IActivity {
 
     private Consumer<SharedEnums.GUI_ACTION_CONTEXT> intent; //The Intent object for navigation
     private static final String SET_PROJECT = "SET_PROJECT";
+
+    private final HistoryService history = HistoryService.getInstance();
 
     //Dependency injections to access data processing services
     private final StudentService studentService;
@@ -104,18 +109,18 @@ public class AssignActivity extends AnchorPane implements IActivity {
             eraseTeamDetailsTable();
             if (postMessage != null) IActivity.drawSuccessMessage(postMessage, this);
 
-            attachListenersToObservables(container);
+            attachListenersToObservables(container, students);
             drawButtonBasedOnContext(container, false);
 
             List<Student> assignableStudents = LogicalAssistant.filterUnteamedStudents(students, teams);
             LogicalAssistant.setStudentDataInTeams(teams, students);
             drawWidgetsForAssigningStudentsTask(container, assignableStudents, teams);
 
-            drawButtonBasedOnContext(container, false);
+            //drawButtonBasedOnContext(container, false);
         }
     }
 
-    private void attachListenersToObservables(Scene container) {
+    private void attachListenersToObservables(Scene container, List<Student> students) {
         SimpleBooleanProperty shouldEnableAssignButton = new SimpleBooleanProperty(false);
         //The Team's requirements on the assignee will be stringified into this variable, then displayed.
         AtomicReference<String> message = new AtomicReference<>(SharedConstants.EMPTY_STRING);
@@ -128,6 +133,20 @@ public class AssignActivity extends AnchorPane implements IActivity {
         teamToReceiveMember.addListener((observable -> {
             message.set(SharedConstants.EMPTY_STRING);
             manageStatusMessageAndAssignButtonBasedOnRequirements(container, message, shouldEnableAssignButton);
+
+            if (teamToReceiveMember.get() != null && teamToReceiveMember.get().getProject() != null) {
+                //Faking add the previously selected Students to team and get the suggestion
+                SuggestionService suggestionService = new SuggestionService();
+                Team clone = teamToReceiveMember.get().clone();
+
+                if (studentInTeamToBeReplaced.get() != null) clone.removeMemberByUniqueId(studentInTeamToBeReplaced.get().getUniqueId());
+                if (studentToAssign.get() != null) clone.addMember(studentToAssign.get());
+
+                //The suggestion for a Student to assign
+                Pair<Student, Student> suggestion = suggestionService.runForResult(new AssignStudentAnalyzer<>(clone));
+                IActivity.drawStudentSwapOrAssignSuggestion(this, suggestion);
+                suggestionService.die();
+            }
         }));
 
         studentInTeamToBeReplaced.addListener(observable -> {
@@ -570,6 +589,8 @@ public class AssignActivity extends AnchorPane implements IActivity {
                 Project selectedProject = projects.get(selectedProjectIndex);
 
                 teams.get(teamIndexToSetProject.get()).setProject(selectedProject);
+                Team team = teams.get(teamIndexToSetProject.get()).clone();
+                teamToReceiveMember.set(team);
                 drawTeamsSelectionArea(teams, initialWidth, null);
             }
         });
@@ -763,9 +784,11 @@ public class AssignActivity extends AnchorPane implements IActivity {
      */
     private void drawButtonBasedOnContext(Scene container, boolean isErrorOccurred) {
         Button backButton = new Button(isErrorOccurred ? "Okay" : "Back");
+        Button undoButton = new Button("Undo");
+        undoButton.setId("undo-button");
         Button assignButton = new Button("Assign");
 
-        IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, assignButton);
+        IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, assignButton, undoButton);
         setActionListenerFor(container, assignButton);
 
         backButton.setOnAction(event -> {
@@ -823,6 +846,8 @@ public class AssignActivity extends AnchorPane implements IActivity {
             }
 
             if (updateSuccess) {
+                //TODO: add history
+
                 assignButton.setDisable(true);
                 studentToAssign.set(null);
                 teamToReceiveMember.set(null);

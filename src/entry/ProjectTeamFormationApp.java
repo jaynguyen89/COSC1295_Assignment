@@ -5,7 +5,9 @@ import cosc1295.designs.ApplicationFacade;
 import cosc1295.designs.Flasher;
 import cosc1295.providers.bases.DatabaseContext;
 import cosc1295.src.models.*;
+import cosc1295.src.services.SuggestionService;
 import cosc1295.src.services.TeamFitnessMetricService;
+import cosc1295.src.services.analyzers.AssignStudentAnalyzer;
 import helpers.commons.SharedEnums.FLASH_TYPES;
 import helpers.commons.SharedEnums.APPLICATION_MENU;
 import static helpers.commons.SharedEnums.APPLICATION_MENU.*;
@@ -117,6 +119,8 @@ public final class ProjectTeamFormationApp {
                 break;
             case I:
                 appFacade.runTeamManagementGui();
+            case J:
+                appFacade.runUndoFeature();
             default:
                 taskDone = true;
                 break;

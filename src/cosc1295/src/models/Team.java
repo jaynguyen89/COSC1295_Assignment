@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Team implements IThing, Serializable {
 
@@ -63,6 +64,12 @@ public class Team implements IThing, Serializable {
 
     public void addMember(Student member) {
         members.add(member);
+    }
+
+    public boolean hasMember(String uniqueId) {
+        AtomicBoolean contain = new AtomicBoolean(false);
+        members.forEach(m -> { if (m.getUniqueId().equalsIgnoreCase(uniqueId)) contain.set(true); });
+        return contain.get();
     }
 
     //Return true if member is removed successfully, otherwise false

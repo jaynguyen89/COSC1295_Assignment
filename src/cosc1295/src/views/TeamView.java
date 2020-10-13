@@ -6,6 +6,8 @@ import cosc1295.src.models.Flash;
 import cosc1295.src.models.Project;
 import cosc1295.src.models.Student;
 import cosc1295.src.models.Team;
+import cosc1295.src.services.SuggestionService;
+import cosc1295.src.services.analyzers.AssignStudentAnalyzer;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 import helpers.commons.SharedEnums.FLASH_TYPES;
@@ -333,13 +335,23 @@ public class TeamView {
             //Inform the number of slots available, and the Team requirements on the new Student, so user is informed
             flasher.flash(new Flash(
                 "\nYou can now select " + selectableCount + " more Student(s).\n" +
-                        (teamRequirements != null && teamRequirements.getKey()
-                                ? "This Team needs a Student with Leader personality type (A).\n" : SharedConstants.EMPTY_STRING
-                        ) +
-                        "Your selection: (press X to skip and go back or if you have done selection)",
+                    (teamRequirements != null && teamRequirements.getKey()
+                            ? "This Team needs a Student with Leader personality type (A)." : SharedConstants.EMPTY_STRING
+                    ),
                 FLASH_TYPES.NONE
             ));
 
+            //Faking add the previously selected Students to team and get the suggestion
+            SuggestionService suggestionService = new SuggestionService();
+            Team clone = teamToAssign.clone();
+            selectedStudents.forEach(clone::addMember);
+
+            //The suggestion for a Student to assign
+            Pair<Student, Student> suggestion = suggestionService.runForResult(new AssignStudentAnalyzer<>(clone));
+            displayAssignOrStudentSwapSuggestion(suggestion);
+            suggestionService.die();
+
+            flasher.flash(new Flash("\nYour selection: (press X to skip and go back or if you have done selection)", FLASH_TYPES.NONE));
             String selectedStudentId = inputScanner.next(); //Take user input
             inputScanner.nextLine();
 
@@ -364,7 +376,7 @@ public class TeamView {
                         break;
                     }
                 } catch (NumberFormatException ex) { //Invalid inputs
-                    flasher.flash(new Flash("Your selection is invalid. Press enter to continue.", FLASH_TYPES.ATTENTION));
+                    flasher.flash(new Flash("\nYour selection is invalid. Press enter to continue.", FLASH_TYPES.ATTENTION));
                     inputScanner.nextLine();
 
                     error = true;
@@ -490,9 +502,40 @@ public class TeamView {
         }
     }
 
+    public void displayAssignOrStudentSwapSuggestion(Pair<Student, Student> suggestion) {
+        String message = "\nRecommended Student: " + suggestion.getKey().display();
+        if (suggestion.getValue() != null) message += "\nReplacing team member " + suggestion.getValue().display() + "\n";
+
+        flasher.flash(new Flash(message, FLASH_TYPES.NONE));
+    }
+
+    public void displayTeamSwapSuggestion(Pair<Pair<Team, Team>, Pair<Student, Student>> suggestion) {
+        String message = "\nRecommended Swap: Student " + suggestion.getValue().getKey().getUniqueId() + " in Team #" + suggestion.getKey().getKey().getId() +
+                         " swapping to Student " + suggestion.getValue().getValue().getUniqueId() + " in Team #" + suggestion.getKey().getValue().getId();
+
+        flasher.flash(new Flash(message, FLASH_TYPES.NONE));
+    }
+
+    public void displaySecondTeamSuggestion(Pair<Team, Pair<Student, Student>> suggestion) {
+        String message = "Recommended Swap: Student " + suggestion.getValue().getKey().getUniqueId() + " in your selected Team" +
+                         " swapping to Student " + suggestion.getValue().getValue().getUniqueId() + " in Team #" + suggestion.getKey().getId();
+
+        flasher.flash(new Flash(message, FLASH_TYPES.NONE));
+    }
+
     //This method is used by Unittest to send user inputs into app
     public void sendTestInput(ByteArrayInputStream in) {
         System.setIn(in);
         inputScanner = new Scanner(System.in);
+    }
+
+    public void displayNoTeamMessage() {
+        flasher.flash(new Flash("" +
+            "\nNo Team found so a new Team has been created for you." +
+            "\nNow just set it a Project and go on.\nPress enter to continue.",
+            FLASH_TYPES.NONE
+        ));
+
+        inputScanner.nextLine();
     }
 }

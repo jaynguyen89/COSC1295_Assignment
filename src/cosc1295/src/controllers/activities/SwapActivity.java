@@ -5,6 +5,11 @@ import cosc1295.providers.services.ProjectService;
 import cosc1295.src.controllers.ControllerBase;
 import cosc1295.src.models.Preference;
 import cosc1295.src.models.Project;
+import cosc1295.src.services.HistoryService;
+import cosc1295.src.services.SuggestionService;
+import cosc1295.src.services.analyzers.SecondTeamAnalyzer;
+import cosc1295.src.services.analyzers.SwapStudentAnalyzer;
+import cosc1295.src.services.analyzers.TeamsSwapAnalyzer;
 import helpers.commons.SharedEnums.PERSONALITIES;
 import cosc1295.providers.services.StudentService;
 import cosc1295.providers.services.TeamService;
@@ -41,6 +46,8 @@ public class SwapActivity extends AnchorPane implements IActivity {
     private Consumer<SharedEnums.GUI_ACTION_CONTEXT> intent;
     private static final String FIRST_TEAM = "FIRST_TEAM";
     private static final String SECOND_TEAM = "SECOND_TEAM";
+
+    private final HistoryService history = HistoryService.getInstance();
 
     //Dependency injections to access data processing services
     private final StudentService studentService;
@@ -109,21 +116,8 @@ public class SwapActivity extends AnchorPane implements IActivity {
     private void attachListenersToObservables(double initialWidth) {
         SimpleBooleanProperty shouldEnableSwapButton = new SimpleBooleanProperty(false);
 
-        firstTeamInSwap.addListener(observable -> {
-            if (firstTeamInSwap.get() == null) {
-                eraseMemberSelectionFragment(FIRST_TEAM);
-                shouldEnableSwapButton.set(false);
-            }
-            else drawMemberSelectionFragment(firstTeamInSwap.get().getMembers(), FIRST_TEAM, initialWidth);
-        });
-
-        secondTeamInSwap.addListener(observable -> {
-            if (secondTeamInSwap.get() == null) {
-                eraseMemberSelectionFragment(SECOND_TEAM);
-                shouldEnableSwapButton.set(false);
-            }
-            else drawMemberSelectionFragment(secondTeamInSwap.get().getMembers(), SECOND_TEAM, initialWidth);
-        });
+        checkTeamObservables(initialWidth, shouldEnableSwapButton, firstTeamInSwap, FIRST_TEAM);
+        checkTeamObservables(initialWidth, shouldEnableSwapButton, secondTeamInSwap, SECOND_TEAM);
 
         firstTeamMember.addListener(observable -> {
             if (firstTeamMember.get() == null) {
@@ -147,6 +141,45 @@ public class SwapActivity extends AnchorPane implements IActivity {
             Button assignButton = (Button) this.lookup("#main-button");
             assignButton.setDisable(!shouldEnableSwapButton.get());
         });
+    }
+
+    private void checkTeamObservables(
+        double initialWidth, SimpleBooleanProperty shouldEnableSwapButton,
+        SimpleObjectProperty<Team> teamInSwap, String secondTeam
+    ) {
+        teamInSwap.addListener(observable -> {
+            if (teamInSwap.get() == null) {
+                eraseMemberSelectionFragment(secondTeam);
+                shouldEnableSwapButton.set(false);
+            }
+            else drawMemberSelectionFragment(teamInSwap.get().getMembers(), secondTeam, initialWidth);
+
+            displaySuggestion();
+        });
+    }
+
+    private void displaySuggestion() {
+        SuggestionService suggestionService = new SuggestionService();
+        Team firstClone = firstTeamInSwap.get() == null ? null : firstTeamInSwap.get().clone();
+        Team secondClone = secondTeamInSwap.get() == null ? null : secondTeamInSwap.get().clone();
+
+
+        if (firstClone != null && secondClone != null) {
+            Pair<Student, Student> suggestion = suggestionService.runForResult(new SwapStudentAnalyzer<>(firstClone, secondClone));
+            IActivity.drawStudentSwapOrAssignSuggestion(this, suggestion);
+        }
+        else if (firstClone == null && secondClone == null) {
+            Pair<Pair<Team, Team>, Pair<Student, Student>> suggestion = suggestionService.runForResult(new TeamsSwapAnalyzer<>());
+            drawTeamSwapSuggestion(suggestion);
+        }
+        else {
+            Pair<Team, Pair<Student, Student>> suggestion = suggestionService.runForResult(new SecondTeamAnalyzer<>(
+                firstClone == null ? secondClone : firstClone
+            ));
+            drawSecondTeamSuggestion(suggestion);
+        }
+
+        suggestionService.die();
     }
 
     private void drawActivityFailMessage(Scene container, String message) {
@@ -305,7 +338,7 @@ public class SwapActivity extends AnchorPane implements IActivity {
         requirementLabel.getStyleClass().add("requirement-message");
         requirementLabel.setPrefWidth(this.getPrefWidth() / SharedConstants.GUI_ASPECT_RATIO);
 
-        AnchorPane.setBottomAnchor(requirementLabel, MARGIN * 4);
+        AnchorPane.setBottomAnchor(requirementLabel, MARGIN * 5.5);
         AnchorPane.setLeftAnchor(requirementLabel, (this.getPrefWidth() - requirementLabel.getPrefWidth()) / 2);
 
         this.prefWidthProperty().addListener(((observable, oldValue, newValue) -> {
@@ -385,9 +418,11 @@ public class SwapActivity extends AnchorPane implements IActivity {
 
     private void drawButtonBasedOnContext(Scene container, boolean isErrorOccurred) {
         Button backButton = new Button(isErrorOccurred ? "Okay" : "Back");
+        Button undoButton = new Button("Undo");
+        undoButton.setId("undo-button");
         Button swapButton = new Button("Swap");
 
-        IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, swapButton);
+        IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, swapButton, undoButton);
         setActionListenerFor(container, swapButton);
 
         backButton.setOnAction(event -> {
@@ -424,6 +459,8 @@ public class SwapActivity extends AnchorPane implements IActivity {
 
                 boolean result = teamService.updateTeam(firstTeam);
                 if (result && teamService.updateTeam(secondTeam)) {
+                    //TODO: add history
+
                     observableTeams.set(null);
                     firstTeamInSwap.set(null);
                     secondTeamInSwap.set(null);
@@ -434,6 +471,41 @@ public class SwapActivity extends AnchorPane implements IActivity {
                     drawActivityFailMessage(container, "An error occurred while updating/saving data into files.\nPlease retry your task.");
             }
         });
+    }
+
+    private void drawSecondTeamSuggestion(Pair<Team, Pair<Student, Student>> suggestion) {
+        IActivity.removeElementIfExists("suggestion", this);
+
+        Label suggestionLabel = new Label();
+        suggestionLabel.getStyleClass().add("suggestion");
+        suggestionLabel.setId("suggestion");
+
+        String message = "Recommended Student: " + suggestion.getValue().getValue().getUniqueId() + " in Team #" + suggestion.getKey().getId();
+        message += " Replacing Student " + suggestion.getValue().getKey().getUniqueId() + " in the currently selected Team.";
+
+        constraintSuggestion(suggestionLabel, message);
+    }
+
+    private void drawTeamSwapSuggestion(Pair<Pair<Team, Team>, Pair<Student, Student>> suggestion) {
+        IActivity.removeElementIfExists("suggestion", this);
+
+        Label suggestionLabel = new Label();
+        suggestionLabel.getStyleClass().add("suggestion");
+        suggestionLabel.setId("suggestion");
+
+        String message = "Recommended Student: " + suggestion.getValue().getKey().getUniqueId() + " in Team #" + suggestion.getKey().getKey().getId();
+        message += " Replacing Student " + suggestion.getValue().getValue().getUniqueId() + " in Team #" + suggestion.getKey().getValue().getId();
+
+        constraintSuggestion(suggestionLabel, message);
+    }
+
+    private void constraintSuggestion(Label suggestionLabel, String message) {
+        suggestionLabel.setText(message);
+        this.getChildren().add(suggestionLabel);
+        suggestionLabel.setPrefWidth(MARGIN * 30);
+        suggestionLabel.setPrefHeight(MARGIN * 1.5);
+        AnchorPane.setLeftAnchor(suggestionLabel, (this.getPrefWidth() - suggestionLabel.getPrefWidth()) / 2);
+        AnchorPane.setBottomAnchor(suggestionLabel, MARGIN * 3);
     }
 
     @Override

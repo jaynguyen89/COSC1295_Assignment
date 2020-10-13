@@ -57,13 +57,23 @@ public class ControllerBase {
 
             //Sum up satisfaction preferences
             if (memberPreferences != null)
-                for (Map.Entry<String, Integer> entry : memberPreferences.getPreference().entrySet()) {
-                    if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 4)
-                        satisfactions = new Pair<>(satisfactions.getKey() + 1, satisfactions.getValue());
+                for (Map.Entry<String, Integer> entry : memberPreferences.getPreference().entrySet())
+                    try {
+                        if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 4)
+                            satisfactions = new Pair<>(satisfactions.getKey() + 1, satisfactions.getValue());
 
-                    if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 3)
-                        satisfactions = new Pair<>(satisfactions.getKey(), satisfactions.getValue() + 1);
-                }
+                        if (entry.getKey().equals(team.getProject().getUniqueId()) && entry.getValue() == 3)
+                            satisfactions = new Pair<>(satisfactions.getKey(), satisfactions.getValue() + 1);
+                    } catch (NullPointerException ex) {
+                        flasher.flash(new Flash(
+                            "Missing Project Preference data for member " + member.getUniqueId() + ".\n" +
+                            "Preference Satisfaction will be skipped. Please check data and retry.",
+                            SharedEnums.FLASH_TYPES.ERROR
+                        ));
+
+                        satisfactions = null;
+                        break;
+                    }
             else
                 satisfactions = null;
         }

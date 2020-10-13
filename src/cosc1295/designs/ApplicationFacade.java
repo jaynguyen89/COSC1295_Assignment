@@ -13,6 +13,7 @@ public class ApplicationFacade {
     private final StudentController studentController;
     private final TeamFormationController teamController;
     private final TeamGuiController teamGuiController;
+    private final UndoController undoController;
 
     public ApplicationFacade() {
         companyController = new CompanyController();
@@ -21,6 +22,7 @@ public class ApplicationFacade {
         studentController = new StudentController();
         teamController = new TeamFormationController();
         teamGuiController = new TeamGuiController();
+        undoController = new UndoController();
     }
 
     public void runAddCompanyFeature() {
@@ -92,5 +94,9 @@ public class ApplicationFacade {
 
     public void runTeamManagementGui() {
     	teamGuiController.runGuiTeamManagementFeatures();
+    }
+
+    public void runUndoFeature() {
+        undoController.undoLastChange();
     }
 }

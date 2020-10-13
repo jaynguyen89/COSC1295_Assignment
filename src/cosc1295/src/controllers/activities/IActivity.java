@@ -1,6 +1,7 @@
 package cosc1295.src.controllers.activities;
 
 import com.sun.istack.internal.NotNull;
+import cosc1295.src.models.Student;
 import helpers.commons.SharedConstants;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.SimpleObjectProperty;
@@ -12,6 +13,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.util.Pair;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReference;
@@ -205,9 +207,20 @@ public interface IActivity {
         backButton.getStyleClass().add(isErrorOccurred ? "done-button" : "back-button");
         activity.getChildren().add(backButton);
 
+        Button undoButton = buttons.length > 2 ? buttons[2] : null;
+        if (undoButton != null) {
+            undoButton.getStyleClass().add("undo-button");
+            activity.getChildren().add(undoButton);
+        }
+
         if (!isErrorOccurred) {
             backButton.setLayoutY(MARGIN / 2);
             backButton.setLayoutX(MARGIN / 2);
+
+            if (undoButton != null) {
+                AnchorPane.setRightAnchor(undoButton, MARGIN / 2);
+                AnchorPane.setTopAnchor(undoButton, MARGIN / 2);
+            }
 
             Button mainButton = buttons[1];
             mainButton.setId("main-button");
@@ -270,5 +283,32 @@ public interface IActivity {
         success.setContentDisplay(ContentDisplay.RIGHT);
 
         hider.setOnAction(event -> success.setVisible(false));
+    }
+
+    static void drawStudentSwapOrAssignSuggestion(Pane activity, Pair<Student, Student> suggestion) {
+        removeElementIfExists("suggestion", activity);
+
+        Label suggestionLabel = new Label();
+        suggestionLabel.getStyleClass().add("suggestion");
+        suggestionLabel.setId("suggestion");
+
+        String message = "Recommended Student: " + suggestion.getKey().display();
+        if (suggestion.getValue() != null) message += " Replacing Student " + suggestion.getValue().display() + "\n";
+
+        suggestionLabel.setText(message);
+        activity.getChildren().add(suggestionLabel);
+
+        if (activity.getId().toLowerCase().contains(AssignActivity.class.getSimpleName().toLowerCase())) {
+            suggestionLabel.setPrefWidth(MARGIN * 15);
+            suggestionLabel.setPrefHeight(MARGIN * 1.5);
+            AnchorPane.setLeftAnchor(suggestionLabel, MARGIN / 2);
+            AnchorPane.setBottomAnchor(suggestionLabel, MARGIN / 2);
+        }
+        else {
+            suggestionLabel.setPrefWidth(MARGIN * 30);
+            suggestionLabel.setPrefHeight(MARGIN * 1.5);
+            AnchorPane.setLeftAnchor(suggestionLabel, (activity.getPrefWidth() - suggestionLabel.getPrefWidth()) / 2);
+            AnchorPane.setBottomAnchor(suggestionLabel, MARGIN * 3);
+        }
     }
 }

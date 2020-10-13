@@ -8,11 +8,13 @@ import cosc1295.src.models.Flash;
 import cosc1295.src.models.Preference;
 import cosc1295.src.models.Project;
 import cosc1295.src.models.Student;
+import cosc1295.src.services.SuggestionService;
 import cosc1295.src.views.StudentView;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.FLASH_TYPES;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class StudentController extends ControllerBase {
 

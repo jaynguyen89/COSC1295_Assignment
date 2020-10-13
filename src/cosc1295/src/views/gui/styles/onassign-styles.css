@@ -74,6 +74,20 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 10, 0, 0, 0);
 }
 
+.undo-button {
+    -fx-background-color: #fff1cc;
+    -fx-text-fill: #bf8c00;
+    -fx-font-size: 0.6em;
+    -fx-pref-width: 4em;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 0);
+}
+
+.undo-button:hover {
+    -fx-background-color: #ffeebf;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 10, 0, 0, 0);
+}
+
 .warning {
     -fx-alignment: center;
     -fx-text-alignment: center;
@@ -172,6 +186,17 @@
     -fx-background-color: #ffedeb;
     -fx-background-radius: 0.2em;
     -fx-padding: 0.25em 0.5em;
+    -fx-wrap-text: true;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 10, 0, 0, 0);
+}
+
+.suggestion {
+    -fx-font-size: 0.5em;
+    -fx-font-weight: lighter;
+    -fx-background-color: #fffae6;
+    -fx-text-fill: #d9b100;
+    -fx-background-radius: 0.2em;
+    -fx-padding: 0.15em 0.3em;
     -fx-wrap-text: true;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 10, 0, 0, 0);
 }

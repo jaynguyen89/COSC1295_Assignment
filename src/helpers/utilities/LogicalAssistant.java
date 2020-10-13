@@ -2,6 +2,7 @@ package helpers.utilities;
 
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
+import cosc1295.src.controllers.ControllerBase;
 import cosc1295.src.models.*;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
@@ -303,6 +304,68 @@ public final class LogicalAssistant {
             return new Pair<>(firstTeamImbalanceCheck, secondTeamImbalanceCheck);
 
         return null;
+    }
+
+    public static boolean isStudentAssignable(Student student, Pair<Team, Student> teamAndMember) {
+        List<Student> members = new ArrayList<>(teamAndMember.getKey().getMembers());
+        Team faker = teamAndMember.getKey().clone();
+        if (teamAndMember.getValue() != null) {
+            members.removeIf(m -> m.getUniqueId().equalsIgnoreCase(teamAndMember.getValue().getUniqueId()));
+            faker.removeMemberByUniqueId(teamAndMember.getValue().getUniqueId());
+        }
+
+        Pair<Boolean, List<String>> requirements = produceTeamRequirementsOnNewMember(members, new ArrayList<Student>() {{ add(student); }});
+        Pair<Boolean, List<SharedEnums.PERSONALITIES>> balance = checkImbalancePersonalityOnAssign(new Pair<>(faker, student));
+        if (requirements == null && balance == null) return true;
+
+        boolean assignable = true;
+        if (requirements != null) {
+            assignable = !(requirements.getKey() && teamAndMember.getKey().getMembers().size() == SharedConstants.GROUP_LIMIT - 1);
+            assignable = assignable && (requirements.getValue() == null || !requirements.getValue().contains(student.getUniqueId()));
+        }
+
+        if (balance != null) assignable = assignable && !balance.getKey();
+        return assignable;
+    }
+
+    public static boolean areStudentsSwappable(Pair<Team, Team> teams, Pair<Student, Student> students) {
+        Pair<Team, Student> first = new Pair<>(teams.getKey(), students.getKey());
+        Pair<Team, Student> second = new Pair<>(teams.getValue(), students.getValue());
+
+        Pair<Pair<Boolean, String>, Pair<Boolean, String>> requirements = isTeamRequirementsMutuallySatisfied(first, second);
+        Pair<
+            Pair<Boolean, List<SharedEnums.PERSONALITIES>>,
+            Pair<Boolean, List<SharedEnums.PERSONALITIES>>
+        > balance = isImbalancePersonalityOnSwap(first, second);
+
+        if (requirements == null && balance == null) return true;
+
+        boolean isSwappable = true;
+        if (requirements != null) {
+            Pair<Boolean, String> firstTeamRequires = requirements.getKey();
+            Pair<Boolean, String> secondTeamRequires = requirements.getValue();
+
+            if (firstTeamRequires != null) {
+                isSwappable = firstTeamRequires.getKey();
+                isSwappable = isSwappable && firstTeamRequires.getValue() == null;
+            }
+
+            if (secondTeamRequires != null) {
+                isSwappable = isSwappable && secondTeamRequires.getKey();
+                isSwappable = isSwappable && secondTeamRequires.getValue() == null;
+            }
+        }
+
+        if (isSwappable && balance != null) {
+            Pair<Boolean, List<SharedEnums.PERSONALITIES>> firstTeamBalance = balance.getKey();
+            Pair<Boolean, List<SharedEnums.PERSONALITIES>> secondTeamBalance = balance.getValue();
+
+            isSwappable = isSwappable &&
+                (firstTeamBalance == null || firstTeamBalance.getKey() == null || !firstTeamBalance.getKey()) &&
+                (secondTeamBalance == null || secondTeamBalance.getKey() == null || !secondTeamBalance.getKey());
+        }
+
+        return isSwappable;
     }
 
     //For unittest only
