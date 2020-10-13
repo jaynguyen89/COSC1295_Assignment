@@ -6,6 +6,7 @@ import cosc1295.providers.services.ProjectService;
 import cosc1295.providers.services.StudentService;
 import cosc1295.providers.services.TeamService;
 import cosc1295.src.controllers.ControllerBase;
+import cosc1295.src.controllers.UndoController;
 import cosc1295.src.models.*;
 import cosc1295.src.services.HistoryService;
 import cosc1295.src.services.SuggestionService;
@@ -115,8 +116,6 @@ public class AssignActivity extends AnchorPane implements IActivity {
             List<Student> assignableStudents = LogicalAssistant.filterUnteamedStudents(students, teams);
             LogicalAssistant.setStudentDataInTeams(teams, students);
             drawWidgetsForAssigningStudentsTask(container, assignableStudents, teams);
-
-            //drawButtonBasedOnContext(container, false);
         }
     }
 
@@ -790,6 +789,11 @@ public class AssignActivity extends AnchorPane implements IActivity {
 
         IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, assignButton, undoButton);
         setActionListenerFor(container, assignButton);
+
+//        undoButton.setOnAction(event -> {
+//            UndoController undoController = new UndoController();
+//            boolean result = undoController.undoLastChange(SharedConstants.ACTION_ASSIGN);
+//        });
 
         backButton.setOnAction(event -> {
             teamToReceiveMember.set(null);

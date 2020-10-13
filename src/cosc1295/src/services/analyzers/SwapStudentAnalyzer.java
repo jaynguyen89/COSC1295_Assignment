@@ -5,6 +5,11 @@ import javafx.util.Pair;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
+/**
+ * Used for suggesting a swap when user have selected 2 Teams.
+ * Return data of type Pair<Student, Student>
+ * @param <T>
+ */
 public class SwapStudentAnalyzer<T> extends SuperAnalyzer implements Callable<T> {
 
     private final Team firstTeam;
@@ -23,6 +28,13 @@ public class SwapStudentAnalyzer<T> extends SuperAnalyzer implements Callable<T>
         return (T) produceSwapSuggestion(metricsData);
     }
 
+    /**
+     * Calculates the Fitness Metrics for each possible pair combination of Students across all Teams.
+     * `Possible` means each pair is checked against all team requirements.
+     * Returns HashMap of Pair<Student, Student> being the possible swap,
+     * and Pair<TeamFitness, TeamFitness> being the Fitness Metrics of 2 Teams.
+     * @return HashMap<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>>
+     */
     private HashMap<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>> calculateMetrics() {
         //First-Second respectively
         HashMap<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>> metricsData = new HashMap<>();

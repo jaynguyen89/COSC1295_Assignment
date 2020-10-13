@@ -9,6 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+/**
+ * Used for suggesting an assignee to a Team.
+ * Returns data of type Pair<Student, Student> with Key being assignee, Value being replaced member (nullable)
+ * @param <T>
+ */
 public class AssignStudentAnalyzer<T> extends SuperAnalyzer implements Callable<T> {
 
     private final Team team;
@@ -26,6 +31,10 @@ public class AssignStudentAnalyzer<T> extends SuperAnalyzer implements Callable<
         return (T) produceAssignSuggestion(metricsData);
     }
 
+    /**
+     * Calculates Fitness Metrics for all possible assignees if they satisfy all Team's requirements.
+     * @return
+     */
     private HashMap<Pair<Student, Student>, TeamFitness> calculateMetrics() {
         HashMap<Pair<Student, Student>, TeamFitness> metricsData = new HashMap<>();
         ControllerBase controllerBase = new ControllerBase();
@@ -35,6 +44,7 @@ public class AssignStudentAnalyzer<T> extends SuperAnalyzer implements Callable<
         for (Student student : assignableStudents) {
             if (!hasPreferenceData(student, preferences) || team.hasMember(student.getUniqueId())) continue;
 
+            //When Team has available slots to take more Students, so just assign, no replace
             if (team.getMembers().size() < SharedConstants.GROUP_LIMIT) {
                 boolean assignable = LogicalAssistant.isStudentAssignable(student, new Pair<>(team, null));
                 if (!assignable) continue;
@@ -47,6 +57,7 @@ public class AssignStudentAnalyzer<T> extends SuperAnalyzer implements Callable<
                 continue;
             }
 
+            //When Team is full, the assignee will replace 1 Team member
             for (Student member : team.getMembers()) {
                 boolean assignable = LogicalAssistant.isStudentAssignable(student, new Pair<>(team, member));
                 if (!assignable) continue;

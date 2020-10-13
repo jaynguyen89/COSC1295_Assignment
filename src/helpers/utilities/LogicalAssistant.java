@@ -306,6 +306,14 @@ public final class LogicalAssistant {
         return null;
     }
 
+    /**
+     * Used for the analyzers to check if a Student can be assigned to a Team without any
+     * worry about the details of requirements.
+     * Data passed in with Pair<Team, Student> being Team to get the assignee, and Student being a replaced member.
+     * @param student Student
+     * @param teamAndMember Pair<Team, Student>
+     * @return boolean
+     */
     public static boolean isStudentAssignable(Student student, Pair<Team, Student> teamAndMember) {
         List<Student> members = new ArrayList<>(teamAndMember.getKey().getMembers());
         Team faker = teamAndMember.getKey().clone();
@@ -328,6 +336,14 @@ public final class LogicalAssistant {
         return assignable;
     }
 
+    /**
+     * Used for the analyzers to check if 2 Students can be swapped between 2 Teams without any
+     * worry about the details of requirements.
+     * Data must be passed in respective order of Team-Student belonging to each other.
+     * @param teams Pair<Team, Team>
+     * @param students Pair<Student, Student>
+     * @return boolean
+     */
     public static boolean areStudentsSwappable(Pair<Team, Team> teams, Pair<Student, Student> students) {
         Pair<Team, Student> first = new Pair<>(teams.getKey(), students.getKey());
         Pair<Team, Student> second = new Pair<>(teams.getValue(), students.getValue());

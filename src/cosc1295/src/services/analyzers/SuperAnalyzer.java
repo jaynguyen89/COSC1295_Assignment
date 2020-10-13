@@ -27,6 +27,14 @@ class SuperAnalyzer {
         LogicalAssistant.setStudentDataInTeams(teams, students);
     }
 
+    /**
+     * Calculates the averages of of the Fitness Metrics for each Team.
+     * Used for AssignStudentAnalyzer to produce a suggestion.
+     * Returns HashMap with Key being a pair of Students that can be assigned/replaced,
+     * and Value being the averages for later comparisons.
+     * @param metricsData HashMap<Pair<Student, Student>, TeamFitness>
+     * @return HashMap<Pair<Student, Student>, Double>
+     */
     HashMap<Pair<Student, Student>, Double> calculateAssignMetricsAverages(
         HashMap<Pair<Student, Student>, TeamFitness> metricsData
     ) {
@@ -46,6 +54,14 @@ class SuperAnalyzer {
         return averages;
     }
 
+    /**
+     * Calculates the averages of of the Fitness Metrics for each Team.
+     * Used for TeamsSwapAnalyzer, SecondTeamAnalyzer, SwapStudentAnalyser to produce a suggestion.
+     * Returns HashMap with Key being a pair of Students that can be assigned/replaced,
+     * and Value being the averages for later comparisons.
+     * @param metricsData HashMap<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>>
+     * @return HashMap<Pair<Student, Student>, Double>
+     */
     HashMap<Pair<Student, Student>, Double> calculateSwapMetricsAverages(
         HashMap<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>> metricsData
     ) {
@@ -67,6 +83,12 @@ class SuperAnalyzer {
         return averages;
     }
 
+    /**
+     * Checks if a Student has its data for Project Preference or it's missing.
+     * @param student Student
+     * @param preferences List<Preference>
+     * @return boolean
+     */
     boolean hasPreferenceData(Student student, List<Preference> preferences) {
         for (Preference preference : preferences)
             if (preference.getStudentUniqueId().equalsIgnoreCase(student.getUniqueId()))
@@ -75,6 +97,12 @@ class SuperAnalyzer {
         return false;
     }
 
+    /**
+     * Returns a suggestion for assigning Student to a Team, with the Key being
+     * the Student to be assign, and Value (if not null) being a Team's member possibly replaced.
+     * @param metricsData HashMap<Pair<Student, Student>, TeamFitness>
+     * @return Pair<Student, Student>
+     */
     Pair<Student, Student> produceAssignSuggestion(
         HashMap<Pair<Student, Student>, TeamFitness> metricsData
     ) {
@@ -82,6 +110,11 @@ class SuperAnalyzer {
         return getStudentsPair(metricsAverages);
     }
 
+    /**
+     *
+     * @param metricsData
+     * @return
+     */
     Pair<Student, Student> produceSwapSuggestion(
         HashMap<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>> metricsData
     ) {
@@ -89,6 +122,15 @@ class SuperAnalyzer {
         return getStudentsPair(metricsAverages);
     }
 
+    /**
+     * Calculates the Fitness Metrics for each pair of Students.
+     * Each pair combination of Students can be a suggestion.
+     * @param firstTeam Team
+     * @param secondTeam Team
+     * @param firstTeamMember Student
+     * @param secondTeamMember Student
+     * @return Pair<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>>
+     */
     Pair<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>> produceMetricsData(
         Team firstTeam, Team secondTeam, Student firstTeamMember, Student secondTeamMember
     ) {
@@ -115,6 +157,7 @@ class SuperAnalyzer {
         );
     }
 
+    //Inspects the averages of Fitness Metrics of each team to get a Student pair for suggestion
     private Pair<Student, Student> getStudentsPair(HashMap<Pair<Student, Student>, Double> metricsAverages) {
         Pair<Student, Student> suggestion = null;
         double minAvg = Double.MAX_VALUE;

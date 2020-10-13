@@ -3,6 +3,7 @@ package cosc1295.src.controllers.activities;
 import com.sun.istack.internal.Nullable;
 import cosc1295.providers.services.ProjectService;
 import cosc1295.src.controllers.ControllerBase;
+import cosc1295.src.controllers.UndoController;
 import cosc1295.src.models.Preference;
 import cosc1295.src.models.Project;
 import cosc1295.src.services.HistoryService;
@@ -424,6 +425,11 @@ public class SwapActivity extends AnchorPane implements IActivity {
 
         IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, swapButton, undoButton);
         setActionListenerFor(container, swapButton);
+
+//        undoButton.setOnAction(event -> {
+//            UndoController undoController = new UndoController();
+//            undoController.undoLastChange(SharedConstants.ACTION_SWAP);
+//        });
 
         backButton.setOnAction(event -> {
             observableTeams.set(null);

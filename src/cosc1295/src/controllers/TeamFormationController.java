@@ -91,7 +91,7 @@ public class TeamFormationController extends ControllerBase {
                     newTeamId = teamService.SaveNewTeam(newTeam);
 
                     if (newTeamId > 0) {
-                        Pair<
+                        Pair< //Set the history for undoing feature
                                 Pair<Team, Team>,
                                 Pair<Student, Student>
                             > action = history.getLastChangeAndRemove();
@@ -231,7 +231,7 @@ public class TeamFormationController extends ControllerBase {
             if (requirementChecks.getValue() != null) teamView.displayTeamFailedRequirements(requirementChecks.getValue(), 2);
         }
 
-        history.add(new Pair<>(
+        history.add(new Pair<>( //Set history for undoing feature
             new Pair<>(teamToRemoveStudent, teamToAssignStudent),
             new Pair<>(studentToBeReplaced, studentToBeRemoved))
         );

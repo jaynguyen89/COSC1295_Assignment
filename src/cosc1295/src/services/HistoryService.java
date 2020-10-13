@@ -51,10 +51,6 @@ public final class HistoryService {
         return history.pop();
     }
 
-    public void clear() {
-        history.clear();
-    }
-
     public boolean isEmpty() {
         return history.empty();
     }

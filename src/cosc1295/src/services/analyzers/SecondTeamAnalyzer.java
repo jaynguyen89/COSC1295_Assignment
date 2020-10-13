@@ -3,12 +3,18 @@ package cosc1295.src.services.analyzers;
 import cosc1295.src.models.Student;
 import cosc1295.src.models.Team;
 import cosc1295.src.models.TeamFitness;
-import javafx.util.Pair;
 
+import javafx.util.Pair;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.Callable;
 
+/**
+ * Used for suggesting a swap when user have selected 1 Team.
+ * Returns data of type Pair<Team, Pair<Student, Student>>
+ *     with Team being the second Team in swap,
+ *     and Pair<Student, Student> being the Students in 2 Teams for swap
+ * @param <T>
+ */
 public class SecondTeamAnalyzer<T> extends SuperAnalyzer implements Callable<T> {
 
     private final Team selectedTeam;
@@ -28,6 +34,13 @@ public class SecondTeamAnalyzer<T> extends SuperAnalyzer implements Callable<T> 
         return (T) new Pair<>(secondTeam, suggestion);
     }
 
+    /**
+     * Calculates the Fitness Metrics for each possible pair combination of Students across all Teams.
+     * `Possible` means each pair is checked against all team requirements.
+     * Returns HashMap of Pair<Student, Student> being the possible swap,
+     * and Pair<TeamFitness, TeamFitness> being the Fitness Metrics of 2 Teams.
+     * @return HashMap<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>>
+     */
     private HashMap<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>> calculateMetrics() {
         HashMap<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>> metricsData = new HashMap<>();
 

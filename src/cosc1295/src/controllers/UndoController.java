@@ -10,8 +10,8 @@ import cosc1295.src.models.Team;
 import cosc1295.src.services.HistoryService;
 import cosc1295.src.views.UndoView;
 import helpers.commons.SharedConstants;
-import javafx.util.Pair;
 
+import javafx.util.Pair;
 import java.util.List;
 
 public class UndoController extends ControllerBase {
@@ -32,34 +32,56 @@ public class UndoController extends ControllerBase {
         preferences = (new StudentService()).readAllStudentPreferencesFromFile();
     }
 
+    /**
+     * Called when user select "undo" from APPLICATION_MENU.
+     * Revert changes by 1 step each. Allows for undoing until nothing left to undo.
+     */
     public void undoLastChange() {
-        if (undoView.promptForUndoConfirmation()) {
-            Pair<
-                Pair<Team, Team>,
-                Pair<Student, Student>
-            > historyItem = history.getLastChangeAndRemove();
+        if (history.isEmpty()) undoView.displayUndoEmptyMessage();
 
-            Pair<Team, Team> teams = historyItem.getKey();
-            Pair<Student, Student> students = historyItem.getValue();
+        while (!history.isEmpty()) {
+            if (undoView.promptForUndoConfirmation()) {
+                Pair< //Get the latest item in the history to undo
+                    Pair<Team, Team>,
+                    Pair<Student, Student>
+                > historyItem = history.getLastChangeAndRemove();
 
-            if (teams.getValue() == null) undoAssignment(teams.getKey().clone(), students);
-            else undoSwapping(teams, students);
+                //Get data from history item
+                Pair<Team, Team> teams = historyItem.getKey();
+                Pair<Student, Student> students = historyItem.getValue();
+
+                //Base on item data, determine the action type was whether Assignment or Swapping
+                //Read class HistoryService for details
+                if (teams.getValue() == null) undoAssignment(teams.getKey().clone(), students);
+                else undoSwapping(teams, students);
+            }
+
+            if (history.isEmpty()) {
+                undoView.displayUndoEmptyMessage();
+                continue;
+            }
+
+            if (!undoView.promptForContinueUndo())
+                break;
         }
     }
 
     private void undoSwapping(Pair<Team, Team> teams, Pair<Student, Student> students) {
-        Team first = teams.getKey().clone();
-        Team second = teams.getValue().clone();
+        Team first = teams.getKey().clone(); //First team in swap
+        Team second = teams.getValue().clone(); //Second team in swap
 
+        //Swap back members between teams
         first.replaceMemberByUniqueId(students.getKey().getUniqueId(), students.getValue());
         second.replaceMemberByUniqueId(students.getValue().getUniqueId(), students.getKey());
 
+        //Recalculate Fitness Metrics
         if (first.getMembers().size() == SharedConstants.GROUP_LIMIT)
             first.setFitnessMetrics(calculateTeamFitnessMetricsFor(first, projects, preferences));
 
         if (second.getMembers().size() == SharedConstants.GROUP_LIMIT)
             second.setFitnessMetrics(calculateTeamFitnessMetricsFor(second, projects, preferences));
 
+        //Save data
         if (!teamService.updateTeam(first) || !teamService.updateTeam(second))
             undoView.displayUndoFailMessage();
         else
@@ -67,12 +89,13 @@ public class UndoController extends ControllerBase {
     }
 
     private void undoAssignment(Team team, Pair<Student, Student> students) {
-        if (students.getValue() == null)
+        if (students.getValue() == null) //Student added, no member was replaced
             team.removeMemberByUniqueId(students.getKey().getUniqueId());
-        else
+        else //The assignee replaced a member in team
             team.replaceMemberByUniqueId(students.getKey().getUniqueId(), students.getValue());
 
-        Boolean result = null;
+        //Save data
+        Boolean result;
         if (team.getMembers().size() == 0)
             result = teamService.deleteTeam(team);
         else

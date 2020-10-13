@@ -18,7 +18,7 @@ public class UndoView {
     public boolean promptForUndoConfirmation() {
         return flasher.promptForConfirmation(
             new Flash(
-                "Changes will be lost and not recoverable after undoing. Are you sure?" +
+                "\nChanges will be lost and not recoverable after undoing. Are you sure?" +
                         "\nY: Yes, undo it.\tN: No, cancel.",
                 SharedEnums.FLASH_TYPES.NONE
             ));
@@ -26,7 +26,7 @@ public class UndoView {
 
     public void displayUndoFailMessage() {
         flasher.flash(new Flash(
-            "An error occurred while undoing the last change. Please try again." +
+            "\nAn error occurred while undoing the last change. Please try again." +
                     "\nPress enter to continue",
             SharedEnums.FLASH_TYPES.ERROR
         ));
@@ -36,11 +36,26 @@ public class UndoView {
 
     public void displayUndoSuccessMessage() {
         flasher.flash(new Flash(
-                "All good. The last change has been undone successfully." +
-                        "\nPress enter to continue",
-                SharedEnums.FLASH_TYPES.ERROR
+            "\nAll good. The last change has been undone successfully." +
+                    "\nPress enter to continue",
+            SharedEnums.FLASH_TYPES.ERROR
         ));
 
         inputScanner.nextLine();
+    }
+
+    public void displayUndoEmptyMessage() {
+        flasher.flash(new Flash(
+            "\nNo changes to undo.\n",
+            SharedEnums.FLASH_TYPES.NONE
+        ));
+    }
+
+    public boolean promptForContinueUndo() {
+        return flasher.promptForConfirmation(
+            new Flash(
+                "\nDo you wish to undo more?\tY: Yes.\tN: No.",
+                SharedEnums.FLASH_TYPES.NONE
+            ));
     }
 }

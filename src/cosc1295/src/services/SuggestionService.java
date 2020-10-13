@@ -7,6 +7,11 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Uses an ExecutorService to run an Analyzer, which will analyze all data to produce suggestions.
+ * This service is created to run the analyzers on a dedicated Thread, and closed right after.
+ * To work with all types of analyzers, including the ones that would be written later.
+ */
 public class SuggestionService {
     private static final Logger logger = Logger.getLogger(SuggestionService.class.getName());
 
