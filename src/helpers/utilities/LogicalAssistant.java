@@ -302,22 +302,35 @@ public final class LogicalAssistant {
         return null;
     }
 
+    /**
+     * Assigns a Student to a Team and possibly replaces a Team's member.
+     * The action will be saved to history and if the Team has 4 members after the assignment,
+     * the FitnessMetrics will be calculated for it.
+     * @param teamAndMember Pair<Team, Student>
+     * @param assignee Student
+     * @param projects List<Project>
+     * @param preferences List<Preference>
+     * @return boolean
+     */
     @SuppressWarnings("UnusedReturnValue")
     public static boolean assignStudentToTeam(
         Pair<Team, Student> teamAndMember, Student assignee, List<Project> projects, List<Preference> preferences
     ) {
         HistoryService history = HistoryService.getInstance();
 
+        //The teamAndMember has its Value not null, meaning a member should be replaced, so remove the member first
         if (teamAndMember.getValue() != null &&
             !teamAndMember.getKey().removeMemberByUniqueId(teamAndMember.getValue().getUniqueId())
         ) return false;
 
+        //Then add the assignee to the Team then calculate FitnessMetrics if Team has 4 members
         teamAndMember.getKey().addMember(assignee);
         if (teamAndMember.getKey().getMembers().size() == SharedConstants.GROUP_LIMIT)
             teamAndMember.getKey().setFitnessMetrics(
                 (new ControllerBase()).calculateTeamFitnessMetricsFor(teamAndMember.getKey(), projects, preferences)
             );
 
+        //Finally add a history item to support undoing
         history.add(new Pair<>(
             new Pair<>(teamAndMember.getKey(), null), new Pair<>(assignee, teamAndMember.getValue())
         ));
@@ -325,12 +338,23 @@ public final class LogicalAssistant {
         return true;
     }
 
+    /**
+     * Swaps Students between Teams and recalculates FitnessMetrics if any Team has 4 members
+     * @param first Pair<Team, Student>
+     * @param second Pair<Team, Student>
+     * @param projects List<Project>
+     * @param preferences List<Preference>
+     * @return Pair<Team, Team>
+     */
     public static Pair<Team, Team> swapStudentsBetweenTeams(
         Pair<Team, Student> first, Pair<Team, Student> second, List<Project> projects, List<Preference> preferences
     ) {
         HistoryService history = HistoryService.getInstance();
+        //First, remove the member from Team 1
         boolean swapResult = first.getKey().removeMemberByUniqueId(first.getValue().getUniqueId());;
 
+        //If Team 2 specifies a member, it means that member will be swapped to Team 1
+        //If Team 2 specifies no member, it means Team 2 will take Team 1 member, and Team 1 receive no member
         if (swapResult && second.getValue() == null)
             second.getKey().addMember(first.getValue());
         else if (swapResult) {
@@ -338,7 +362,7 @@ public final class LogicalAssistant {
             swapResult = second.getKey().replaceMemberByUniqueId(second.getValue().getUniqueId(), first.getValue());
         }
 
-        if (swapResult) {
+        if (swapResult) { //If Students are swapped successfully, then recalculate FitnessMetrics if necessary
             if (first.getKey().getMembers().size() == SharedConstants.GROUP_LIMIT)
                 first.getKey().setFitnessMetrics(
                     (new ControllerBase()).calculateTeamFitnessMetricsFor(first.getKey(), projects, preferences)
@@ -352,7 +376,7 @@ public final class LogicalAssistant {
             return new Pair<>(first.getKey(), second.getKey());
         }
 
-        return null;
+        return null; //Swap failed
     }
 
     /**

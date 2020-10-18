@@ -58,7 +58,17 @@ public final class HistoryService {
         return history.empty();
     }
 
+    /**
+     * Because user can create a new Team while they are assigning or swapping Students,
+     * So the history item saved to `history` possibly has its Team ID = 0. Therefore after the Team is
+     * saved into database, it has an ID and this method set that ID for that Team in the history.
+     * @param newTeamId int
+     * @param featureToRun String
+     */
     public void reviseLastChange(int newTeamId, String featureToRun) {
+        //Since user can assign multiple Students to a Team at once, so it needs a while statement to
+        //set ID for all the associated history items. Once the ID is set, the next time new Team is created
+        //will not clash with the previous new Team in history.
         while (true) {
             Pair< //Set the history for undoing feature
                 Pair<Team, Team>,
