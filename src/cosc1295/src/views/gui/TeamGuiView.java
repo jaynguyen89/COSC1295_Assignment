@@ -18,7 +18,14 @@ public class TeamGuiView extends Application {
 	private final ContentInflator inflator = ContentInflator.getInstance();
 
 	public void launchGuiWindow() {
-		launch();
+		try {
+			launch();
+		} catch (IllegalStateException ex) {
+			System.out.println(
+				"\nYou have launched the GUI once during this session.\n" +
+				"If you need to use the GUI again, please restart the app.\n\n"
+			);
+		}
 	}
 
 	@Override

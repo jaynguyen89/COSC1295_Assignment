@@ -8,24 +8,24 @@ import cosc1295.src.models.Project;
 import cosc1295.src.models.Student;
 import cosc1295.src.models.Team;
 import cosc1295.src.services.HistoryService;
-import cosc1295.src.views.UndoView;
+import cosc1295.src.views.HistoryView;
 import helpers.commons.SharedConstants;
 
 import javafx.util.Pair;
 import java.util.List;
 
-public class UndoController extends ControllerBase {
+public class HistoryController extends ControllerBase {
 
     private final HistoryService history = HistoryService.getInstance();
 
-    private final UndoView undoView;
+    private final HistoryView historyView;
     private final TeamService teamService;
 
     private final List<Project> projects;
     private final List<Preference> preferences;
 
-    public UndoController() {
-        undoView = new UndoView();
+    public HistoryController() {
+        historyView = new HistoryView();
         teamService = new TeamService();
 
         projects = (new ProjectService()).readAllProjectsFromFile();
@@ -37,14 +37,14 @@ public class UndoController extends ControllerBase {
      * Revert changes by 1 step each. Allows for undoing until nothing left to undo.
      */
     public void undoLastChange() {
-        if (history.isEmpty()) undoView.displayUndoEmptyMessage();
+        if (history.isEmpty()) historyView.displayUndoEmptyMessage();
 
         while (!history.isEmpty()) {
-            if (undoView.promptForUndoConfirmation()) {
+            if (historyView.promptForUndoConfirmation()) {
                 Pair< //Get the latest item in the history to undo
                     Pair<Team, Team>,
                     Pair<Student, Student>
-                > historyItem = history.getLastChangeAndRemove();
+                > historyItem = history.popLastChange();
 
                 //Get data from history item
                 Pair<Team, Team> teams = historyItem.getKey();
@@ -57,11 +57,11 @@ public class UndoController extends ControllerBase {
             }
 
             if (history.isEmpty()) {
-                undoView.displayUndoEmptyMessage();
+                historyView.displayUndoEmptyMessage();
                 continue;
             }
 
-            if (!undoView.promptForContinueUndo())
+            if (!historyView.promptForContinueUndo())
                 break;
         }
     }
@@ -72,7 +72,8 @@ public class UndoController extends ControllerBase {
 
         //Swap back members between teams
         first.replaceMemberByUniqueId(students.getKey().getUniqueId(), students.getValue());
-        second.replaceMemberByUniqueId(students.getValue().getUniqueId(), students.getKey());
+        if (!second.isNewlyAdded())
+            second.replaceMemberByUniqueId(students.getValue().getUniqueId(), students.getKey());
 
         //Recalculate Fitness Metrics
         if (first.getMembers().size() == SharedConstants.GROUP_LIMIT)
@@ -82,10 +83,14 @@ public class UndoController extends ControllerBase {
             second.setFitnessMetrics(calculateTeamFitnessMetricsFor(second, projects, preferences));
 
         //Save data
-        if (!teamService.updateTeam(first) || !teamService.updateTeam(second))
-            undoView.displayUndoFailMessage();
+        if (!teamService.updateTeam(first) || ( //if first team updated failed
+                !second.isNewlyAdded() && !teamService.updateTeam(second) //if second team was not a newly created team, and updated failed
+            ) || (
+                second.isNewlyAdded() && !teamService.deleteTeam(second) //if second team was a newly created team, and delete failed
+            )
+        ) historyView.displayUndoFailMessage();
         else
-            undoView.displayUndoSuccessMessage();
+            historyView.displayUndoSuccessMessage();
     }
 
     private void undoAssignment(Team team, Pair<Student, Student> students) {
@@ -102,8 +107,8 @@ public class UndoController extends ControllerBase {
             result = teamService.updateTeam(team);
 
         if (result != null && result)
-            undoView.displayUndoSuccessMessage();
+            historyView.displayUndoSuccessMessage();
         else
-            undoView.displayUndoFailMessage();
+            historyView.displayUndoFailMessage();
     }
 }

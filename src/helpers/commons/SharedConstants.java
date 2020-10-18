@@ -1,6 +1,7 @@
 package helpers.commons;
 
 import cosc1295.providers.bases.DatabaseContext;
+import cosc1295.providers.bases.TextFileServiceBase;
 import helpers.commons.SharedEnums.GUI_ACTION_CONTEXT;
 
 import java.util.HashMap;
@@ -14,7 +15,7 @@ public final class SharedConstants {
 
     public static final String DATA_ENV = "local"; //"server" or "local"
 
-    public static final String DATA_SOURCE = DatabaseContext.class.getSimpleName();//TextFileServiceBase.class.getSimpleName();
+    public static String DATA_SOURCE = DatabaseContext.class.getSimpleName(); //TextFileServiceBase.class.getSimpleName();
 
     public static final String DB_INSERT = "INSERT";
 

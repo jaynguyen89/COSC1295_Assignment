@@ -29,8 +29,9 @@ public class SecondTeamAnalyzer<T> extends SuperAnalyzer implements Callable<T> 
     public T call() {
         HashMap<Pair<Student, Student>, Pair<TeamFitness, TeamFitness>> metricsData = calculateMetrics();
         Pair<Student, Student> suggestion = produceSwapSuggestion(metricsData);
-        Team secondTeam = findTeamByMember(suggestion.getValue());
+        if (suggestion == null) return null;
 
+        Team secondTeam = findTeamByMember(suggestion.getValue());
         return (T) new Pair<>(secondTeam, suggestion);
     }
 

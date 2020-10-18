@@ -1,9 +1,12 @@
 package tests;
 
+import cosc1295.providers.bases.DatabaseContext;
+import cosc1295.providers.bases.TextFileServiceBase;
 import cosc1295.providers.services.ProjectService;
 import cosc1295.providers.services.StudentService;
 import cosc1295.src.controllers.ControllerBase;
 import cosc1295.src.models.*;
+import helpers.commons.SharedConstants;
 import junit.framework.TestCase;
 import org.junit.*;
 
@@ -24,6 +27,8 @@ public class StandardDeviationTest {
 
     @BeforeClass
     public static void setUpBeforeClass() {
+        SharedConstants.DATA_SOURCE = TextFileServiceBase.class.getSimpleName();
+
         projectService = new ProjectService();
         projects = projectService.readAllProjectsFromFile();
 
@@ -105,8 +110,8 @@ public class StandardDeviationTest {
         double set2CompetencySD = controllerBase.calculateStandardDeviationsForFitnessMetrics(testData2, projects, preferences).get(0);
 
         //Assert correct skill competency SD for each Teams set
-        TestCase.assertEquals(0.057, set1CompetencySD);
-        TestCase.assertEquals(0.057, set2CompetencySD);
+        TestCase.assertEquals(0.0, set1CompetencySD);
+        TestCase.assertEquals(0.0, set2CompetencySD);
     }
 
     @Test
@@ -117,7 +122,7 @@ public class StandardDeviationTest {
         double set2SatisfactionSD = controllerBase.calculateStandardDeviationsForFitnessMetrics(testData2, projects, preferences).get(1);
 
         //Assert correct preference satisfaction SD for each Teams set
-        TestCase.assertEquals(31.18, set1SatisfactionSD);
+        TestCase.assertEquals(0.0, set1SatisfactionSD);
         TestCase.assertEquals(23.57, set2SatisfactionSD);
     }
 
@@ -129,8 +134,8 @@ public class StandardDeviationTest {
         double set2ShortfallSD = controllerBase.calculateStandardDeviationsForFitnessMetrics(testData2, projects, preferences).get(2);
 
         //Assert correct skill shortfall SD for each Teams set
-        TestCase.assertEquals(0.329, set1ShortfallSD);
-        TestCase.assertEquals(0.118, set2ShortfallSD);
+        TestCase.assertEquals(0.272, set1ShortfallSD);
+        TestCase.assertEquals(0.102, set2ShortfallSD);
     }
 
     @After
@@ -141,6 +146,7 @@ public class StandardDeviationTest {
 
     @AfterClass
     public static void tearDownAfterClass() {
+        SharedConstants.DATA_SOURCE = DatabaseContext.class.getSimpleName();
         projectService = null;
         controllerBase = null;
         projects = null;

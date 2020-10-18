@@ -207,20 +207,9 @@ public interface IActivity {
         backButton.getStyleClass().add(isErrorOccurred ? "done-button" : "back-button");
         activity.getChildren().add(backButton);
 
-        Button undoButton = buttons.length > 2 ? buttons[2] : null;
-        if (undoButton != null) {
-            undoButton.getStyleClass().add("undo-button");
-            activity.getChildren().add(undoButton);
-        }
-
         if (!isErrorOccurred) {
             backButton.setLayoutY(MARGIN / 2);
             backButton.setLayoutX(MARGIN / 2);
-
-            if (undoButton != null) {
-                AnchorPane.setRightAnchor(undoButton, MARGIN / 2);
-                AnchorPane.setTopAnchor(undoButton, MARGIN / 2);
-            }
 
             Button mainButton = buttons[1];
             mainButton.setId("main-button");
@@ -287,18 +276,24 @@ public interface IActivity {
 
     static void drawStudentSwapOrAssignSuggestion(Pane activity, Pair<Student, Student> suggestion) {
         removeElementIfExists("suggestion", activity);
+        boolean isAssignActivity = activity.getId().toLowerCase().contains(AssignActivity.class.getSimpleName().toLowerCase());
 
         Label suggestionLabel = new Label();
         suggestionLabel.getStyleClass().add("suggestion");
         suggestionLabel.setId("suggestion");
 
-        String message = "Recommended Student: " + suggestion.getKey().display();
-        if (suggestion.getValue() != null) message += " Replacing Student " + suggestion.getValue().display() + "\n";
+        String message;
+        if (suggestion == null)
+            message = "All Teams are balanced." + (isAssignActivity ? " No valid unteamed Students to suggest." : " No suggestion for a swap.");
+        else {
+            message = "Recommended Student: " + suggestion.getKey().display();
+            if (suggestion.getValue() != null) message += " Replacing Student " + suggestion.getValue().display() + "\n";
+        }
 
         suggestionLabel.setText(message);
         activity.getChildren().add(suggestionLabel);
 
-        if (activity.getId().toLowerCase().contains(AssignActivity.class.getSimpleName().toLowerCase())) {
+        if (isAssignActivity) {
             suggestionLabel.setPrefWidth(MARGIN * 15);
             suggestionLabel.setPrefHeight(MARGIN * 1.5);
             AnchorPane.setLeftAnchor(suggestionLabel, MARGIN / 2);

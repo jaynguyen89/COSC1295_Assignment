@@ -1,21 +1,21 @@
 package cosc1295.src.services.analyzers;
 
-import cosc1295.src.models.*;
+import cosc1295.src.controllers.ControllerBase;
+import cosc1295.src.models.Student;
+import cosc1295.src.models.Team;
+import cosc1295.src.models.TeamFitness;
+
 import javafx.util.Pair;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
-/**
- * Used for suggesting a swap when user have selected no Teams.
- * return data of type Pair<Pair<Team, Team>, Pair<Student, Student>> with Team-Student in respective order.
- * @param <T>
- */
-public class TeamsSwapAnalyzer<T> extends SuperAnalyzer implements Callable<T> {
+public class AutoSwapAnalyzer<T> extends SuperAnalyzer implements Callable<T> {
 
-    public TeamsSwapAnalyzer() {
+    public AutoSwapAnalyzer() {
         super();
     }
 
+    //Suggestion responds in format Pair<Pair<Team, Student>, Pair<Team, Student>>
     @SuppressWarnings("unchecked")
     @Override
     public T call() {
@@ -25,6 +25,9 @@ public class TeamsSwapAnalyzer<T> extends SuperAnalyzer implements Callable<T> {
         if (suggestion == null) return null;
 
         Pair<Team, Team> teamPair = findTeamsByMembers(suggestion);
-        return (T) new Pair<>(teamPair, suggestion);
+        return (T) new Pair<>(
+            new Pair<>(teamPair.getKey(), suggestion.getKey()),
+            new Pair<>(teamPair.getValue(), suggestion.getValue())
+        );
     }
 }

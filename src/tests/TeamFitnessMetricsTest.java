@@ -1,9 +1,12 @@
 package tests;
 
+import cosc1295.providers.bases.DatabaseContext;
+import cosc1295.providers.bases.TextFileServiceBase;
 import cosc1295.providers.services.ProjectService;
 import cosc1295.providers.services.StudentService;
 import cosc1295.src.controllers.ControllerBase;
 import cosc1295.src.models.*;
+import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums.SKILLS;
 import junit.framework.TestCase;
 import org.junit.*;
@@ -26,6 +29,8 @@ public class TeamFitnessMetricsTest {
 
     @BeforeClass
     public static void setUpBeforeClass() {
+        SharedConstants.DATA_SOURCE = TextFileServiceBase.class.getSimpleName();
+
         controllerBase = new ControllerBase();
         projectService = new ProjectService();
         projects = projectService.readAllProjectsFromFile();
@@ -112,7 +117,7 @@ public class TeamFitnessMetricsTest {
 
             //Asserting average competency of team
             TestCase.assertEquals(
-                i == 3 ? 1.62 : (i == 4 ? 1.62 : 1.5),
+                i == 3 ? 6.0 : (i == 4 ? 6.0 : 6.0),
                 fitnessMetrics.getAverageTeamSkillCompetency()
             );
 
@@ -122,7 +127,7 @@ public class TeamFitnessMetricsTest {
                     TestCase.assertEquals(i == 3 ? 1.0 : (i == 4 ? 1.75 : 1.25), entry.getValue());
 
                 if (entry.getKey() == SKILLS.N)
-                    TestCase.assertEquals(i == 3 ? 2.5 : (i == 4 ? 1.25 : 1.25), entry.getValue());
+                    TestCase.assertEquals(i == 3 ? 2.0 : (i == 4 ? 0.75 : 1.25), entry.getValue());
 
                 if (entry.getKey() == SKILLS.P)
                     TestCase.assertEquals(i == 3 ? 2.0 : (i == 4 ? 1.0 : 1.25), entry.getValue());
@@ -143,18 +148,18 @@ public class TeamFitnessMetricsTest {
 
             //Asserting average Team's satisfaction
             TestCase.assertEquals(
-                i == 3 ? 25.0 : (i == 4 ? 75.0 : 100.0),
+                i == 3 ? 50.0 : (i == 4 ? 50.0 : 50.0),
                 fitnessMetrics.getPreferenceSatisfaction().getKey()
             );
 
             //Asserting average satisfaction by first and second preference
             TestCase.assertEquals(
-                i == 3 ? 0.0 : (i == 4 ? 25.0 : 50.0),
+                i == 3 ? 25.0 : (i == 4 ? 25.0 : 0.0),
                 fitnessMetrics.getPreferenceSatisfaction().getValue().getKey()
             );
 
             TestCase.assertEquals(
-                i == 3 ? 25.0 : (i == 4 ? 50.0 : 50.0),
+                i == 3 ? 25.0 : (i == 4 ? 25.0 : 50.0),
                 fitnessMetrics.getPreferenceSatisfaction().getValue().getValue()
             );
         }
@@ -172,7 +177,7 @@ public class TeamFitnessMetricsTest {
 
             //Asserting Team's average shortfall
             TestCase.assertEquals(
-                i == 3 ? 2.25 : (i == 4 ? 1.5 : 1.62),
+                i == 3 ? 2.25 : (i == 4 ? 1.75 : 1.62),
                 fitnessMetrics.getAverageSkillShortfall()
             );
 
@@ -182,9 +187,9 @@ public class TeamFitnessMetricsTest {
                         : (project.getUniqueId().equalsIgnoreCase("pro2") ? 2.0
                         : (project.getUniqueId().equalsIgnoreCase("pro3") ? 2.0 : 2.0));
 
-                double team5Expected = project.getUniqueId().equalsIgnoreCase("pro1") ? 1.25
+                double team5Expected = project.getUniqueId().equalsIgnoreCase("pro1") ? 1.5
                         : (project.getUniqueId().equalsIgnoreCase("pro2") ? 2.0
-                        : (project.getUniqueId().equalsIgnoreCase("pro3") ? 1.25 : 1.5));
+                        : (project.getUniqueId().equalsIgnoreCase("pro3") ? 1.75 : 1.75));
 
                 double team6Expected = project.getUniqueId().equalsIgnoreCase("pro1") ? 1.75
                         : (project.getUniqueId().equalsIgnoreCase("pro2") ? 1.75
@@ -205,6 +210,7 @@ public class TeamFitnessMetricsTest {
 
     @AfterClass
     public static void tearDownAfterClass() {
+        SharedConstants.DATA_SOURCE = DatabaseContext.class.getSimpleName();
         projectService = null;
         controllerBase = null;
         projects = null;

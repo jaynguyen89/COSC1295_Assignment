@@ -503,24 +503,26 @@ public class TeamView {
     }
 
     public void displayAssignOrStudentSwapSuggestion(Pair<Student, Student> suggestion) {
-        String message = "\nRecommended Student: " + suggestion.getKey().display();
-        if (suggestion.getValue() != null) message += "\nReplacing team member " + suggestion.getValue().display() + "\n";
+        if (suggestion != null) {
+            String message = "\nRecommended Student: " + suggestion.getKey().display();
+            if (suggestion.getValue() != null)
+                message += "\nReplacing team member " + suggestion.getValue().display() + "\n";
 
-        flasher.flash(new Flash(message, FLASH_TYPES.NONE));
+            flasher.flash(new Flash(message, FLASH_TYPES.NONE));
+        }
+        else
+            flasher.flash(new Flash("\nAll Teams are balanced, no valid unteamed Students to suggest.\n", FLASH_TYPES.NONE));
     }
 
     public void displayTeamSwapSuggestion(Pair<Pair<Team, Team>, Pair<Student, Student>> suggestion) {
-        String message = "\nRecommended Swap: Student " + suggestion.getValue().getKey().getUniqueId() + " in Team #" + suggestion.getKey().getKey().getId() +
-                         " swapping to Student " + suggestion.getValue().getValue().getUniqueId() + " in Team #" + suggestion.getKey().getValue().getId();
+        if (suggestion != null) {
+            String message = "\nRecommended Swap: Student " + suggestion.getValue().getKey().getUniqueId() + " in Team #" + suggestion.getKey().getKey().getId() +
+                " swapping to Student " + suggestion.getValue().getValue().getUniqueId() + " in Team #" + suggestion.getKey().getValue().getId();
 
-        flasher.flash(new Flash(message, FLASH_TYPES.NONE));
-    }
-
-    public void displaySecondTeamSuggestion(Pair<Team, Pair<Student, Student>> suggestion) {
-        String message = "Recommended Swap: Student " + suggestion.getValue().getKey().getUniqueId() + " in your selected Team" +
-                         " swapping to Student " + suggestion.getValue().getValue().getUniqueId() + " in Team #" + suggestion.getKey().getId();
-
-        flasher.flash(new Flash(message, FLASH_TYPES.NONE));
+            flasher.flash(new Flash(message, FLASH_TYPES.NONE));
+        }
+        else
+            flasher.flash(new Flash("\nAll Teams are balanced, no suggestion for swap.\n", FLASH_TYPES.NONE));
     }
 
     //This method is used by Unittest to send user inputs into app

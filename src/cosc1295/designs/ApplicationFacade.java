@@ -13,7 +13,8 @@ public class ApplicationFacade {
     private final StudentController studentController;
     private final TeamFormationController teamController;
     private final TeamGuiController teamGuiController;
-    private final UndoController undoController;
+    private final HistoryController historyController;
+    private final AutomationController automationController;
 
     public ApplicationFacade() {
         companyController = new CompanyController();
@@ -22,7 +23,8 @@ public class ApplicationFacade {
         studentController = new StudentController();
         teamController = new TeamFormationController();
         teamGuiController = new TeamGuiController();
-        undoController = new UndoController();
+        historyController = new HistoryController();
+        automationController = new AutomationController();
     }
 
     public void runAddCompanyFeature() {
@@ -97,6 +99,10 @@ public class ApplicationFacade {
     }
 
     public void runUndoFeature() {
-        undoController.undoLastChange();
+        historyController.undoLastChange();
+    }
+
+    public void runAutoAssignSwapFeature() {
+        automationController.executeAutoAssignSwapFeatures();
     }
 }

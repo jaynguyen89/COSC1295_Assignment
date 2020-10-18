@@ -2,8 +2,11 @@ package cosc1295.src.services;
 
 import cosc1295.src.models.Student;
 import cosc1295.src.models.Team;
+import helpers.commons.SharedConstants;
 import javafx.util.Pair;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -47,11 +50,33 @@ public final class HistoryService {
         history.push(entry);
     }
 
-    public Pair<Pair<Team, Team>, Pair<Student, Student>> getLastChangeAndRemove() {
+    public Pair<Pair<Team, Team>, Pair<Student, Student>> popLastChange() {
         return history.pop();
     }
 
     public boolean isEmpty() {
         return history.empty();
+    }
+
+    public void reviseLastChange(int newTeamId, String featureToRun) {
+        while (true) {
+            Pair< //Set the history for undoing feature
+                Pair<Team, Team>,
+                Pair<Student, Student>
+            > action = popLastChange();
+
+            if (featureToRun.equalsIgnoreCase(SharedConstants.ACTION_ASSIGN) && action.getKey().getKey().getId() == 0) {
+                action.getKey().getKey().setId(newTeamId);
+                continue;
+            }
+
+            if (featureToRun.equalsIgnoreCase(SharedConstants.ACTION_SWAP) && action.getKey().getValue().getId() == 0) {
+                action.getKey().getValue().setId(newTeamId);
+                continue;
+            }
+
+            add(action);
+            break;
+        }
     }
 }

@@ -70,9 +70,9 @@ public class TeamFormationController extends ControllerBase {
 
         List<Team> newTeams; //The Teams after assigning or swapping Students
         if (SharedConstants.ACTION_SWAP.equals(featureToRun)) //Run swapping task
-            newTeams = executeSwapTeamMembersFunction(teams, projects);
+            newTeams = executeSwapTeamMembersFunction(teams, projects, preferences);
         else //Run assigning task
-            newTeams = executeAssignStudentToTeamFunction(unteamedStudents, teams, projects);
+            newTeams = executeAssignStudentToTeamFunction(unteamedStudents, teams, projects, preferences);
 
         if (newTeams == null) return false; //user have changed their mind, no change was made, so go back to Main menu
         if (newTeams.size() != 0) { //Changes were made to teams, now save changes
@@ -80,34 +80,19 @@ public class TeamFormationController extends ControllerBase {
             boolean updateSuccess = false;
 
             for (Team newTeam : newTeams) {
-                //Calculate Fitness Metrics only if a Team has enough 4 Students
-                if (newTeam.getMembers().size() == SharedConstants.GROUP_LIMIT) {
-                    TeamFitness teamFitness = calculateTeamFitnessMetricsFor(newTeam, projects, preferences);
-                    newTeam.setFitnessMetrics(teamFitness);
-                }
-
-                //A brand new Team has created just now, so save it into file
+                //A new Team has created just now, so save it into file
                 if (newTeam.isNewlyAdded()) {
                     newTeamId = teamService.SaveNewTeam(newTeam);
 
-                    if (newTeamId > 0) {
-                        Pair< //Set the history for undoing feature
-                                Pair<Team, Team>,
-                                Pair<Student, Student>
-                            > action = history.getLastChangeAndRemove();
-                        Team savedTeam = action.getKey().getKey();
-                        savedTeam.setId(newTeamId);
-
-                        history.add(new Pair<>(new Pair<>(savedTeam, null), action.getValue()));
-                    }
-                    else history.getLastChangeAndRemove();
+                    if (newTeamId > 0) history.reviseLastChange(newTeamId, featureToRun);
+                    else history.popLastChange();
                 }
                 else updateSuccess = teamService.updateTeam(newTeam); //otherwise, just update it
 
                 if ((!newTeam.isNewlyAdded() && !updateSuccess) ||
                     (newTeam.isNewlyAdded() && newTeamId < 0)) { //File processing was failed (some exception)
                     teamView.displayUrgentFailedMessage();
-                    if (SharedConstants.ACTION_ASSIGN.equals(featureToRun)) history.getLastChangeAndRemove();
+                    if (SharedConstants.ACTION_ASSIGN.equals(featureToRun)) history.popLastChange();
                     return false;
                 }
             }
@@ -118,9 +103,10 @@ public class TeamFormationController extends ControllerBase {
 
     //Actually run the Assigning task
     private List<Team> executeAssignStudentToTeamFunction(
-        List<Student> students,
-        List<Team> teams,
-        List<Project> projects
+        @NotNull List<Student> students,
+        @NotNull List<Team> teams,
+        @NotNull List<Project> projects,
+        @NotNull List<Preference> preferences
     ) {
         if (teams.size() == 0) teamView.displayNoTeamMessage();
 
@@ -152,23 +138,17 @@ public class TeamFormationController extends ControllerBase {
         if (selectedStudentsToAssign.size() == 0) return null;
 
         //Add all selected Student into Team
-        for (Student student : selectedStudentsToAssign) {
-            selectedTeamToAssign.addMember(student);
-            history.add(new Pair<>(
-                new Pair<>(selectedTeamToAssign, null), new Pair<>(student, null)
-            ));
-        }
+        for (Student student : selectedStudentsToAssign)
+            LogicalAssistant.assignStudentToTeam(new Pair<>(selectedTeamToAssign, null), student, projects, preferences);
 
         return new ArrayList<Team>() {{ add(selectedTeamToAssign); }};
     }
 
     //Actually run the Swapping task
-    private List<Team> executeSwapTeamMembersFunction(List<Team> teams, List<Project> projects) {
-        @NotNull Team teamToRemoveStudent = null;
-        @NotNull Student studentToBeRemoved = null;
-        @NotNull Team teamToAssignStudent = null;
-        @Nullable Student studentToBeReplaced = null;
-        boolean shouldCreateNewTeam = false;
+    private List<Team> executeSwapTeamMembersFunction(List<Team> teams, List<Project> projects, List<Preference> preferences) {
+        @Nullable Pair<Team, Student> firstTeamAndMember = null;
+        @Nullable Pair<Team, Student> secondTeamAndMember = null;
+        boolean shouldCreateNewTeam;
 
         //Check Team requirements on the Student it is about to take in, for Leader Type and conflicters
         boolean teamRequirementsMutuallySatisfied = false;
@@ -179,12 +159,9 @@ public class TeamFormationController extends ControllerBase {
             suggestionService.die();
 
             //The first Team in swap, and the Student it offers for swap
-            Pair<Team, Student> firstTeamAndStudentToRemove = teamView.selectTeamsAndStudentsToSwap(
+            firstTeamAndMember = teamView.selectTeamsAndStudentsToSwap(
                 teams, SharedConstants.ACTION_SWAP, 1
             );
-
-            teamToRemoveStudent = firstTeamAndStudentToRemove.getKey();
-            studentToBeRemoved = firstTeamAndStudentToRemove.getValue();
 
             //Then ask if user want to take the above selected Student into a brand new Team
             //instead of putting into another existing Team
@@ -193,7 +170,7 @@ public class TeamFormationController extends ControllerBase {
             //If user want to put the Student into an existing Team,
             // find the possible Teams to select as second Team in swap
             List<Team> selectableTeams = new ArrayList<>(teams);
-            selectableTeams.remove(teamToRemoveStudent);
+            selectableTeams.remove(firstTeamAndMember.getKey());
 
             //If no possible Team to select (ie. only 1 Team has ever created)
             //Then user must create a new Team, and put the Student into that Team
@@ -203,20 +180,17 @@ public class TeamFormationController extends ControllerBase {
             }
 
             //So call a method to handle both situations: creating or selecting a Team
-            Pair<Team, Student> secondTeamAndStudentToBeRemoved = createOrSelectTeam(
+            secondTeamAndMember = createOrSelectTeam(
                 shouldCreateNewTeam, selectableTeams, projects, SharedConstants.ACTION_SWAP, 2
             );
 
             //Null here means user have changed their mind and want to go back to Main Menu
-            if (secondTeamAndStudentToBeRemoved == null) return null;
-
-            teamToAssignStudent = secondTeamAndStudentToBeRemoved.getKey();
-            studentToBeReplaced = secondTeamAndStudentToBeRemoved.getValue();
+            if (secondTeamAndMember == null) return null;
 
             //Check both Teams' requirements on the new Member using the utility method
             Pair<Pair<Boolean, String>, Pair<Boolean, String>> requirementChecks =
                 LogicalAssistant.isTeamRequirementsMutuallySatisfied(
-                    firstTeamAndStudentToRemove, secondTeamAndStudentToBeRemoved
+                    firstTeamAndMember, secondTeamAndMember
                 );
 
             //Null here means both Teams agree with each other's assignee
@@ -231,36 +205,13 @@ public class TeamFormationController extends ControllerBase {
             if (requirementChecks.getValue() != null) teamView.displayTeamFailedRequirements(requirementChecks.getValue(), 2);
         }
 
-        history.add(new Pair<>( //Set history for undoing feature
-            new Pair<>(teamToRemoveStudent, teamToAssignStudent),
-            new Pair<>(studentToBeReplaced, studentToBeRemoved))
-        );
-
-        //User have done picking 2 Teams and Students for swap task, now swap
-        boolean assignOrRemoveSuccess;
-        if (shouldCreateNewTeam || studentToBeReplaced == null) {
-            teamToAssignStudent.addMember(studentToBeRemoved);
-            assignOrRemoveSuccess = true;
-        }
-        else
-            assignOrRemoveSuccess = teamToAssignStudent.replaceMemberByUniqueId(
-                                        studentToBeReplaced.getUniqueId(),
-                                        studentToBeRemoved
-                                    ) &&
-                                    teamToRemoveStudent.replaceMemberByUniqueId(
-                                        studentToBeRemoved.getUniqueId(),
-                                        studentToBeReplaced
-                                    );
-
-        if (!assignOrRemoveSuccess) {
+        Pair<Team, Team> swapResults = LogicalAssistant.swapStudentsBetweenTeams(firstTeamAndMember, secondTeamAndMember, projects, preferences);
+        if (swapResults == null) {
             teamView.displayAssignOrRemoveMemberError();
             return null;
         }
 
-        Team finalTeamToRemoveStudent = teamToRemoveStudent;
-        Team finalTeamToAssignStudent = teamToAssignStudent;
-
-        return new ArrayList<Team>() {{ add(finalTeamToRemoveStudent); add(finalTeamToAssignStudent); }};
+        return new ArrayList<Team>() {{ add(swapResults.getKey()); add(swapResults.getValue()); }};
     }
 
     //Handle the situations create/select Team when swapping Students
@@ -308,8 +259,9 @@ public class TeamFormationController extends ControllerBase {
     public List<Team> runFeatureAssignStudentForTest(
         List<Student> students,
         List<Team> teams,
-        List<Project> projects
+        List<Project> projects,
+        List<Preference> preferences
     ) {
-        return executeAssignStudentToTeamFunction(students, teams, projects);
+        return executeAssignStudentToTeamFunction(students, teams, projects, preferences);
     }
 }

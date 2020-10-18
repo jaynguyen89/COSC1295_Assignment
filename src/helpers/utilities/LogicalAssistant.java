@@ -4,17 +4,13 @@ import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 import cosc1295.src.controllers.ControllerBase;
 import cosc1295.src.models.*;
+import cosc1295.src.services.HistoryService;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
 
 import javafx.util.Pair;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static java.lang.Math.abs;
 
 public final class LogicalAssistant {
 
@@ -302,6 +298,59 @@ public final class LogicalAssistant {
         //If 1 or both Teams disagree on the offered Student, return at this
         if (firstTeamImbalanceCheck != null || secondTeamImbalanceCheck != null)
             return new Pair<>(firstTeamImbalanceCheck, secondTeamImbalanceCheck);
+
+        return null;
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    public static boolean assignStudentToTeam(
+        Pair<Team, Student> teamAndMember, Student assignee, List<Project> projects, List<Preference> preferences
+    ) {
+        HistoryService history = HistoryService.getInstance();
+
+        if (teamAndMember.getValue() != null &&
+            !teamAndMember.getKey().removeMemberByUniqueId(teamAndMember.getValue().getUniqueId())
+        ) return false;
+
+        teamAndMember.getKey().addMember(assignee);
+        if (teamAndMember.getKey().getMembers().size() == SharedConstants.GROUP_LIMIT)
+            teamAndMember.getKey().setFitnessMetrics(
+                (new ControllerBase()).calculateTeamFitnessMetricsFor(teamAndMember.getKey(), projects, preferences)
+            );
+
+        history.add(new Pair<>(
+            new Pair<>(teamAndMember.getKey(), null), new Pair<>(assignee, teamAndMember.getValue())
+        ));
+
+        return true;
+    }
+
+    public static Pair<Team, Team> swapStudentsBetweenTeams(
+        Pair<Team, Student> first, Pair<Team, Student> second, List<Project> projects, List<Preference> preferences
+    ) {
+        HistoryService history = HistoryService.getInstance();
+        boolean swapResult = first.getKey().removeMemberByUniqueId(first.getValue().getUniqueId());;
+
+        if (swapResult && second.getValue() == null)
+            second.getKey().addMember(first.getValue());
+        else if (swapResult) {
+            first.getKey().addMember(second.getValue());
+            swapResult = second.getKey().replaceMemberByUniqueId(second.getValue().getUniqueId(), first.getValue());
+        }
+
+        if (swapResult) {
+            if (first.getKey().getMembers().size() == SharedConstants.GROUP_LIMIT)
+                first.getKey().setFitnessMetrics(
+                    (new ControllerBase()).calculateTeamFitnessMetricsFor(first.getKey(), projects, preferences)
+                );
+
+            history.add(new Pair<>( //Set history for undoing feature
+                new Pair<>(first.getKey(), second.getKey()),
+                new Pair<>(second.getValue(), first.getValue()))
+            );
+
+            return new Pair<>(first.getKey(), second.getKey());
+        }
 
         return null;
     }

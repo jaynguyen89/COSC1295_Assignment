@@ -3,10 +3,8 @@ package cosc1295.src.controllers.activities;
 import com.sun.istack.internal.Nullable;
 import cosc1295.providers.services.ProjectService;
 import cosc1295.src.controllers.ControllerBase;
-import cosc1295.src.controllers.UndoController;
 import cosc1295.src.models.Preference;
 import cosc1295.src.models.Project;
-import cosc1295.src.services.HistoryService;
 import cosc1295.src.services.SuggestionService;
 import cosc1295.src.services.analyzers.SecondTeamAnalyzer;
 import cosc1295.src.services.analyzers.SwapStudentAnalyzer;
@@ -47,8 +45,6 @@ public class SwapActivity extends AnchorPane implements IActivity {
     private Consumer<SharedEnums.GUI_ACTION_CONTEXT> intent;
     private static final String FIRST_TEAM = "FIRST_TEAM";
     private static final String SECOND_TEAM = "SECOND_TEAM";
-
-    private final HistoryService history = HistoryService.getInstance();
 
     //Dependency injections to access data processing services
     private final StudentService studentService;
@@ -163,7 +159,6 @@ public class SwapActivity extends AnchorPane implements IActivity {
         SuggestionService suggestionService = new SuggestionService();
         Team firstClone = firstTeamInSwap.get() == null ? null : firstTeamInSwap.get().clone();
         Team secondClone = secondTeamInSwap.get() == null ? null : secondTeamInSwap.get().clone();
-
 
         if (firstClone != null && secondClone != null) {
             Pair<Student, Student> suggestion = suggestionService.runForResult(new SwapStudentAnalyzer<>(firstClone, secondClone));
@@ -419,17 +414,10 @@ public class SwapActivity extends AnchorPane implements IActivity {
 
     private void drawButtonBasedOnContext(Scene container, boolean isErrorOccurred) {
         Button backButton = new Button(isErrorOccurred ? "Okay" : "Back");
-        Button undoButton = new Button("Undo");
-        undoButton.setId("undo-button");
         Button swapButton = new Button("Swap");
 
-        IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, swapButton, undoButton);
+        IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, swapButton);
         setActionListenerFor(container, swapButton);
-
-//        undoButton.setOnAction(event -> {
-//            UndoController undoController = new UndoController();
-//            undoController.undoLastChange(SharedConstants.ACTION_SWAP);
-//        });
 
         backButton.setOnAction(event -> {
             observableTeams.set(null);
@@ -448,29 +436,19 @@ public class SwapActivity extends AnchorPane implements IActivity {
             if (projects == null || preferences == null)
                 drawActivityFailMessage(container, "\"An error occurred while retrieving data from files.\nPlease try again.\"");
             else {
-                Team firstTeam = firstTeamInSwap.get().clone();
-                Student firstMember = firstTeamMember.get().clone();
+                Pair<Team, Team> swapResults = LogicalAssistant.swapStudentsBetweenTeams(
+                    new Pair<>(firstTeamInSwap.get(), firstTeamMember.get()),
+                    new Pair<>(secondTeamInSwap.get(), secondTeamMember.get()),
+                    projects, preferences
+                );
 
-                Team secondTeam = secondTeamInSwap.get().clone();
-                Student secondMember = secondTeamMember.get().clone();
-
-                firstTeam.replaceMemberByUniqueId(firstMember.getUniqueId(), secondMember);
-                secondTeam.replaceMemberByUniqueId(secondMember.getUniqueId(), firstMember);
-
-                if (firstTeam.getMembers().size() == SharedConstants.GROUP_LIMIT)
-                    firstTeam.setFitnessMetrics(controllerBase.calculateTeamFitnessMetricsFor(firstTeam, projects, preferences));
-
-                if (secondTeam.getMembers().size() == SharedConstants.GROUP_LIMIT)
-                    secondTeam.setFitnessMetrics(controllerBase.calculateTeamFitnessMetricsFor(secondTeam, projects, preferences));
-
-                boolean result = teamService.updateTeam(firstTeam);
-                if (result && teamService.updateTeam(secondTeam)) {
-                    history.add(new Pair<>(new Pair<>(firstTeam, secondTeam), new Pair<>(secondMember, firstMember)));
-
+                boolean result = swapResults != null && teamService.updateTeam(swapResults.getKey());
+                if (result && teamService.updateTeam(swapResults.getValue())) {
                     observableTeams.set(null);
                     firstTeamInSwap.set(null);
                     secondTeamInSwap.set(null);
 
+                    IActivity.removeElementIfExists("suggestion", this);
                     drawSwappingTaskContents(container, "The Students have been swapped between 2 Teams successfully.");
                 }
                 else
@@ -486,8 +464,13 @@ public class SwapActivity extends AnchorPane implements IActivity {
         suggestionLabel.getStyleClass().add("suggestion");
         suggestionLabel.setId("suggestion");
 
-        String message = "Recommended Student: " + suggestion.getValue().getValue().getUniqueId() + " in Team #" + suggestion.getKey().getId();
-        message += " Replacing Student " + suggestion.getValue().getKey().getUniqueId() + " in the currently selected Team.";
+        String message;
+        if (suggestion == null)
+            message = "All teams are balanced, no suggestion for a swap.";
+        else {
+            message = "Recommended Student: " + suggestion.getValue().getValue().getUniqueId() + " in Team #" + suggestion.getKey().getId();
+            message += " Replacing Student " + suggestion.getValue().getKey().getUniqueId() + " in the currently selected Team.";
+        }
 
         constraintSuggestion(suggestionLabel, message);
     }
@@ -499,8 +482,13 @@ public class SwapActivity extends AnchorPane implements IActivity {
         suggestionLabel.getStyleClass().add("suggestion");
         suggestionLabel.setId("suggestion");
 
-        String message = "Recommended Student: " + suggestion.getValue().getKey().getUniqueId() + " in Team #" + suggestion.getKey().getKey().getId();
-        message += " Replacing Student " + suggestion.getValue().getValue().getUniqueId() + " in Team #" + suggestion.getKey().getValue().getId();
+        String message;
+        if (suggestion == null)
+            message = "All teams are balanced, no suggestion for a swap.";
+        else {
+            message ="Recommended Student: " + suggestion.getValue().getKey().getUniqueId() + " in Team #" + suggestion.getKey().getKey().getId();
+            message += " Replacing Student " + suggestion.getValue().getValue().getUniqueId() + " in Team #" + suggestion.getKey().getValue().getId();
+        }
 
         constraintSuggestion(suggestionLabel, message);
     }

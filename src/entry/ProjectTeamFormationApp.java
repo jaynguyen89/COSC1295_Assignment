@@ -119,8 +119,13 @@ public final class ProjectTeamFormationApp {
                 break;
             case I:
                 appFacade.runTeamManagementGui();
+                break;
             case J:
                 appFacade.runUndoFeature();
+                break;
+            case K:
+                appFacade.runAutoAssignSwapFeature();
+                break;
             default:
                 taskDone = true;
                 break;

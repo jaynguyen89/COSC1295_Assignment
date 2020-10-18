@@ -6,12 +6,12 @@ import helpers.commons.SharedEnums;
 
 import java.util.Scanner;
 
-public class UndoView {
+public class HistoryView {
 
     private final Flasher flasher = Flasher.getInstance();
-    private Scanner inputScanner;
+    private final Scanner inputScanner;
 
-    public UndoView() {
+    public HistoryView() {
         inputScanner = new Scanner(System.in);
     }
 
@@ -38,7 +38,7 @@ public class UndoView {
         flasher.flash(new Flash(
             "\nAll good. The last change has been undone successfully." +
                     "\nPress enter to continue",
-            SharedEnums.FLASH_TYPES.ERROR
+            SharedEnums.FLASH_TYPES.SUCCESS
         ));
 
         inputScanner.nextLine();
@@ -46,9 +46,11 @@ public class UndoView {
 
     public void displayUndoEmptyMessage() {
         flasher.flash(new Flash(
-            "\nNo changes to undo.\n",
+            "\nNo changes to undo.\nPress enter to continue.\n",
             SharedEnums.FLASH_TYPES.NONE
         ));
+
+        inputScanner.nextLine();
     }
 
     public boolean promptForContinueUndo() {

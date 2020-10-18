@@ -6,11 +6,11 @@ import cosc1295.providers.services.ProjectService;
 import cosc1295.providers.services.StudentService;
 import cosc1295.providers.services.TeamService;
 import cosc1295.src.controllers.ControllerBase;
-import cosc1295.src.controllers.UndoController;
 import cosc1295.src.models.*;
 import cosc1295.src.services.HistoryService;
 import cosc1295.src.services.SuggestionService;
 import cosc1295.src.services.analyzers.AssignStudentAnalyzer;
+import cosc1295.src.services.analyzers.TeamToAssignAnalyzer;
 import cosc1295.src.views.gui.viewmodels.StudentVM;
 import helpers.commons.SharedConstants;
 import helpers.commons.SharedEnums;
@@ -27,13 +27,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -57,8 +54,6 @@ public class AssignActivity extends AnchorPane implements IActivity {
 
     private Consumer<SharedEnums.GUI_ACTION_CONTEXT> intent; //The Intent object for navigation
     private static final String SET_PROJECT = "SET_PROJECT";
-
-    private final HistoryService history = HistoryService.getInstance();
 
     //Dependency injections to access data processing services
     private final StudentService studentService;
@@ -127,25 +122,14 @@ public class AssignActivity extends AnchorPane implements IActivity {
         studentToAssign.addListener(observable -> {
             message.set(SharedConstants.EMPTY_STRING);
             manageStatusMessageAndAssignButtonBasedOnRequirements(container, message, shouldEnableAssignButton);
+            if (studentToAssign.get() != null && teamToReceiveMember.get() == null) suggestAssigneeAndTeam();
         });
 
         teamToReceiveMember.addListener((observable -> {
             message.set(SharedConstants.EMPTY_STRING);
             manageStatusMessageAndAssignButtonBasedOnRequirements(container, message, shouldEnableAssignButton);
-
-            if (teamToReceiveMember.get() != null && teamToReceiveMember.get().getProject() != null) {
-                //Faking add the previously selected Students to team and get the suggestion
-                SuggestionService suggestionService = new SuggestionService();
-                Team clone = teamToReceiveMember.get().clone();
-
-                if (studentInTeamToBeReplaced.get() != null) clone.removeMemberByUniqueId(studentInTeamToBeReplaced.get().getUniqueId());
-                if (studentToAssign.get() != null) clone.addMember(studentToAssign.get());
-
-                //The suggestion for a Student to assign
-                Pair<Student, Student> suggestion = suggestionService.runForResult(new AssignStudentAnalyzer<>(clone));
-                IActivity.drawStudentSwapOrAssignSuggestion(this, suggestion);
-                suggestionService.die();
-            }
+            if (teamToReceiveMember.get() != null) suggestAssigneeAndTeam();
+            else IActivity.removeElementIfExists("suggestion", this);
         }));
 
         studentInTeamToBeReplaced.addListener(observable -> {
@@ -157,6 +141,28 @@ public class AssignActivity extends AnchorPane implements IActivity {
             Button assignButton = (Button) this.lookup("#main-button");
             assignButton.setDisable(!shouldEnableAssignButton.get());
         });
+    }
+
+    private void suggestAssigneeAndTeam() {
+        SuggestionService suggestionService = new SuggestionService();
+
+        if (teamToReceiveMember.get() != null && teamToReceiveMember.get().getProject() != null) {
+            //Faking add the previously selected Students to team and get the suggestion
+            Team clone = teamToReceiveMember.get().clone();
+
+            if (studentInTeamToBeReplaced.get() != null) clone.removeMemberByUniqueId(studentInTeamToBeReplaced.get().getUniqueId());
+            if (studentToAssign.get() != null) clone.addMember(studentToAssign.get());
+
+            //The suggestion for a Student to assign
+            Pair<Student, Student> suggestion = suggestionService.runForResult(new AssignStudentAnalyzer<>(clone));
+            IActivity.drawStudentSwapOrAssignSuggestion(this, suggestion);
+        }
+        else if (studentToAssign.get() != null && teamToReceiveMember.get() == null) {
+            Pair<Team, Student> suggestion = suggestionService.runForResult(new TeamToAssignAnalyzer<>(studentToAssign.get().clone()));
+            drawTeamToAssignSuggestion(suggestion);
+        }
+
+        suggestionService.die();
     }
 
     private void manageStatusMessageAndAssignButtonBasedOnRequirements(
@@ -335,7 +341,7 @@ public class AssignActivity extends AnchorPane implements IActivity {
             studentsData.add(studentVm);
         }
 
-        studentsTable.setItems(studentsData);
+        studentsTable.setItems(studentsData); //put students data on the table to be displayed
         studentsTable.getColumns().addAll(uniqueIdCol, rankingCol, personaCol, conflictCol);
 
         TableView.TableViewSelectionModel studentSelectionModel = studentsTable.getSelectionModel();
@@ -783,17 +789,10 @@ public class AssignActivity extends AnchorPane implements IActivity {
      */
     private void drawButtonBasedOnContext(Scene container, boolean isErrorOccurred) {
         Button backButton = new Button(isErrorOccurred ? "Okay" : "Back");
-        Button undoButton = new Button("Undo");
-        undoButton.setId("undo-button");
         Button assignButton = new Button("Assign");
 
-        IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, assignButton, undoButton);
+        IActivity.drawActivityFixedButtons(container, this, isErrorOccurred, backButton, assignButton);
         setActionListenerFor(container, assignButton);
-
-//        undoButton.setOnAction(event -> {
-//            UndoController undoController = new UndoController();
-//            boolean result = undoController.undoLastChange(SharedConstants.ACTION_ASSIGN);
-//        });
 
         backButton.setOnAction(event -> {
             teamToReceiveMember.set(null);
@@ -816,18 +815,10 @@ public class AssignActivity extends AnchorPane implements IActivity {
             drawActivityFailMessage(container, "An error occurred while retrieving data from files.\nPlease try again.");
 
         assignButton.setOnAction(event -> {
-            //If user want to replace a member in Team, remove that member first
-            if (studentInTeamToBeReplaced.get() != null)
-                teamToReceiveMember.get().getMembers().remove(studentInTeamToBeReplaced.get());
-
-            //Add the assignee into Team
-            teamToReceiveMember.get().getMembers().add(studentToAssign.get());
-
-            //If after assigning, Team has 4 members, calculate the Fitness Metrics
-            if (teamToReceiveMember.get().getMembers().size() == SharedConstants.GROUP_LIMIT)
-                teamToReceiveMember.get().setFitnessMetrics(
-                    controllerBase.calculateTeamFitnessMetricsFor(teamToReceiveMember.get(), projects, preferences)
-                );
+            LogicalAssistant.assignStudentToTeam(
+                new Pair<>(teamToReceiveMember.get(), studentInTeamToBeReplaced.get()),
+                studentToAssign.get(), projects, preferences
+            );
 
             //Finally save or update data
             boolean updateSuccess = false;
@@ -835,39 +826,63 @@ public class AssignActivity extends AnchorPane implements IActivity {
             if (teamToReceiveMember.get().isNewlyAdded()) newTeamId = teamService.SaveNewTeam(teamToReceiveMember.get());
             else updateSuccess = teamService.updateTeam(teamToReceiveMember.get());
 
+            HistoryService history = HistoryService.getInstance();
             //Check the save/update results
             if ((!teamToReceiveMember.get().isNewlyAdded() && !updateSuccess) ||
                 (teamToReceiveMember.get().isNewlyAdded() && newTeamId < 0)
             ) {
                 assignButton.setVisible(false);
+                history.popLastChange();
                 drawActivityFailMessage(container, "An error occurred while updating/saving data into files.\nPlease retry your task.");
             }
 
             if (teamToReceiveMember.get().isNewlyAdded() && newTeamId != -1) {
+                history.reviseLastChange(newTeamId, SharedConstants.ACTION_ASSIGN);
+
                 teamToReceiveMember.get().setId(newTeamId);
                 teamToReceiveMember.get().setNewlyAdded(false);
                 updateSuccess = true;
             }
 
             if (updateSuccess) {
-                history.add(new Pair<>(
-                    new Pair<>(teamToReceiveMember.get(), null),
-                    new Pair<>(studentToAssign.get(), studentInTeamToBeReplaced.get())
-                ));
-
                 assignButton.setDisable(true);
-                studentToAssign.set(null);
-                teamToReceiveMember.set(null);
-                studentInTeamToBeReplaced.set(null);
-                eraseTeamDetailsTable();
-                drawAssigningTaskContents(container, "The selected Student has been assigned to team successfully.");
+                redrawActivity(container);
             }
         });
+    }
+
+    private void redrawActivity(Scene container) {
+        studentToAssign.set(null);
+        teamToReceiveMember.set(null);
+        studentInTeamToBeReplaced.set(null);
+        eraseTeamDetailsTable();
+        IActivity.removeElementIfExists("suggestion", this);
+        drawAssigningTaskContents(container, "The selected Student has been assigned to team successfully.");
     }
 
     private void drawActivityFailMessage(Scene container, String message) {
         IActivity.drawActivityMessageOnException(container, this, message);
         drawButtonBasedOnContext(container, true);
+    }
+
+    private void drawTeamToAssignSuggestion(Pair<Team, Student> suggestion) {
+        IActivity.removeElementIfExists("suggestion", this);
+
+        if (suggestion != null) {
+            String message = "Recommended Team #" + suggestion.getKey().getId();
+            if (suggestion.getValue() != null)
+                message += " Replacing member " + suggestion.getValue().getUniqueId() + ".";
+
+            Label suggestionLabel = new Label(message);
+            suggestionLabel.getStyleClass().add("suggestion");
+            suggestionLabel.setId("suggestion");
+
+            this.getChildren().add(suggestionLabel);
+            suggestionLabel.setPrefWidth(MARGIN * 15);
+            suggestionLabel.setPrefHeight(MARGIN * 1.5);
+            AnchorPane.setLeftAnchor(suggestionLabel, MARGIN / 2);
+            AnchorPane.setBottomAnchor(suggestionLabel, MARGIN / 2);
+        }
     }
 
     @Override

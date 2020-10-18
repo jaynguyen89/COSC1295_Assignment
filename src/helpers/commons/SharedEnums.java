@@ -19,6 +19,7 @@ public final class SharedEnums {
         H("Display Team Fitness Metrics"),
         I("Launch Team Management GUI"),
         J("Undo Last Change"),
+        K("Auto Assign/Swap"),
         X("Quit");
 
         private final String value;
